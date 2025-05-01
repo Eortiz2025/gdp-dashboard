@@ -115,33 +115,25 @@ else:
     st.info("Aún no hay movimientos registrados.")
 
 # --------------------------
-# Predicción de compras futuras
+# 💰 Resumen de ventas del día en pesos
 # --------------------------
 st.markdown("---")
-st.subheader("📈 Predicción de compras futuras")
+st.subheader("💵 Total de ventas del día")
 
-if not movs.empty:
-    salidas = movs[movs["tipo"] == "salida"]
-    salidas["fecha"] = pd.to_datetime(salidas["fecha"])
-    salidas["semana"] = salidas["fecha"].dt.isocalendar().week
+hoy = datetime.now().strftime("%Y-%m-%d")
+movs["fecha"] = pd.to_datetime(movs["fecha"])
+ventas_dia = movs[
+    (movs["tipo"] == "salida") &
+    (movs["fecha"].dt.strftime("%Y-%m-%d") == hoy)
+]
 
-    pred = salidas.groupby(["producto", "semana"])["cantidad"].sum().groupby("producto").mean().reset_index()
-    pred.columns = ["producto", "promedio_semanal"]
-
-    # Buscar columna correcta
-    if 'nombre' in resumen.columns:
-        stock_actual = resumen[["nombre", "stock"]].rename(columns={"nombre": "producto"})
-    elif 'producto' in resumen.columns:
-        stock_actual = resumen[["producto", "stock"]]
-    else:
-        stock_actual = pd.DataFrame(columns=["producto", "stock"])
-
-    sugerencia = pred.merge(stock_actual, on="producto", how="left")
-    sugerencia["sugerido_comprar"] = (sugerencia["promedio_semanal"] * 2 - sugerencia["stock"]).clip(lower=0).round()
-
-    st.dataframe(sugerencia[["producto", "stock", "promedio_semanal", "sugerido_comprar"]])
+if not ventas_dia.empty:
+    ventas_con_precios = ventas_dia.merge(inventario, left_on="producto", right_on="nombre", how="left")
+    ventas_con_precios["importe"] = ventas_con_precios["cantidad"] * ventas_con_precios["precio"]
+    total = ventas_con_precios["importe"].sum()
+    st.success(f"Total vendido hoy: **${total:,.2f}**")
 else:
-    st.info("Aún no hay suficientes datos para calcular predicciones.")
+    st.info("No hay ventas registradas hoy.")
 
 # --------------------------
 # Historial de movimientos
