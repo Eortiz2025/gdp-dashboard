@@ -95,14 +95,19 @@ if not movs.empty:
         if col not in resumen.columns:
             resumen[col] = 0
 
-    resumen = resumen[["codigo", "producto", "precio", "entrada", "salida", "stock"]]
-    resumen.rename(columns={"producto": "nombre"}, inplace=True)
+    columnas_deseadas = ["codigo", "producto", "precio", "entrada", "salida", "stock"]
+    columnas_existentes = [col for col in columnas_deseadas if col in resumen.columns]
+    resumen = resumen[columnas_existentes]
+
+    if "producto" in resumen.columns:
+        resumen.rename(columns={"producto": "nombre"}, inplace=True)
 
     # Alerta de stock bajo
-    bajo_stock = resumen[resumen["stock"] <= 5]
-    if not bajo_stock.empty:
-        st.warning("⚠️ Alerta: Productos con stock bajo")
-        st.dataframe(bajo_stock)
+    if "stock" in resumen.columns:
+        bajo_stock = resumen[resumen["stock"] <= 5]
+        if not bajo_stock.empty:
+            st.warning("⚠️ Alerta: Productos con stock bajo")
+            st.dataframe(bajo_stock)
 
     st.dataframe(resumen, use_container_width=True)
 else:
