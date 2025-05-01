@@ -1,72 +1,88 @@
 import streamlit as st
 import pandas as pd
+import os
+from datetime import date
+from uuid import uuid4
 
-st.set_page_config(page_title="Decisiones estilo Dalio", layout="centered")
+# Configuración de la app
+st.set_page_config(page_title="Seguimiento de Expedientes", layout="centered")
+st.title("⚖️ Seguimiento de Expedientes Jurídicos")
 
-st.title("📊 Sistema de Decisiones Ponderadas - Estilo Ray Dalio")
+# Rutas
+DATA_PATH = "data"
+EXPEDIENTES_FILE = os.path.join(DATA_PATH, "expedientes.csv")
+DOCS_PATH = os.path.join(DATA_PATH, "documentos")
 
-st.markdown("""
-Este sistema te ayuda a tomar decisiones basadas en opiniones **ponderadas por credibilidad**.
-""")
+# Crear carpetas si no existen
+os.makedirs(DATA_PATH, exist_ok=True)
+os.makedirs(DOCS_PATH, exist_ok=True)
 
-st.subheader("Paso 1: Ingresar opiniones")
+# Inicializar archivo CSV si no existe
+if not os.path.exists(EXPEDIENTES_FILE):
+    df_init = pd.DataFrame(columns=["id", "cliente", "materia", "juzgado", "fecha_inicio", "archivo"])
+    df_init.to_csv(EXPEDIENTES_FILE, index=False)
 
-# Inicializar la tabla en sesión si no existe
-if "tabla_opiniones" not in st.session_state:
-    st.session_state.tabla_opiniones = pd.DataFrame(columns=["Persona", "Opinión (1-10)", "Credibilidad (1-10)"])
+# Función para cargar expedientes
+def cargar_expedientes():
+    return pd.read_csv(EXPEDIENTES_FILE)
 
-# Formulario de entrada
-with st.form("formulario_opinion"):
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        persona = st.text_input("Nombre de la persona")
-    with col2:
-        opinion = st.slider("Opinión", 1, 10, 7)
-    with col3:
-        cred = st.slider("Credibilidad", 1, 10, 5)
-    enviar = st.form_submit_button("Agregar")
+# Función para guardar un nuevo expediente
+def guardar_expediente(info):
+    df = cargar_expedientes()
+    df = pd.concat([df, pd.DataFrame([info])], ignore_index=True)
+    df.to_csv(EXPEDIENTES_FILE, index=False)
 
-    if enviar and persona:
-        nueva_fila = pd.DataFrame({
-            "Persona": [persona],
-            "Opinión (1-10)": [opinion],
-            "Credibilidad (1-10)": [cred]
-        })
-        st.session_state.tabla_opiniones = pd.concat([st.session_state.tabla_opiniones, nueva_fila], ignore_index=True)
+# Navegación principal
+seccion = st.sidebar.radio("Menú", ["Registrar expediente", "Ver expedientes"])
 
-# Mostrar tabla con Ponderado
-df = st.session_state.tabla_opiniones.copy()
-if not df.empty:
-    df["Ponderado"] = df["Opinión (1-10)"] * df["Credibilidad (1-10)"]
-st.write("### Opiniones Registradas")
-st.dataframe(df, use_container_width=True)
+if seccion == "Registrar expediente":
+    st.header("Registrar nuevo expediente")
 
-# Calcular resultado si hay datos
-if not df.empty:
-    st.subheader("Paso 2: Resultado de la decisión")
+    cliente = st.text_input("Nombre del cliente")
+    materia = st.selectbox("Materia", ["Civil", "Penal", "Familiar", "Laboral", "Administrativo"])
+    juzgado = st.text_input("Juzgado")
+    fecha_inicio = st.date_input("Fecha de inicio", value=date.today())
+    archivo = st.file_uploader("Documento PDF del expediente", type=["pdf"])
 
-    total_ponderado = df["Ponderado"].sum()
-    total_credibilidad = df["Credibilidad (1-10)"].sum()
+    if st.button("Guardar expediente"):
+        if cliente and juzgado and archivo:
+            expediente_id = str(uuid4())[:8]
+            archivo_nombre = f"{expediente_id}_{archivo.name}"
+            archivo_path = os.path.join(DOCS_PATH, archivo_nombre)
+            with open(archivo_path, "wb") as f:
+                f.write(archivo.read())
 
-    resultado = round(total_ponderado / total_credibilidad, 2) if total_credibilidad > 0 else 0
+            nuevo = {
+                "id": expediente_id,
+                "cliente": cliente,
+                "materia": materia,
+                "juzgado": juzgado,
+                "fecha_inicio": fecha_inicio,
+                "archivo": archivo_nombre
+            }
+            guardar_expediente(nuevo)
+            st.success("Expediente guardado correctamente.")
+        else:
+            st.warning("Por favor completa todos los campos y sube un archivo.")
 
-    st.metric(label="Promedio Ponderado de la Decisión", value=resultado)
+elif seccion == "Ver expedientes":
+    st.header("Listado de expedientes")
+    df = cargar_expedientes()
+    filtro = st.text_input("Buscar por nombre del cliente o materia")
+    if filtro:
+        df = df[df["cliente"].str.contains(filtro, case=False) | df["materia"].str.contains(filtro, case=False)]
+    st.dataframe(df, use_container_width=True)
 
-    # Interpretación visual estilo semáforo
-    if resultado < 5.0:
-        mensaje = "🔴 Opinión mayormente negativa o con baja confianza."
-    elif resultado < 7.0:
-        mensaje = "🟡 Opiniones divididas, falta consenso. Requiere discusión."
-    elif resultado < 9.0:
-        mensaje = "🟢 Hay buena confianza en la decisión."
-    else:
-        mensaje = "✅ Consenso claro y muy alta confianza."
+    if not df.empty:
+        seleccionado = st.selectbox("Selecciona un expediente", df["id"])
+        expediente = df[df["id"] == seleccionado].iloc[0]
+        st.subheader(f"Detalles del expediente {seleccionado}")
+        st.write(f"**Cliente:** {expediente['cliente']}")
+        st.write(f"**Materia:** {expediente['materia']}")
+        st.write(f"**Juzgado:** {expediente['juzgado']}")
+        st.write(f"**Fecha de inicio:** {expediente['fecha_inicio']}")
 
-    st.info(f"**Interpretación:** {mensaje}")
+        archivo_path = os.path.join(DOCS_PATH, expediente["archivo"])
+        with open(archivo_path, "rb") as pdf_file:
+            st.download_button("Descargar documento", data=pdf_file, file_name=expediente["archivo"])
 
-    with st.expander("Ver cálculo detallado"):
-        st.write(df)
-
-# Botón para reiniciar
-if st.button("🔄 Reiniciar tabla"):
-    st.session_state.tabla_opiniones = pd.DataFrame(columns=["Persona", "Opinión (1-10)", "Credibilidad (1-10)"])
