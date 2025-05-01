@@ -147,7 +147,14 @@ elif seccion == "Consultar expedientes":
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
         st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
-        fecha_formateada = pd.to_datetime(expediente["fecha_inicio"], errors="coerce").strftime("%d/%m/%Y")
+
+        # Manejo seguro de fecha
+        try:
+            fecha_inicio_dt = pd.to_datetime(expediente["fecha_inicio"], errors="coerce")
+            fecha_formateada = fecha_inicio_dt.strftime("%d/%m/%Y") if not pd.isnull(fecha_inicio_dt) else "Sin fecha"
+        except:
+            fecha_formateada = "Sin fecha"
+
         st.write(f"**Fecha de inicio:** {fecha_formateada}")
 
         archivo_nombre = str(expediente["archivo"])
