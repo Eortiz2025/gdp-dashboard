@@ -25,7 +25,14 @@ if not os.path.exists(EXPEDIENTES_FILE):
 
 # Funciones de datos
 def cargar_expedientes():
-    df = pd.read_csv(EXPEDIENTES_FILE)
+    columnas = ["id", "cliente", "materia", "numero_expediente", "fecha_inicio", "archivo"]
+    try:
+        df = pd.read_csv(EXPEDIENTES_FILE)
+        if not all(col in df.columns for col in columnas):
+            raise ValueError("Columnas faltantes")
+    except Exception:
+        df = pd.DataFrame(columns=columnas)
+        df.to_csv(EXPEDIENTES_FILE, index=False)
     df["fecha_inicio"] = pd.to_datetime(df["fecha_inicio"], errors="coerce")
     return df
 
@@ -73,7 +80,7 @@ if seccion == "Registrar expediente":
     if st.button("Guardar expediente"):
         if cliente and numero_expediente:
             df_existente = cargar_expedientes()
-            if numero_expediente in df_existente["numero_expediente"].astype(str).values:
+            if "numero_expediente" in df_existente.columns and numero_expediente in df_existente["numero_expediente"].astype(str).values:
                 st.error("\u26a0\ufe0f Ya existe un expediente con ese número.")
             else:
                 expediente_id = str(uuid4())[:8]
