@@ -90,8 +90,9 @@ movs = cargar_movimientos()
 if not movs.empty:
     resumen = movs.groupby(["producto", "tipo"])["cantidad"].sum().unstack().fillna(0)
     resumen["stock"] = resumen.get("entrada", 0) - resumen.get("salida", 0)
-    resumen = resumen.reset_index().merge(inventario, on="nombre")
-    resumen = resumen[["codigo", "nombre", "precio", "entrada", "salida", "stock"]]
+    resumen = resumen.reset_index().merge(inventario, left_on="producto", right_on="nombre")
+    resumen = resumen[["codigo", "producto", "precio", "entrada", "salida", "stock"]]
+    resumen.rename(columns={"producto": "nombre"}, inplace=True)
     st.dataframe(resumen, use_container_width=True)
 else:
     st.info("Aún no hay movimientos registrados.")
