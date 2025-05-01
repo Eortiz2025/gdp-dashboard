@@ -6,7 +6,7 @@ from uuid import uuid4
 from PyPDF2 import PdfReader
 
 # Configuración general
-st.set_page_config(page_title="Seguimiento de Expedientes Laborales", layout="centered")
+st.set_page_config(page_title="Sistema Bravo & Asociados", layout="centered")
 st.title("📂 Sistema Bravo & Asociados")
 
 # Rutas de datos
@@ -156,6 +156,7 @@ elif st.session_state.vista_actual == "Expedientes":
 elif st.session_state.vista_actual == "Audiencias":
     st.subheader("📅 Próximas audiencias")
     df_eventos = cargar_eventos()
+    df_expedientes = cargar_expedientes()
     df_eventos["fecha"] = pd.to_datetime(df_eventos["fecha"], errors="coerce")
     hoy = pd.to_datetime(date.today())
     futuras = df_eventos[(df_eventos["tipo_evento"] == "Audiencia") & (df_eventos["fecha"] >= hoy)]
@@ -166,4 +167,8 @@ elif st.session_state.vista_actual == "Audiencias":
     else:
         for _, row in futuras.iterrows():
             fecha = row['fecha'].strftime("%d/%m/%Y")
-            st.write(f"📌 {fecha}: {row['descripcion']}")
+            exp_id = row['expediente_id']
+            expediente = df_expedientes[df_expedientes['id'] == exp_id]
+            numero_exp = expediente['numero_expediente'].values[0] if not expediente.empty else "(no encontrado)"
+            st.markdown(f"📌 **{fecha}** | **Expediente:** `{numero_exp}`  
+📝 {row['descripcion']}")
