@@ -30,7 +30,7 @@ def cargar_expedientes(formatear_fecha=True):
     return df
 
 def guardar_expediente(info):
-    df = pd.read_csv(EXPEDIENTES_FILE)  # sin formato para guardar limpio
+    df = pd.read_csv(EXPEDIENTES_FILE)  # sin formato
     df = pd.concat([df, pd.DataFrame([info])], ignore_index=True)
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
@@ -39,7 +39,7 @@ def actualizar_archivo(expediente_id, archivo_nombre):
     df.loc[df["id"] == expediente_id, "archivo"] = archivo_nombre
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
-# Menú principal
+# Menú
 seccion = st.sidebar.radio("Menú", ["Registrar expediente", "Ver expedientes"])
 
 # Registro de expediente
@@ -53,7 +53,7 @@ if seccion == "Registrar expediente":
 
     if st.button("Guardar expediente"):
         if cliente and numero_expediente:
-            df_existente = cargar_expedientes(formatear_fecha=False)
+            df_existente = pd.read_csv(EXPEDIENTES_FILE)
             if numero_expediente in df_existente["numero_expediente"].astype(str).values:
                 st.error("⚠️ Ya existe un expediente con ese número. Debe ser único.")
             else:
@@ -63,7 +63,7 @@ if seccion == "Registrar expediente":
                     "cliente": cliente,
                     "materia": materia,
                     "numero_expediente": numero_expediente,
-                    "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),
+                    "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),  # guardar en formato estándar
                     "archivo": ""
                 }
                 guardar_expediente(nuevo)
@@ -87,8 +87,8 @@ elif seccion == "Ver expedientes":
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
         st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
-        # Corregimos el formato de fecha aquí también
-        fecha_formateada = pd.to_datetime(expediente['fecha_inicio'], errors='coerce').strftime("%d/%m/%Y")
+        # ✅ Mostrar fecha formateada correctamente
+        fecha_formateada = pd.to_datetime(expediente["fecha_inicio"], errors="coerce").strftime("%d/%m/%Y")
         st.write(f"**Fecha de inicio:** {fecha_formateada}")
 
         if expediente["archivo"]:
