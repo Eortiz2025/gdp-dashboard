@@ -79,11 +79,15 @@ def guardar_mensaje_chat(expediente_id, autor, mensaje):
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
     df.to_csv(CHAT_FILE, index=False)
 
-# Menú
-seccion = st.sidebar.radio("Menú", ["Registrar nuevo expediente", "Consultar expedientes"])
+# Estado para mostrar el formulario
+if "mostrar_formulario" not in st.session_state:
+    st.session_state.mostrar_formulario = False
 
-if seccion == "Registrar nuevo expediente":
-    st.header("Registrar nuevo expediente")
+if st.button("➕ Registrar nuevo expediente"):
+    st.session_state.mostrar_formulario = not st.session_state.mostrar_formulario
+
+if st.session_state.mostrar_formulario:
+    st.subheader("Registro de nuevo expediente")
     cliente = st.text_input("Nombre del cliente").strip()
     numero_expediente = st.text_input("Número de expediente").strip()
     fecha_inicio = st.date_input("Fecha de inicio", value=date.today())
@@ -108,79 +112,56 @@ if seccion == "Registrar nuevo expediente":
         else:
             st.warning("Por favor completa todos los campos.")
 
-elif seccion == "Consultar expedientes":
-    st.header("Consulta de expedientes laborales")
-    df = cargar_expedientes()
+st.markdown("---")
 
-    df_mostrar = df.copy()
-    df_mostrar["Fecha de Inicio"] = pd.to_datetime(df_mostrar["fecha_inicio"], errors="coerce").dt.strftime("%d/%m/%Y")
-    df_mostrar = df_mostrar.rename(columns={"numero_expediente": "Expediente"})
-    df_mostrar = df_mostrar[["cliente", "Expediente", "Fecha de Inicio"]]
-
-    filtro = st.text_input("Buscar por nombre del cliente")
-    if filtro:
-        df_mostrar = df_mostrar[df_mostrar["cliente"].str.contains(filtro, case=False)]
-
-    st.dataframe(df_mostrar, use_container_width=True)
-
-    if not df.empty:
-        seleccionado = st.selectbox("Selecciona un expediente", df["numero_expediente"])
-        expediente = df[df["numero_expediente"] == seleccionado].iloc[0]
-
-        st.subheader(f"Detalles del expediente {seleccionado}")
-        st.write(f"**Cliente:** {expediente['cliente']}")
-        st.write(f"**Materia:** {expediente['materia']}")
-
-        try:
-            fecha_inicio_dt = pd.to_datetime(expediente["fecha_inicio"], errors="coerce")
-            fecha_formateada = fecha_inicio_dt.strftime("%d/%m/%Y") if not pd.isnull(fecha_inicio_dt) else "Sin fecha"
-        except:
-            fecha_formateada = "Sin fecha"
-        st.write(f"**Fecha de inicio:** {fecha_formateada}")
-
-        archivo_nombre = str(expediente["archivo"])
-        if archivo_nombre and archivo_nombre.lower() != "nan":
-            archivo_path = os.path.join(DOCS_PATH, archivo_nombre)
-            if os.path.exists(archivo_path):
-                with open(archivo_path, "rb") as f:
-                    st.download_button("Descargar documento", data=f, file_name=archivo_nombre)
-
-        st.markdown("## 📜 Cronología del expediente")
-        df_eventos = cargar_eventos()
-        eventos = df_eventos[df_eventos["expediente_id"] == expediente["id"]]
-        if not eventos.empty:
-            eventos["fecha"] = pd.to_datetime(eventos["fecha"], errors="coerce")
-            eventos = eventos.sort_values("fecha")
-            for _, row in eventos.iterrows():
-                st.markdown(f"**{row['fecha'].strftime('%d/%m/%Y')} – {row['tipo_evento']}**: {row['descripcion']}")
+# Chat de actualización
+st.subheader("💬 Actualización de expedientes (Chat)")
+df_expedientes = cargar_expedientes()
+if not df_expedientes.empty:
+    df_expedientes["mostrar"] = df_expedientes["numero_expediente"] + " - " + df_expedientes["cliente"]
+    seleccionado = st.selectbox("Selecciona expediente", df_expedientes["mostrar"], key="chat_exp")
+    expediente = df_expedientes[df_expedientes["mostrar"] == seleccionado].iloc[0]
+    autor = st.text_input("Tu nombre o iniciales", key="autor_chat")
+    mensaje = st.text_area("Mensaje", key="mensaje_chat")
+    if st.button("Enviar mensaje"):
+        if autor.strip() and mensaje.strip():
+            guardar_mensaje_chat(expediente["id"], autor.strip(), mensaje.strip())
+            st.success("Mensaje enviado.")
         else:
-            st.info("Este expediente aún no tiene eventos registrados.")
+            st.warning("Completa autor y mensaje.")
 
-        st.markdown("### ➕ Agregar evento")
-        with st.form("form_evento"):
-            fecha_evento = st.date_input("Fecha del evento", value=date.today(), key="fecha_evento")
-            tipo_evento = st.selectbox("Tipo de evento", EVENTOS_TIPOS, key="tipo_evento")
-            descripcion = st.text_area("Descripción del evento", key="descripcion_evento")
-            submit = st.form_submit_button("Guardar evento")
-            if submit:
-                guardar_evento(expediente["id"], fecha_evento, tipo_evento, descripcion)
-                st.success("✅ Evento agregado correctamente. Recarga la página para verlo.")
+    st.markdown("### Historial del chat")
+    df_chat = cargar_chat()
+    mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
+    for _, row in mensajes.iterrows():
+        st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
+else:
+    st.info("No hay expedientes disponibles.")
 
-        st.markdown("## 💬 Chat interno del expediente")
-        autor = st.text_input("Tu nombre o iniciales", max_chars=50)
-        mensaje = st.text_area("Escribe tu mensaje")
-        if st.button("Enviar mensaje"):
-            if autor.strip() and mensaje.strip():
-                guardar_mensaje_chat(expediente["id"], autor.strip(), mensaje.strip())
-                st.success("Mensaje enviado.")
-            else:
-                st.warning("Debes completar autor y mensaje.")
+st.markdown("---")
 
-        st.markdown("### Historial del chat")
-        df_chat = cargar_chat()
-        mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
-        if not mensajes.empty:
-            for _, row in mensajes.iterrows():
-                st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
-        else:
-            st.info("Aún no hay mensajes en este expediente.")
+# Listado de expedientes
+st.subheader("📁 Listado de expedientes")
+df = cargar_expedientes()
+df_mostrar = df.copy()
+df_mostrar["Fecha de Inicio"] = pd.to_datetime(df_mostrar["fecha_inicio"], errors="coerce").dt.strftime("%d/%m/%Y")
+df_mostrar = df_mostrar.rename(columns={"numero_expediente": "Expediente"})
+df_mostrar = df_mostrar[["cliente", "Expediente", "Fecha de Inicio"]]
+st.dataframe(df_mostrar, use_container_width=True)
+
+st.markdown("---")
+
+# Próximas audiencias
+st.subheader("📅 Próximas audiencias")
+df_eventos = cargar_eventos()
+df_eventos["fecha"] = pd.to_datetime(df_eventos["fecha"], errors="coerce")
+hoy = pd.to_datetime(date.today())
+futuras = df_eventos[(df_eventos["tipo_evento"] == "Audiencia") & (df_eventos["fecha"] >= hoy)]
+futuras = futuras.sort_values("fecha")
+
+if futuras.empty:
+    st.info("No hay audiencias futuras registradas.")
+else:
+    for _, row in futuras.iterrows():
+        fecha = row['fecha'].strftime("%d/%m/%Y")
+        st.write(f"📌 {fecha}: {row['descripcion']}")
