@@ -150,10 +150,14 @@ elif seccion == "Consultar expedientes":
         fecha_formateada = pd.to_datetime(expediente["fecha_inicio"], errors="coerce").strftime("%d/%m/%Y")
         st.write(f"**Fecha de inicio:** {fecha_formateada}")
 
-        if expediente["archivo"]:
-            archivo_path = os.path.join(DOCS_PATH, expediente["archivo"])
-            with open(archivo_path, "rb") as f:
-                st.download_button("Descargar documento", data=f, file_name=expediente["archivo"])
+        archivo_nombre = str(expediente["archivo"])
+        if archivo_nombre and archivo_nombre.lower() != "nan":
+            archivo_path = os.path.join(DOCS_PATH, archivo_nombre)
+            if os.path.exists(archivo_path):
+                with open(archivo_path, "rb") as f:
+                    st.download_button("Descargar documento", data=f, file_name=archivo_nombre)
+            else:
+                st.warning("El archivo no se encuentra disponible en la carpeta.")
         else:
             st.info("📂 No se ha cargado ningún documento.")
 
