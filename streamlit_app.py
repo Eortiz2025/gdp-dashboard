@@ -104,9 +104,10 @@ elif seccion == "Consultar expedientes":
     df = cargar_expedientes()
 
     df_mostrar = df.copy()
+    df_mostrar["fecha_inicio"] = pd.to_datetime(df_mostrar["fecha_inicio"], errors="coerce")
+    df_mostrar = df_mostrar[["cliente", "numero_expediente", "fecha_inicio"]]
     df_mostrar["fecha_inicio"] = df_mostrar["fecha_inicio"].dt.strftime("%d/%m/%Y")
-    if "id" in df_mostrar.columns:
-        df_mostrar = df_mostrar.drop(columns=["id", "archivo"])
+    df_mostrar["fecha_inicio"] = df_mostrar["fecha_inicio"].fillna("Sin fecha")
 
     filtro = st.text_input("Buscar por nombre del cliente o número de expediente")
     if filtro:
