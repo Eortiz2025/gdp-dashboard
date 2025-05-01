@@ -3,95 +3,108 @@ import pandas as pd
 from datetime import datetime
 import os
 
-# -----------------------------
-# Funciones auxiliares
-# -----------------------------
+st.set_page_config("POS + Inventario", layout="centered")
+st.title("📦 Control de Inventario - OlaCafe")
 
-# Cargar inventario
+# --------------------------
+# Cargar datos
+# --------------------------
 def cargar_inventario():
     if os.path.exists("inventario.csv"):
         return pd.read_csv("inventario.csv")
     else:
-        st.error("No se encontró 'inventario.csv'")
-        return pd.DataFrame(columns=["codigo", "nombre", "precio", "stock"])
+        return pd.DataFrame(columns=["codigo", "nombre", "precio"])
 
-# Guardar inventario actualizado
 def guardar_inventario(df):
     df.to_csv("inventario.csv", index=False)
 
-# Registrar venta
-def registrar_venta(producto, cantidad, total):
-    venta = pd.DataFrame([{
-        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "producto": producto,
-        "cantidad": cantidad,
-        "total": total
-    }])
-    archivo = "ventas.csv"
-    if os.path.exists(archivo):
-        venta.to_csv(archivo, mode="a", header=False, index=False)
+def cargar_movimientos():
+    if os.path.exists("movimientos.csv"):
+        return pd.read_csv("movimientos.csv")
     else:
-        venta.to_csv(archivo, index=False)
+        return pd.DataFrame(columns=["fecha", "tipo", "producto", "cantidad"])
 
-# -----------------------------
-# Interfaz Streamlit
-# -----------------------------
+def guardar_movimiento(tipo, producto, cantidad):
+    df = cargar_movimientos()
+    nuevo = {
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "tipo": tipo,
+        "producto": producto,
+        "cantidad": cantidad
+    }
+    df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
+    df.to_csv("movimientos.csv", index=False)
 
-st.set_page_config("POS Café", layout="centered")
-st.title("🧾 Punto de Venta - OlaCafe")
+# --------------------------
+# Registro de inventario inicial
+# --------------------------
+st.subheader("📌 Inventario inicial")
 
 inventario = cargar_inventario()
-
-# -----------------------------
-# Registro de Venta
-# -----------------------------
-st.header("💳 Nueva venta")
-
-if not inventario.empty:
-    producto_seleccionado = st.selectbox("Selecciona un producto", inventario["nombre"])
-    datos_producto = inventario[inventario["nombre"] == producto_seleccionado].iloc[0]
-
-    precio = datos_producto["precio"]
-    stock = datos_producto["stock"]
-
-    cantidad = st.number_input("Cantidad", min_value=1, max_value=int(stock), step=1)
-
-    total = cantidad * precio
-    st.markdown(f"**Total: ${total:,.2f}**")
-
-    if st.button("Registrar venta"):
-        idx = inventario[inventario["nombre"] == producto_seleccionado].index[0]
-        if cantidad <= inventario.at[idx, "stock"]:
-            inventario.at[idx, "stock"] -= cantidad
+if inventario.empty:
+    with st.form("inv_inicial"):
+        nombre = st.text_input("Nombre del producto")
+        codigo = st.text_input("Código del producto")
+        precio = st.number_input("Precio", min_value=0.0)
+        submitted = st.form_submit_button("Agregar producto")
+        if submitted and nombre and codigo:
+            nuevo = pd.DataFrame([[codigo, nombre, precio]], columns=["codigo", "nombre", "precio"])
+            inventario = pd.concat([inventario, nuevo], ignore_index=True)
             guardar_inventario(inventario)
-            registrar_venta(producto_seleccionado, cantidad, total)
-            st.success("✅ Venta registrada con éxito")
-            st.info(f"🧾 Ticket:\n\nProducto: {producto_seleccionado}\nCantidad: {cantidad}\nTotal: ${total:,.2f}")
-        else:
-            st.error("No hay suficiente stock para esta venta.")
-
-# -----------------------------
-# Historial de ventas del día
-# -----------------------------
-st.markdown("---")
-st.header("📋 Ventas del día")
-
-if os.path.exists("ventas.csv"):
-    ventas = pd.read_csv("ventas.csv")
-    hoy = datetime.now().strftime("%Y-%m-%d")
-    ventas["fecha"] = pd.to_datetime(ventas["fecha"])
-    ventas_dia = ventas[ventas["fecha"].dt.strftime("%Y-%m-%d") == hoy]
-
-    if not ventas_dia.empty:
-        st.dataframe(ventas_dia, use_container_width=True)
-        csv = ventas_dia.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="📥 Descargar ventas del día",
-            data=csv,
-            file_name=f"ventas_{hoy}.csv",
-            mime="text/csv"
-        )
-    else:
-        st.info("Aún no hay ventas registradas hoy.")
+            st.success("Producto agregado.")
 else:
-    st.info("No se ha registrado ninguna venta aún.")
+    st.info("Inventario ya registrado. Si deseas reiniciarlo, borra 'inventario.csv'.")
+
+# --------------------------
+# Entradas (compras del día)
+# --------------------------
+st.subheader("🟢 Registro de entradas (compras)")
+
+inventario = cargar_inventario()
+if not inventario.empty:
+    producto_ent = st.selectbox("Producto comprado", inventario["nombre"])
+    cant_ent = st.number_input("Cantidad comprada", min_value=1, step=1)
+    if st.button("Registrar entrada"):
+        guardar_movimiento("entrada", producto_ent, cant_ent)
+        st.success(f"Entrada registrada: {producto_ent} +{cant_ent}")
+
+# --------------------------
+# Salidas (ventas)
+# --------------------------
+st.subheader("🔴 Registro de salidas (ventas)")
+
+producto_sal = st.selectbox("Producto vendido", inventario["nombre"], key="venta")
+cant_sal = st.number_input("Cantidad vendida", min_value=1, step=1, key="venta_cant")
+if st.button("Registrar venta"):
+    guardar_movimiento("salida", producto_sal, cant_sal)
+    st.success(f"Venta registrada: {producto_sal} -{cant_sal}")
+
+# --------------------------
+# Inventario actual
+# --------------------------
+st.markdown("---")
+st.subheader("📊 Inventario actual")
+
+movs = cargar_movimientos()
+
+if not movs.empty:
+    resumen = movs.groupby(["producto", "tipo"])["cantidad"].sum().unstack().fillna(0)
+    resumen["stock"] = resumen.get("entrada", 0) - resumen.get("salida", 0)
+    resumen = resumen.reset_index().merge(inventario, on="nombre")
+    resumen = resumen[["codigo", "nombre", "precio", "entrada", "salida", "stock"]]
+    st.dataframe(resumen, use_container_width=True)
+else:
+    st.info("Aún no hay movimientos registrados.")
+
+# --------------------------
+# Historial de movimientos
+# --------------------------
+st.markdown("---")
+st.subheader("📜 Historial de movimientos")
+
+if not movs.empty:
+    st.dataframe(movs.sort_values(by="fecha", ascending=False), use_container_width=True)
+    csv = movs.to_csv(index=False).encode("utf-8")
+    st.download_button("📥 Descargar historial", csv, file_name="movimientos.csv", mime="text/csv")
+else:
+    st.info("No hay movimientos registrados aún.")
