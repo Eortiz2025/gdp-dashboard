@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-from datetime import date
+from datetime import date, datetime
 from uuid import uuid4
 from PyPDF2 import PdfReader
 
@@ -39,12 +39,12 @@ def cargar_expedientes():
 def guardar_expediente(info):
     df = cargar_expedientes()
     df = pd.concat([df, pd.DataFrame([info])], ignore_index=True)
-    df.to_csv(EXPEDIENTES_FILE, index=False)
+    df.to_csv(EXPEDIENTES_FILE, index=False, date_format="%Y-%m-%d")
 
 def actualizar_archivo(expediente_id, archivo_nombre):
     df = cargar_expedientes()
     df.loc[df["id"] == expediente_id, "archivo"] = archivo_nombre
-    df.to_csv(EXPEDIENTES_FILE, index=False)
+    df.to_csv(EXPEDIENTES_FILE, index=False, date_format="%Y-%m-%d")
 
 def eliminar_expediente(expediente_id):
     df = cargar_expedientes()
@@ -57,7 +57,7 @@ def eliminar_expediente(expediente_id):
             if os.path.exists(archivo_path):
                 os.remove(archivo_path)
         df = df[df["id"] != expediente_id]
-        df.to_csv(EXPEDIENTES_FILE, index=False)
+        df.to_csv(EXPEDIENTES_FILE, index=False, date_format="%Y-%m-%d")
 
 # Validación de PDF
 def es_pdf_valido(file):
@@ -90,7 +90,7 @@ if seccion == "Registrar nuevo expediente":
                     "cliente": cliente,
                     "materia": "Laboral",
                     "numero_expediente": numero_expediente,
-                    "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),
+                    "fecha_inicio": datetime.combine(fecha_inicio, datetime.min.time()),
                     "archivo": ""
                 }
                 guardar_expediente(nuevo)
