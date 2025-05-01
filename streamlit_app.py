@@ -68,11 +68,11 @@ def es_pdf_valido(file):
         return False
 
 # Menú
-seccion = st.sidebar.radio("Menú", ["Registrar expediente", "Ver expedientes"])
+seccion = st.sidebar.radio("Menú", ["Registrar nuevo expediente", "Consultar expedientes"])
 
 # Registrar nuevo expediente
-if seccion == "Registrar expediente":
-    st.header("Registrar nuevo expediente laboral")
+if seccion == "Registrar nuevo expediente":
+    st.header("Registrar nuevo expediente")
 
     cliente = st.text_input("Nombre del cliente").strip()
     numero_expediente = st.text_input("Número de expediente").strip()
@@ -98,15 +98,15 @@ if seccion == "Registrar expediente":
         else:
             st.warning("Por favor completa todos los campos.")
 
-# Ver expedientes
-elif seccion == "Ver expedientes":
-    st.header("Listado de expedientes laborales")
+# Consultar expedientes
+elif seccion == "Consultar expedientes":
+    st.header("Consulta de expedientes laborales")
     df = cargar_expedientes()
 
     df_mostrar = df.copy()
     df_mostrar["fecha_inicio"] = df_mostrar["fecha_inicio"].dt.strftime("%d/%m/%Y")
 
-    filtro = st.text_input("Buscar por cliente o número de expediente")
+    filtro = st.text_input("Buscar por nombre del cliente o número de expediente")
     if filtro:
         df_mostrar = df_mostrar[
             df_mostrar["cliente"].str.contains(filtro, case=False) |
@@ -115,12 +115,12 @@ elif seccion == "Ver expedientes":
     st.dataframe(df_mostrar, use_container_width=True)
 
     if not df.empty:
-        opciones = {row["numero_expediente"]: row["id"] for _, row in df.iterrows()}
-        seleccionado_key = st.selectbox("Selecciona un expediente", options=list(opciones.keys()))
+        opciones = {f"{row['numero_expediente']} - {row['cliente']}": row["id"] for _, row in df.iterrows()}
+        seleccionado_key = st.selectbox("Selecciona un expediente por número", options=list(opciones.keys()))
         seleccionado_id = opciones[seleccionado_key]
         expediente = df[df["id"] == seleccionado_id].iloc[0]
 
-        st.subheader(f"Detalles del expediente {seleccionado_key}")
+        st.subheader(f"Detalles del expediente {expediente['numero_expediente']}")
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
         st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
@@ -136,7 +136,7 @@ elif seccion == "Ver expedientes":
             else:
                 st.warning("El archivo no se encuentra en el sistema.")
         else:
-            st.info("No se ha cargado ningun documento")
+            st.info("No se ha cargado ningún documento")
 
         st.markdown("---")
         st.subheader("Subir o reemplazar documento PDF")
