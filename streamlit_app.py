@@ -1,60 +1,61 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 
-st.set_page_config(page_title="Decisiones estilo Dalio", layout="centered")
+st.set_page_config(page_title="Dot Collector - Estilo Ray Dalio", layout="wide")
 
-st.title("📊 Sistema de Decisiones Ponderadas - Estilo Ray Dalio")
+st.title("🟡 Dot Collector - Evaluación por Áreas Temáticas")
 
 st.markdown("""
-Este sistema te ayuda a tomar decisiones basadas en opiniones **ponderadas por credibilidad**.
+Evalúa a las personas de tu equipo en distintas áreas clave (estilo Ray Dalio).  
+Los puntos recolectados se almacenan para análisis y construcción de perfiles de credibilidad.
 """)
 
-st.subheader("Paso 1: Ingresar opiniones")
+# Lista de áreas temáticas personalizables
+AREAS = ["Estrategia", "Marketing", "Producto", "Liderazgo", "Comunicación", "Innovación"]
 
-# Inicializar la tabla en sesión si no existe
-if "tabla_opiniones" not in st.session_state:
-    st.session_state.tabla_opiniones = pd.DataFrame(columns=["Persona", "Opinión (1-10)", "Credibilidad (1-10)"])
+# Inicializar tabla en sesión
+if "dots" not in st.session_state:
+    st.session_state.dots = pd.DataFrame(columns=["Persona", "Área", "Evaluación", "Comentario", "Fecha"])
 
-# Formulario de entrada
-with st.form("formulario_opinion"):
-    col1, col2, col3 = st.columns(3)
+# Formulario de evaluación
+st.subheader("🔘 Nueva evaluación")
+with st.form("form_dot"):
+    col1, col2, col3 = st.columns([2, 2, 1])
     with col1:
-        persona = st.text_input("Nombre de la persona")
+        persona = st.text_input("Nombre de la persona a evaluar")
     with col2:
-        opinion = st.slider("Opinión", 1, 10, 7)
+        area = st.selectbox("Área temática", AREAS)
     with col3:
-        cred = st.slider("Credibilidad", 1, 10, 5)
-    enviar = st.form_submit_button("Agregar")
+        evaluacion = st.slider("Evaluación (1-10)", 1, 10, 7)
+    comentario = st.text_area("Comentario (opcional)")
+    enviar = st.form_submit_button("Registrar")
 
     if enviar and persona:
-        nueva_fila = pd.DataFrame({
-            "Persona": [persona],
-            "Opinión (1-10)": [opinion],
-            "Credibilidad (1-10)": [cred]
-        })
-        st.session_state.tabla_opiniones = pd.concat([st.session_state.tabla_opiniones, nueva_fila], ignore_index=True)
+        nueva_fila = pd.DataFrame([{
+            "Persona": persona.strip().title(),
+            "Área": area,
+            "Evaluación": evaluacion,
+            "Comentario": comentario.strip(),
+            "Fecha": datetime.today().strftime("%Y-%m-%d")
+        }])
+        st.session_state.dots = pd.concat([st.session_state.dots, nueva_fila], ignore_index=True)
+        st.success(f"Evaluación registrada para {persona.strip().title()}")
 
-# Mostrar tabla
-st.write("### Opiniones Registradas")
-st.dataframe(st.session_state.tabla_opiniones, use_container_width=True)
+# Visualización del historial
+st.subheader("📋 Historial de evaluaciones")
+st.dataframe(st.session_state.dots, use_container_width=True)
 
-# Calcular resultado si hay datos
-if not st.session_state.tabla_opiniones.empty:
-    st.subheader("Paso 2: Resultado de la decisión")
-
-    df = st.session_state.tabla_opiniones.copy()
-    df["Ponderado"] = df["Opinión (1-10)"] * df["Credibilidad (1-10)"]
-
-    total_ponderado = df["Ponderado"].sum()
-    total_credibilidad = df["Credibilidad (1-10)"].sum()
-
-    resultado = round(total_ponderado / total_credibilidad, 2) if total_credibilidad > 0 else 0
-
-    st.metric(label="Promedio Ponderado de la Decisión", value=resultado)
-
-    with st.expander("Ver cálculo detallado"):
-        st.write(df)
+# Agrupado por persona y área (promedios)
+if not st.session_state.dots.empty:
+    st.subheader("📊 Credibilidad promedio por persona y área")
+    resumen = st.session_state.dots.groupby(["Persona", "Área"]).agg(
+        Promedio_Evaluación=("Evaluación", "mean"),
+        Evaluaciones=("Evaluación", "count")
+    ).reset_index()
+    resumen["Promedio_Evaluación"] = resumen["Promedio_Evaluación"].round(2)
+    st.dataframe(resumen, use_container_width=True)
 
 # Botón para reiniciar
-if st.button("🔄 Reiniciar tabla"):
-    st.session_state.tabla_opiniones = pd.DataFrame(columns=["Persona", "Opinión (1-10)", "Credibilidad (1-10)"])
+if st.button("🔄 Reiniciar todos los registros"):
+    st.session_state.dots = pd.DataFrame(columns=["Persona", "Área", "Evaluación", "Comentario", "Fecha"])
