@@ -103,7 +103,7 @@ if st.session_state.vista_actual == "Registro":
             if numero_expediente in df_existente["numero_expediente"].astype(str).values:
                 st.error("Ya existe un expediente con ese número.")
             else:
-        st.info("No hay expedientes disponibles.")
+    st.info("No hay expedientes disponibles.")
                 expediente_id = str(uuid4())[:8]
                 nuevo = {
                     "id": expediente_id,
