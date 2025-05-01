@@ -51,6 +51,7 @@ def eliminar_expediente(expediente_id):
     expediente = df[df["id"] == expediente_id]
     if not expediente.empty:
         archivo = expediente.iloc[0]["archivo"]
+        archivo = str(archivo) if pd.notna(archivo) else ""
         if archivo:
             archivo_path = os.path.join(DOCS_PATH, archivo)
             if os.path.exists(archivo_path):
@@ -124,11 +125,12 @@ elif seccion == "Ver expedientes":
         st.write(f"**Fecha de inicio:** {expediente['fecha_inicio'].strftime('%d/%m/%Y')}")
 
         # Documento
-        if expediente["archivo"]:
-            archivo_path = os.path.join(DOCS_PATH, expediente["archivo"])
+        archivo = str(expediente["archivo"]) if pd.notna(expediente["archivo"]) else ""
+        if archivo:
+            archivo_path = os.path.join(DOCS_PATH, archivo)
             if os.path.exists(archivo_path):
                 with open(archivo_path, "rb") as f:
-                    st.download_button("Descargar documento", data=f, file_name=expediente["archivo"])
+                    st.download_button("Descargar documento", data=f, file_name=archivo)
             else:
                 st.warning("El archivo no se encuentra en el sistema.")
         else:
