@@ -135,3 +135,52 @@ elif seccion == "Consultar expedientes":
         df_mostrar = df_mostrar[df_mostrar["cliente"].str.contains(filtro, case=False)]
 
     st.dataframe(df_mostrar, use_container_width=True)
+
+    if not df.empty:
+        seleccionado = st.selectbox("Selecciona un expediente", df["numero_expediente"])
+        expediente = df[df["numero_expediente"] == seleccionado].iloc[0]
+
+        st.subheader(f"Detalles del expediente {seleccionado}")
+        st.write(f"**Cliente:** {expediente['cliente']}")
+        st.write(f"**Materia:** {expediente['materia']}")
+        st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
+
+        try:
+            fecha_inicio_dt = pd.to_datetime(expediente["fecha_inicio"], errors="coerce")
+            fecha_formateada = fecha_inicio_dt.strftime("%d/%m/%Y") if not pd.isnull(fecha_inicio_dt) else "Sin fecha"
+        except:
+            fecha_formateada = "Sin fecha"
+
+        st.write(f"**Fecha de inicio:** {fecha_formateada}")
+
+        archivo_nombre = str(expediente["archivo"])
+        if archivo_nombre and archivo_nombre.lower() != "nan":
+            archivo_path = os.path.join(DOCS_PATH, archivo_nombre)
+            if os.path.exists(archivo_path):
+                with open(archivo_path, "rb") as f:
+                    st.download_button("Descargar documento", data=f, file_name=archivo_nombre)
+            else:
+                st.warning("El archivo no se encuentra disponible en la carpeta.")
+        else:
+            st.info("📂 No se ha cargado ningún documento.")
+
+        st.markdown("## 📜 Cronología del expediente")
+        df_eventos = cargar_eventos()
+        eventos = df_eventos[df_eventos["expediente_id"] == expediente["id"]]
+        if not eventos.empty:
+            eventos["fecha"] = pd.to_datetime(eventos["fecha"], errors="coerce")
+            eventos = eventos.sort_values("fecha")
+            for _, row in eventos.iterrows():
+                st.markdown(f"**{row['fecha'].strftime('%d/%m/%Y')} – {row['tipo_evento']}**: {row['descripcion']}")
+        else:
+            st.info("Este expediente aún no tiene eventos registrados.")
+
+        st.markdown("### ➕ Agregar evento")
+        with st.form("form_evento"):
+            fecha_evento = st.date_input("Fecha del evento", value=date.today(), key="fecha_evento")
+            tipo_evento = st.selectbox("Tipo de evento", EVENTOS_TIPOS, key="tipo_evento")
+            descripcion = st.text_area("Descripción del evento", key="descripcion_evento")
+            submit = st.form_submit_button("Guardar evento")
+            if submit:
+                guardar_evento(expediente["id"], fecha_evento, tipo_evento, descripcion)
+                st.success("✅ Evento agregado correctamente. Recarga la página para verlo.")
