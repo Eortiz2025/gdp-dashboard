@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-import matplotlib.pyplot as plt
 
 st.set_page_config("POS + Inventario", layout="centered")
 st.title("📦 Control de Inventario - OlaCafe")
@@ -23,15 +22,16 @@ def cargar_movimientos():
     if os.path.exists("movimientos.csv"):
         return pd.read_csv("movimientos.csv")
     else:
-        return pd.DataFrame(columns=["fecha", "tipo", "producto", "cantidad"])
+        return pd.DataFrame(columns=["fecha", "tipo", "producto", "cantidad", "proveedor"])
 
-def guardar_movimiento(tipo, producto, cantidad):
+def guardar_movimiento(tipo, producto, cantidad, proveedor=None):
     df = cargar_movimientos()
     nuevo = {
         "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "tipo": tipo,
         "producto": producto,
-        "cantidad": cantidad
+        "cantidad": cantidad,
+        "proveedor": proveedor if tipo == "entrada" else None
     }
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
     df.to_csv("movimientos.csv", index=False)
@@ -57,15 +57,16 @@ else:
     st.info("Inventario ya registrado. Si deseas reiniciarlo, borra 'inventario.csv'.")
 
 # --------------------------
-# Entradas (compras)
+# Entradas (compras con proveedor)
 # --------------------------
 st.subheader("🟢 Registro de entradas (compras)")
 
 producto_ent = st.selectbox("Producto comprado", inventario["nombre"], key="entrada")
 cant_ent = st.number_input("Cantidad comprada", min_value=1, step=1, key="cant_ent")
+proveedor = st.text_input("Proveedor")
 if st.button("Registrar entrada"):
-    guardar_movimiento("entrada", producto_ent, cant_ent)
-    st.success(f"Entrada registrada: {producto_ent} +{cant_ent}")
+    guardar_movimiento("entrada", producto_ent, cant_ent, proveedor)
+    st.success(f"Entrada registrada: {producto_ent} +{cant_ent} (Proveedor: {proveedor})")
 
 # --------------------------
 # Salidas (ventas)
@@ -114,37 +115,25 @@ else:
     st.info("Aún no hay movimientos registrados.")
 
 # --------------------------
-# 📈 Gráficas
+# Predicción de compras futuras
 # --------------------------
 st.markdown("---")
-st.subheader("📊 Gráfica de entradas y salidas por producto")
+st.subheader("📈 Predicción de compras futuras")
 
 if not movs.empty:
-    resumen_graf = movs.groupby(["producto", "tipo"])["cantidad"].sum().unstack().fillna(0)
-    fig, ax = plt.subplots()
-    resumen_graf.plot(kind="bar", ax=ax)
-    plt.title("Movimientos por producto")
-    plt.ylabel("Cantidad")
-    st.pyplot(fig)
+    salidas = movs[movs["tipo"] == "salida"]
+    salidas["fecha"] = pd.to_datetime(salidas["fecha"])
+    salidas["semana"] = salidas["fecha"].dt.isocalendar().week
 
-# --------------------------
-# 💰 Resumen del día
-# --------------------------
-st.markdown("---")
-st.subheader("📆 Resumen del día")
+    pred = salidas.groupby(["producto", "semana"])["cantidad"].sum().groupby("producto").mean().reset_index()
+    pred.columns = ["producto", "promedio_semanal"]
+    stock_actual = resumen[["nombre", "stock"]].rename(columns={"nombre": "producto"})
+    sugerencia = pred.merge(stock_actual, on="producto", how="left")
+    sugerencia["sugerido_comprar"] = (sugerencia["promedio_semanal"] * 2 - sugerencia["stock"]).clip(lower=0).round()
 
-hoy = datetime.now().strftime("%Y-%m-%d")
-movs["fecha"] = pd.to_datetime(movs["fecha"])
-hoy_df = movs[movs["fecha"].dt.strftime("%Y-%m-%d") == hoy]
-
-if not hoy_df.empty:
-    resumen_dia = hoy_df.groupby("tipo")["cantidad"].sum().to_dict()
-    entradas_hoy = resumen_dia.get("entrada", 0)
-    salidas_hoy = resumen_dia.get("salida", 0)
-    st.metric("Entradas (compras)", f"{entradas_hoy}")
-    st.metric("Salidas (ventas)", f"{salidas_hoy}")
+    st.dataframe(sugerencia[["producto", "stock", "promedio_semanal", "sugerido_comprar"]])
 else:
-    st.info("Aún no hay movimientos registrados hoy.")
+    st.info("Aún no hay suficientes datos para calcular predicciones.")
 
 # --------------------------
 # Historial de movimientos
