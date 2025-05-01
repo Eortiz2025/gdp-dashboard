@@ -14,6 +14,7 @@ DATA_PATH = "data"
 EXPEDIENTES_FILE = os.path.join(DATA_PATH, "expedientes.csv")
 DOCS_PATH = os.path.join(DATA_PATH, "documentos")
 EVENTOS_FILE = os.path.join(DATA_PATH, "eventos.csv")
+CHAT_FILE = os.path.join(DATA_PATH, "chat.csv")
 EVENTOS_TIPOS = ["Audiencia", "Escrito presentado", "Acuerdo", "Resolución", "Otro"]
 
 # Asegurar carpetas
@@ -29,7 +30,12 @@ if not os.path.exists(EVENTOS_FILE):
     df_eventos_init = pd.DataFrame(columns=["expediente_id", "fecha", "tipo_evento", "descripcion"])
     df_eventos_init.to_csv(EVENTOS_FILE, index=False)
 
-# Funciones de expedientes
+if not os.path.exists(CHAT_FILE):
+    df_chat_init = pd.DataFrame(columns=["expediente_id", "fecha_hora", "autor", "mensaje"])
+    df_chat_init.to_csv(CHAT_FILE, index=False)
+
+# Funciones
+
 def cargar_expedientes():
     columnas = ["id", "cliente", "materia", "numero_expediente", "fecha_inicio", "archivo"]
     try:
@@ -52,28 +58,6 @@ def actualizar_archivo(expediente_id, archivo_nombre):
     df.loc[df["id"] == expediente_id, "archivo"] = archivo_nombre
     df.to_csv(EXPEDIENTES_FILE, index=False, date_format="%Y-%m-%d")
 
-def eliminar_expediente(expediente_id):
-    df = cargar_expedientes()
-    expediente = df[df["id"] == expediente_id]
-    if not expediente.empty:
-        archivo = expediente.iloc[0]["archivo"]
-        archivo = str(archivo) if pd.notna(archivo) else ""
-        if archivo:
-            archivo_path = os.path.join(DOCS_PATH, archivo)
-            if os.path.exists(archivo_path):
-                os.remove(archivo_path)
-        df = df[df["id"] != expediente_id]
-        df.to_csv(EXPEDIENTES_FILE, index=False, date_format="%Y-%m-%d")
-
-# Validación de PDF
-def es_pdf_valido(file):
-    try:
-        reader = PdfReader(file)
-        return True
-    except:
-        return False
-
-# Funciones de eventos
 def cargar_eventos():
     return pd.read_csv(EVENTOS_FILE)
 
@@ -88,13 +72,25 @@ def guardar_evento(expediente_id, fecha, tipo_evento, descripcion):
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
     df.to_csv(EVENTOS_FILE, index=False)
 
+def cargar_chat():
+    return pd.read_csv(CHAT_FILE)
+
+def guardar_mensaje_chat(expediente_id, autor, mensaje):
+    df = cargar_chat()
+    nuevo = {
+        "expediente_id": expediente_id,
+        "fecha_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "autor": autor,
+        "mensaje": mensaje
+    }
+    df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
+    df.to_csv(CHAT_FILE, index=False)
+
 # Menú
 seccion = st.sidebar.radio("Menú", ["Registrar nuevo expediente", "Consultar expedientes"])
 
-# Registrar nuevo expediente
 if seccion == "Registrar nuevo expediente":
     st.header("Registrar nuevo expediente")
-
     cliente = st.text_input("Nombre del cliente").strip()
     numero_expediente = st.text_input("Número de expediente").strip()
     fecha_inicio = st.date_input("Fecha de inicio", value=date.today())
@@ -102,7 +98,7 @@ if seccion == "Registrar nuevo expediente":
     if st.button("Guardar expediente"):
         if cliente and numero_expediente:
             df_existente = cargar_expedientes()
-            if "numero_expediente" in df_existente.columns and numero_expediente in df_existente["numero_expediente"].astype(str).values:
+            if numero_expediente in df_existente["numero_expediente"].astype(str).values:
                 st.error("Ya existe un expediente con ese número.")
             else:
                 expediente_id = str(uuid4())[:8]
@@ -119,14 +115,12 @@ if seccion == "Registrar nuevo expediente":
         else:
             st.warning("Por favor completa todos los campos.")
 
-# Consultar expedientes
 elif seccion == "Consultar expedientes":
     st.header("Consulta de expedientes laborales")
     df = cargar_expedientes()
 
     df_mostrar = df.copy()
     df_mostrar["Fecha de Inicio"] = pd.to_datetime(df_mostrar["fecha_inicio"], errors="coerce").dt.strftime("%d/%m/%Y")
-    df_mostrar["Fecha de Inicio"] = df_mostrar["Fecha de Inicio"].fillna("Sin fecha").replace("NaT", "Sin fecha")
     df_mostrar = df_mostrar.rename(columns={"numero_expediente": "Expediente"})
     df_mostrar = df_mostrar[["cliente", "Expediente", "Fecha de Inicio"]]
 
@@ -143,14 +137,12 @@ elif seccion == "Consultar expedientes":
         st.subheader(f"Detalles del expediente {seleccionado}")
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
-        st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
 
         try:
             fecha_inicio_dt = pd.to_datetime(expediente["fecha_inicio"], errors="coerce")
             fecha_formateada = fecha_inicio_dt.strftime("%d/%m/%Y") if not pd.isnull(fecha_inicio_dt) else "Sin fecha"
         except:
             fecha_formateada = "Sin fecha"
-
         st.write(f"**Fecha de inicio:** {fecha_formateada}")
 
         archivo_nombre = str(expediente["archivo"])
@@ -159,10 +151,6 @@ elif seccion == "Consultar expedientes":
             if os.path.exists(archivo_path):
                 with open(archivo_path, "rb") as f:
                     st.download_button("Descargar documento", data=f, file_name=archivo_nombre)
-            else:
-                st.warning("El archivo no se encuentra disponible en la carpeta.")
-        else:
-            st.info("📂 No se ha cargado ningún documento.")
 
         st.markdown("## 📜 Cronología del expediente")
         df_eventos = cargar_eventos()
@@ -184,3 +172,22 @@ elif seccion == "Consultar expedientes":
             if submit:
                 guardar_evento(expediente["id"], fecha_evento, tipo_evento, descripcion)
                 st.success("✅ Evento agregado correctamente. Recarga la página para verlo.")
+
+        st.markdown("## 💬 Chat interno del expediente")
+        autor = st.text_input("Tu nombre o iniciales", max_chars=50)
+        mensaje = st.text_area("Escribe tu mensaje")
+        if st.button("Enviar mensaje"):
+            if autor.strip() and mensaje.strip():
+                guardar_mensaje_chat(expediente["id"], autor.strip(), mensaje.strip())
+                st.success("Mensaje enviado.")
+            else:
+                st.warning("Debes completar autor y mensaje.")
+
+        st.markdown("### Historial del chat")
+        df_chat = cargar_chat()
+        mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
+        if not mensajes.empty:
+            for _, row in mensajes.iterrows():
+                st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
+        else:
+            st.info("Aún no hay mensajes en este expediente.")
