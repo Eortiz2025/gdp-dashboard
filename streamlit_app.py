@@ -115,10 +115,12 @@ elif seccion == "Ver expedientes":
     st.dataframe(df_mostrar, use_container_width=True)
 
     if not df.empty:
-        seleccionado = st.selectbox("Selecciona un expediente", df["id"])
-        expediente = df[df["id"] == seleccionado].iloc[0]
+        opciones = {row["numero_expediente"]: row["id"] for _, row in df.iterrows()}
+        seleccionado_key = st.selectbox("Selecciona un expediente", options=list(opciones.keys()))
+        seleccionado_id = opciones[seleccionado_key]
+        expediente = df[df["id"] == seleccionado_id].iloc[0]
 
-        st.subheader(f"Detalles del expediente {seleccionado}")
+        st.subheader(f"Detalles del expediente {seleccionado_key}")
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
         st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
