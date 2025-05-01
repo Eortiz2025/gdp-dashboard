@@ -3,10 +3,11 @@ import pandas as pd
 import os
 from datetime import date
 from uuid import uuid4
+from PyPDF2 import PdfReader
 
 # Configuración general
 st.set_page_config(page_title="Seguimiento de Expedientes Laborales", layout="centered")
-st.title("⚖️ Seguimiento de Expedientes Laborales")
+st.title("\u2696\ufe0f Seguimiento de Expedientes Laborales")
 
 # Rutas de datos
 DATA_PATH = "data"
@@ -22,9 +23,10 @@ if not os.path.exists(EXPEDIENTES_FILE):
     df_init = pd.DataFrame(columns=["id", "cliente", "materia", "numero_expediente", "fecha_inicio", "archivo"])
     df_init.to_csv(EXPEDIENTES_FILE, index=False)
 
-# Funciones
+# Funciones de datos
 def cargar_expedientes():
     df = pd.read_csv(EXPEDIENTES_FILE)
+    df["fecha_inicio"] = pd.to_datetime(df["fecha_inicio"], errors="coerce")
     return df
 
 def guardar_expediente(info):
@@ -37,6 +39,26 @@ def actualizar_archivo(expediente_id, archivo_nombre):
     df.loc[df["id"] == expediente_id, "archivo"] = archivo_nombre
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
+def eliminar_expediente(expediente_id):
+    df = cargar_expedientes()
+    expediente = df[df["id"] == expediente_id]
+    if not expediente.empty:
+        archivo = expediente.iloc[0]["archivo"]
+        if archivo:
+            archivo_path = os.path.join(DOCS_PATH, archivo)
+            if os.path.exists(archivo_path):
+                os.remove(archivo_path)
+        df = df[df["id"] != expediente_id]
+        df.to_csv(EXPEDIENTES_FILE, index=False)
+
+# Validación de PDF
+def es_pdf_valido(file):
+    try:
+        reader = PdfReader(file)
+        return True
+    except:
+        return False
+
 # Menú
 seccion = st.sidebar.radio("Menú", ["Registrar expediente", "Ver expedientes"])
 
@@ -44,15 +66,15 @@ seccion = st.sidebar.radio("Menú", ["Registrar expediente", "Ver expedientes"])
 if seccion == "Registrar expediente":
     st.header("Registrar nuevo expediente laboral")
 
-    cliente = st.text_input("Nombre del cliente")
-    numero_expediente = st.text_input("Número de expediente")
+    cliente = st.text_input("Nombre del cliente").strip()
+    numero_expediente = st.text_input("Número de expediente").strip()
     fecha_inicio = st.date_input("Fecha de inicio", value=date.today())
 
     if st.button("Guardar expediente"):
         if cliente and numero_expediente:
             df_existente = cargar_expedientes()
             if numero_expediente in df_existente["numero_expediente"].astype(str).values:
-                st.error("⚠️ Ya existe un expediente con ese número.")
+                st.error("\u26a0\ufe0f Ya existe un expediente con ese número.")
             else:
                 expediente_id = str(uuid4())[:8]
                 nuevo = {
@@ -64,7 +86,7 @@ if seccion == "Registrar expediente":
                     "archivo": ""
                 }
                 guardar_expediente(nuevo)
-                st.success("✅ Expediente registrado correctamente.")
+                st.success("\u2705 Expediente registrado correctamente.")
         else:
             st.warning("Por favor completa todos los campos.")
 
@@ -73,9 +95,8 @@ elif seccion == "Ver expedientes":
     st.header("Listado de expedientes laborales")
     df = cargar_expedientes()
 
-    # Mostrar tabla con fecha formateada
     df_mostrar = df.copy()
-    df_mostrar["fecha_inicio"] = pd.to_datetime(df_mostrar["fecha_inicio"], errors="coerce").dt.strftime("%d/%m/%Y")
+    df_mostrar["fecha_inicio"] = df_mostrar["fecha_inicio"].dt.strftime("%d/%m/%Y")
 
     filtro = st.text_input("Buscar por cliente o número de expediente")
     if filtro:
@@ -93,25 +114,35 @@ elif seccion == "Ver expedientes":
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
         st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
-        # Mostrar fecha en formato correcto
-        fecha_formateada = pd.to_datetime(expediente["fecha_inicio"], errors="coerce").strftime("%d/%m/%Y")
-        st.write(f"**Fecha de inicio:** {fecha_formateada}")
+        st.write(f"**Fecha de inicio:** {expediente['fecha_inicio'].strftime('%d/%m/%Y')}")
 
         # Documento
         if expediente["archivo"]:
             archivo_path = os.path.join(DOCS_PATH, expediente["archivo"])
-            with open(archivo_path, "rb") as f:
-                st.download_button("Descargar documento", data=f, file_name=expediente["archivo"])
+            if os.path.exists(archivo_path):
+                with open(archivo_path, "rb") as f:
+                    st.download_button("Descargar documento", data=f, file_name=expediente["archivo"])
+            else:
+                st.warning("El archivo no se encuentra en el sistema.")
         else:
-            st.info("📂 No se ha cargado ningún documento.")
+            st.info("\ud83d\udcc2 No se ha cargado ningún documento.")
 
         st.markdown("---")
-        st.subheader("📤 Subir o reemplazar documento PDF")
+        st.subheader("\ud83d\udcc4 Subir o reemplazar documento PDF")
         archivo_nuevo = st.file_uploader("Selecciona un archivo PDF", type=["pdf"])
         if archivo_nuevo:
-            archivo_nombre = f"{expediente['id']}_{archivo_nuevo.name}"
-            archivo_path = os.path.join(DOCS_PATH, archivo_nombre)
-            with open(archivo_path, "wb") as f:
-                f.write(archivo_nuevo.read())
-            actualizar_archivo(expediente["id"], archivo_nombre)
-            st.success("✅ Archivo subido correctamente.")
+            if es_pdf_valido(archivo_nuevo):
+                archivo_nombre = f"{expediente['id']}_{archivo_nuevo.name}"
+                archivo_path = os.path.join(DOCS_PATH, archivo_nombre)
+                with open(archivo_path, "wb") as f:
+                    f.write(archivo_nuevo.read())
+                actualizar_archivo(expediente["id"], archivo_nombre)
+                st.success("\u2705 Archivo subido correctamente.")
+            else:
+                st.error("El archivo no es un PDF válido.")
+
+        st.markdown("---")
+        if st.button("\ud83d\uddd1 Eliminar expediente"):
+            eliminar_expediente(expediente["id"])
+            st.success("Expediente eliminado correctamente.")
+            st.experimental_rerun()
