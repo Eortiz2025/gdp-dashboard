@@ -105,6 +105,8 @@ elif seccion == "Consultar expedientes":
 
     df_mostrar = df.copy()
     df_mostrar["fecha_inicio"] = df_mostrar["fecha_inicio"].dt.strftime("%d/%m/%Y")
+    if "id" in df_mostrar.columns:
+        df_mostrar = df_mostrar.drop(columns=["id", "archivo"])
 
     filtro = st.text_input("Buscar por nombre del cliente o número de expediente")
     if filtro:
@@ -112,53 +114,5 @@ elif seccion == "Consultar expedientes":
             df_mostrar["cliente"].str.contains(filtro, case=False) |
             df_mostrar["numero_expediente"].astype(str).str.contains(filtro, case=False)
         ]
+
     st.dataframe(df_mostrar, use_container_width=True)
-
-    if not df.empty:
-        opciones = {f"{row['numero_expediente']} - {row['cliente']}": row["id"] for _, row in df.iterrows()}
-        seleccionado_key = st.selectbox("Selecciona un expediente por número", options=list(opciones.keys()))
-        seleccionado_id = opciones[seleccionado_key]
-        expediente = df[df["id"] == seleccionado_id].iloc[0]
-
-        st.subheader(f"Detalles del expediente {expediente['numero_expediente']}")
-        st.write(f"**Cliente:** {expediente['cliente']}")
-        st.write(f"**Materia:** {expediente['materia']}")
-        st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
-
-        fecha_valida = expediente['fecha_inicio']
-        if pd.notna(fecha_valida):
-            st.write(f"**Fecha de inicio:** {fecha_valida.strftime('%d/%m/%Y')}")
-        else:
-            st.write("**Fecha de inicio:** No disponible")
-
-        # Documento
-        archivo = str(expediente["archivo"]) if pd.notna(expediente["archivo"]) else ""
-        if archivo:
-            archivo_path = os.path.join(DOCS_PATH, archivo)
-            if os.path.exists(archivo_path):
-                with open(archivo_path, "rb") as f:
-                    st.download_button("Descargar documento", data=f, file_name=archivo)
-            else:
-                st.warning("El archivo no se encuentra en el sistema.")
-        else:
-            st.info("No se ha cargado ningún documento")
-
-        st.markdown("---")
-        st.subheader("Subir o reemplazar documento PDF")
-        archivo_nuevo = st.file_uploader("Selecciona un archivo PDF", type=["pdf"])
-        if archivo_nuevo:
-            if es_pdf_valido(archivo_nuevo):
-                archivo_nombre = f"{expediente['id']}_{archivo_nuevo.name}"
-                archivo_path = os.path.join(DOCS_PATH, archivo_nombre)
-                with open(archivo_path, "wb") as f:
-                    f.write(archivo_nuevo.read())
-                actualizar_archivo(expediente["id"], archivo_nombre)
-                st.success("Archivo subido correctamente.")
-            else:
-                st.error("El archivo no es un PDF válido.")
-
-        st.markdown("---")
-        if st.button("Eliminar expediente"):
-            eliminar_expediente(expediente["id"])
-            st.success("Expediente eliminado correctamente.")
-            st.experimental_rerun()
