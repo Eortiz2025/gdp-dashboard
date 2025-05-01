@@ -24,7 +24,9 @@ if not os.path.exists(EXPEDIENTES_FILE):
 
 # Funciones
 def cargar_expedientes():
-    return pd.read_csv(EXPEDIENTES_FILE)
+    df = pd.read_csv(EXPEDIENTES_FILE)
+    df["fecha_inicio"] = pd.to_datetime(df["fecha_inicio"]).dt.strftime("%d/%m/%Y")
+    return df
 
 def guardar_expediente(info):
     df = cargar_expedientes()
@@ -32,7 +34,7 @@ def guardar_expediente(info):
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
 def actualizar_archivo(expediente_id, archivo_nombre):
-    df = cargar_expedientes()
+    df = pd.read_csv(EXPEDIENTES_FILE)
     df.loc[df["id"] == expediente_id, "archivo"] = archivo_nombre
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
@@ -60,10 +62,12 @@ if seccion == "Registrar expediente":
                     "cliente": cliente,
                     "materia": materia,
                     "numero_expediente": numero_expediente,
-                    "fecha_inicio": fecha_inicio,
-                    "archivo": ""  # No se sube en este paso
+                    "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),  # para guardar correctamente
+                    "archivo": ""
                 }
-                guardar_expediente(nuevo)
+                df = pd.read_csv(EXPEDIENTES_FILE)  # recargar sin formateo para guardar correctamente
+                df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
+                df.to_csv(EXPEDIENTES_FILE, index=False)
                 st.success("✅ Expediente registrado correctamente. Puedes subir el archivo después desde el panel de consulta.")
         else:
             st.warning("Por favor completa los campos requeridos.")
@@ -92,7 +96,7 @@ elif seccion == "Ver expedientes":
                 st.download_button("Descargar documento", data=pdf_file, file_name=expediente["archivo"])
         else:
             st.info("📂 No se ha cargado ningún documento para este expediente.")
-        
+
         st.markdown("---")
         st.subheader("📤 Subir o reemplazar documento PDF")
         archivo_nuevo = st.file_uploader("Selecciona un archivo PDF", type=["pdf"])
