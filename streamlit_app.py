@@ -11,11 +11,11 @@ Este sistema te ayuda a tomar decisiones basadas en opiniones **ponderadas por c
 
 st.subheader("Paso 1: Ingresar opiniones")
 
-# Inicializar o cargar la tabla de entradas
+# Inicializar la tabla en sesión si no existe
 if "tabla_opiniones" not in st.session_state:
     st.session_state.tabla_opiniones = pd.DataFrame(columns=["Persona", "Opinión (1-10)", "Credibilidad (1-10)"])
 
-# Formulario para agregar una nueva opinión
+# Formulario de entrada
 with st.form("formulario_opinion"):
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -27,18 +27,22 @@ with st.form("formulario_opinion"):
     enviar = st.form_submit_button("Agregar")
 
     if enviar and persona:
-        nueva_fila = pd.DataFrame([[persona, opinion, cred]], columns=st.session_state.tabla_opiniones.columns)
+        nueva_fila = pd.DataFrame({
+            "Persona": [persona],
+            "Opinión (1-10)": [opinion],
+            "Credibilidad (1-10)": [cred]
+        })
         st.session_state.tabla_opiniones = pd.concat([st.session_state.tabla_opiniones, nueva_fila], ignore_index=True)
 
-# Mostrar la tabla actual
+# Mostrar tabla
 st.write("### Opiniones Registradas")
 st.dataframe(st.session_state.tabla_opiniones, use_container_width=True)
 
-# Paso 2: Cálculo del promedio ponderado
+# Calcular resultado si hay datos
 if not st.session_state.tabla_opiniones.empty:
     st.subheader("Paso 2: Resultado de la decisión")
 
-    df = st.session_state.tabla_opiniones
+    df = st.session_state.tabla_opiniones.copy()
     df["Ponderado"] = df["Opinión (1-10)"] * df["Credibilidad (1-10)"]
 
     total_ponderado = df["Ponderado"].sum()
