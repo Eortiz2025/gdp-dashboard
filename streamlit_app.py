@@ -23,13 +23,14 @@ if not os.path.exists(EXPEDIENTES_FILE):
     df_init.to_csv(EXPEDIENTES_FILE, index=False)
 
 # Funciones
-def cargar_expedientes():
+def cargar_expedientes(formatear_fecha=True):
     df = pd.read_csv(EXPEDIENTES_FILE)
-    df["fecha_inicio"] = pd.to_datetime(df["fecha_inicio"]).dt.strftime("%d/%m/%Y")
+    if formatear_fecha:
+        df["fecha_inicio"] = pd.to_datetime(df["fecha_inicio"], errors="coerce").dt.strftime("%d/%m/%Y")
     return df
 
 def guardar_expediente(info):
-    df = cargar_expedientes()
+    df = pd.read_csv(EXPEDIENTES_FILE)  # sin formato
     df = pd.concat([df, pd.DataFrame([info])], ignore_index=True)
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
@@ -52,8 +53,8 @@ if seccion == "Registrar expediente":
 
     if st.button("Guardar expediente"):
         if cliente and numero_expediente:
-            df = cargar_expedientes()
-            if numero_expediente in df["numero_expediente"].astype(str).values:
+            df_existente = cargar_expedientes(formatear_fecha=False)
+            if numero_expediente in df_existente["numero_expediente"].astype(str).values:
                 st.error("⚠️ Ya existe un expediente con ese número. Debe ser único.")
             else:
                 expediente_id = str(uuid4())[:8]
@@ -62,12 +63,10 @@ if seccion == "Registrar expediente":
                     "cliente": cliente,
                     "materia": materia,
                     "numero_expediente": numero_expediente,
-                    "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),  # para guardar correctamente
+                    "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d"),
                     "archivo": ""
                 }
-                df = pd.read_csv(EXPEDIENTES_FILE)  # recargar sin formateo para guardar correctamente
-                df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
-                df.to_csv(EXPEDIENTES_FILE, index=False)
+                guardar_expediente(nuevo)
                 st.success("✅ Expediente registrado correctamente. Puedes subir el archivo después desde el panel de consulta.")
         else:
             st.warning("Por favor completa los campos requeridos.")
