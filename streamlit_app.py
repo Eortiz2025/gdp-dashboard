@@ -134,10 +134,10 @@ elif seccion == "Ver expedientes":
             else:
                 st.warning("El archivo no se encuentra en el sistema.")
         else:
-            st.info("\ud83d\udcc2 No se ha cargado ningún documento.")
+            st.info("[No se ha cargado ningun documento]")
 
         st.markdown("---")
-        st.subheader("\ud83d\udcc4 Subir o reemplazar documento PDF")
+        st.subheader("Subir o reemplazar documento PDF")
         archivo_nuevo = st.file_uploader("Selecciona un archivo PDF", type=["pdf"])
         if archivo_nuevo:
             if es_pdf_valido(archivo_nuevo):
