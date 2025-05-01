@@ -52,6 +52,18 @@ if not df.empty:
 
     st.metric(label="Promedio Ponderado de la Decisión", value=resultado)
 
+    # Interpretación visual estilo semáforo
+    if resultado < 5.0:
+        mensaje = "🔴 Opinión mayormente negativa o con baja confianza."
+    elif resultado < 7.0:
+        mensaje = "🟡 Opiniones divididas, falta consenso. Requiere discusión."
+    elif resultado < 9.0:
+        mensaje = "🟢 Hay buena confianza en la decisión."
+    else:
+        mensaje = "✅ Consenso claro y muy alta confianza."
+
+    st.info(f"**Interpretación:** {mensaje}")
+
     with st.expander("Ver cálculo detallado"):
         st.write(df)
 
