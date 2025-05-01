@@ -2,12 +2,13 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+import matplotlib.pyplot as plt
 
 st.set_page_config("POS + Inventario", layout="centered")
 st.title("📦 Control de Inventario - OlaCafe")
 
 # --------------------------
-# Cargar datos
+# Cargar y guardar datos
 # --------------------------
 def cargar_inventario():
     if os.path.exists("inventario.csv"):
@@ -36,7 +37,7 @@ def guardar_movimiento(tipo, producto, cantidad):
     df.to_csv("movimientos.csv", index=False)
 
 # --------------------------
-# Registro de inventario inicial
+# Inventario inicial
 # --------------------------
 st.subheader("📌 Inventario inicial")
 
@@ -56,17 +57,15 @@ else:
     st.info("Inventario ya registrado. Si deseas reiniciarlo, borra 'inventario.csv'.")
 
 # --------------------------
-# Entradas (compras del día)
+# Entradas (compras)
 # --------------------------
 st.subheader("🟢 Registro de entradas (compras)")
 
-inventario = cargar_inventario()
-if not inventario.empty:
-    producto_ent = st.selectbox("Producto comprado", inventario["nombre"])
-    cant_ent = st.number_input("Cantidad comprada", min_value=1, step=1)
-    if st.button("Registrar entrada"):
-        guardar_movimiento("entrada", producto_ent, cant_ent)
-        st.success(f"Entrada registrada: {producto_ent} +{cant_ent}")
+producto_ent = st.selectbox("Producto comprado", inventario["nombre"], key="entrada")
+cant_ent = st.number_input("Cantidad comprada", min_value=1, step=1, key="cant_ent")
+if st.button("Registrar entrada"):
+    guardar_movimiento("entrada", producto_ent, cant_ent)
+    st.success(f"Entrada registrada: {producto_ent} +{cant_ent}")
 
 # --------------------------
 # Salidas (ventas)
@@ -74,7 +73,7 @@ if not inventario.empty:
 st.subheader("🔴 Registro de salidas (ventas)")
 
 producto_sal = st.selectbox("Producto vendido", inventario["nombre"], key="venta")
-cant_sal = st.number_input("Cantidad vendida", min_value=1, step=1, key="venta_cant")
+cant_sal = st.number_input("Cantidad vendida", min_value=1, step=1, key="cant_sal")
 if st.button("Registrar venta"):
     guardar_movimiento("salida", producto_sal, cant_sal)
     st.success(f"Venta registrada: {producto_sal} -{cant_sal}")
@@ -90,12 +89,57 @@ movs = cargar_movimientos()
 if not movs.empty:
     resumen = movs.groupby(["producto", "tipo"])["cantidad"].sum().unstack().fillna(0)
     resumen["stock"] = resumen.get("entrada", 0) - resumen.get("salida", 0)
-    resumen = resumen.reset_index().merge(inventario, left_on="producto", right_on="nombre")
+    resumen = resumen.reset_index().merge(inventario, left_on="producto", right_on="nombre", how="left")
+
+    for col in ["entrada", "salida"]:
+        if col not in resumen.columns:
+            resumen[col] = 0
+
     resumen = resumen[["codigo", "producto", "precio", "entrada", "salida", "stock"]]
     resumen.rename(columns={"producto": "nombre"}, inplace=True)
+
+    # Alerta de stock bajo
+    bajo_stock = resumen[resumen["stock"] <= 5]
+    if not bajo_stock.empty:
+        st.warning("⚠️ Alerta: Productos con stock bajo")
+        st.dataframe(bajo_stock)
+
     st.dataframe(resumen, use_container_width=True)
 else:
     st.info("Aún no hay movimientos registrados.")
+
+# --------------------------
+# 📈 Gráficas
+# --------------------------
+st.markdown("---")
+st.subheader("📊 Gráfica de entradas y salidas por producto")
+
+if not movs.empty:
+    resumen_graf = movs.groupby(["producto", "tipo"])["cantidad"].sum().unstack().fillna(0)
+    fig, ax = plt.subplots()
+    resumen_graf.plot(kind="bar", ax=ax)
+    plt.title("Movimientos por producto")
+    plt.ylabel("Cantidad")
+    st.pyplot(fig)
+
+# --------------------------
+# 💰 Resumen del día
+# --------------------------
+st.markdown("---")
+st.subheader("📆 Resumen del día")
+
+hoy = datetime.now().strftime("%Y-%m-%d")
+movs["fecha"] = pd.to_datetime(movs["fecha"])
+hoy_df = movs[movs["fecha"].dt.strftime("%Y-%m-%d") == hoy]
+
+if not hoy_df.empty:
+    resumen_dia = hoy_df.groupby("tipo")["cantidad"].sum().to_dict()
+    entradas_hoy = resumen_dia.get("entrada", 0)
+    salidas_hoy = resumen_dia.get("salida", 0)
+    st.metric("Entradas (compras)", f"{entradas_hoy}")
+    st.metric("Salidas (ventas)", f"{salidas_hoy}")
+else:
+    st.info("Aún no hay movimientos registrados hoy.")
 
 # --------------------------
 # Historial de movimientos
@@ -106,6 +150,6 @@ st.subheader("📜 Historial de movimientos")
 if not movs.empty:
     st.dataframe(movs.sort_values(by="fecha", ascending=False), use_container_width=True)
     csv = movs.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Descargar historial", csv, file_name="movimientos.csv", mime="text/csv")
+    st.download_button("📥 Descargar historial completo", csv, file_name="movimientos.csv", mime="text/csv")
 else:
     st.info("No hay movimientos registrados aún.")
