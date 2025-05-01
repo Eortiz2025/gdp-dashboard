@@ -7,7 +7,7 @@ from PyPDF2 import PdfReader
 
 # Configuración general
 st.set_page_config(page_title="Seguimiento de Expedientes Laborales", layout="centered")
-st.title("📂 Sistema de Seguimiento de Expedientes Laborales")
+st.title("📂 Sistema Bravo & Asociados")
 
 # Rutas de datos
 DATA_PATH = "data"
