@@ -124,7 +124,12 @@ elif seccion == "Consultar expedientes":
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
         st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
-        st.write(f"**Fecha de inicio:** {expediente['fecha_inicio'].strftime('%d/%m/%Y')}")
+
+        fecha_valida = expediente['fecha_inicio']
+        if pd.notna(fecha_valida):
+            st.write(f"**Fecha de inicio:** {fecha_valida.strftime('%d/%m/%Y')}")
+        else:
+            st.write("**Fecha de inicio:** No disponible")
 
         # Documento
         archivo = str(expediente["archivo"]) if pd.notna(expediente["archivo"]) else ""
