@@ -7,7 +7,7 @@ from PyPDF2 import PdfReader
 
 # Configuración general
 st.set_page_config(page_title="Seguimiento de Expedientes Laborales", layout="centered")
-st.title("\u2696\ufe0f Seguimiento de Expedientes Laborales")
+st.title("Seguimiento de Expedientes Laborales")
 
 # Rutas de datos
 DATA_PATH = "data"
@@ -82,7 +82,7 @@ if seccion == "Registrar expediente":
         if cliente and numero_expediente:
             df_existente = cargar_expedientes()
             if "numero_expediente" in df_existente.columns and numero_expediente in df_existente["numero_expediente"].astype(str).values:
-                st.error("\u26a0\ufe0f Ya existe un expediente con ese número.")
+                st.error("Ya existe un expediente con ese número.")
             else:
                 expediente_id = str(uuid4())[:8]
                 nuevo = {
@@ -94,7 +94,7 @@ if seccion == "Registrar expediente":
                     "archivo": ""
                 }
                 guardar_expediente(nuevo)
-                st.success("\u2705 Expediente registrado correctamente.")
+                st.success("Expediente registrado correctamente.")
         else:
             st.warning("Por favor completa todos los campos.")
 
@@ -134,7 +134,7 @@ elif seccion == "Ver expedientes":
             else:
                 st.warning("El archivo no se encuentra en el sistema.")
         else:
-            st.info("[No se ha cargado ningun documento]")
+            st.info("No se ha cargado ningun documento")
 
         st.markdown("---")
         st.subheader("Subir o reemplazar documento PDF")
@@ -146,12 +146,12 @@ elif seccion == "Ver expedientes":
                 with open(archivo_path, "wb") as f:
                     f.write(archivo_nuevo.read())
                 actualizar_archivo(expediente["id"], archivo_nombre)
-                st.success("\u2705 Archivo subido correctamente.")
+                st.success("Archivo subido correctamente.")
             else:
                 st.error("El archivo no es un PDF válido.")
 
         st.markdown("---")
-        if st.button("\ud83d\uddd1 Eliminar expediente"):
+        if st.button("Eliminar expediente"):
             eliminar_expediente(expediente["id"])
             st.success("Expediente eliminado correctamente.")
             st.experimental_rerun()
