@@ -127,7 +127,15 @@ if not movs.empty:
 
     pred = salidas.groupby(["producto", "semana"])["cantidad"].sum().groupby("producto").mean().reset_index()
     pred.columns = ["producto", "promedio_semanal"]
-    stock_actual = resumen[["nombre", "stock"]].rename(columns={"nombre": "producto"})
+
+    # Buscar columna correcta
+    if 'nombre' in resumen.columns:
+        stock_actual = resumen[["nombre", "stock"]].rename(columns={"nombre": "producto"})
+    elif 'producto' in resumen.columns:
+        stock_actual = resumen[["producto", "stock"]]
+    else:
+        stock_actual = pd.DataFrame(columns=["producto", "stock"])
+
     sugerencia = pred.merge(stock_actual, on="producto", how="left")
     sugerencia["sugerido_comprar"] = (sugerencia["promedio_semanal"] * 2 - sugerencia["stock"]).clip(lower=0).round()
 
