@@ -4,7 +4,7 @@ import os
 from datetime import date
 from uuid import uuid4
 
-# Configuración
+# Configuración de la app
 st.set_page_config(page_title="Seguimiento de Expedientes Laborales", layout="centered")
 st.title("⚖️ Seguimiento de Expedientes Laborales")
 
@@ -30,7 +30,7 @@ def cargar_expedientes(formatear_fecha=True):
     return df
 
 def guardar_expediente(info):
-    df = pd.read_csv(EXPEDIENTES_FILE)  # sin formato
+    df = pd.read_csv(EXPEDIENTES_FILE)  # sin formato para guardar limpio
     df = pd.concat([df, pd.DataFrame([info])], ignore_index=True)
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
@@ -39,7 +39,7 @@ def actualizar_archivo(expediente_id, archivo_nombre):
     df.loc[df["id"] == expediente_id, "archivo"] = archivo_nombre
     df.to_csv(EXPEDIENTES_FILE, index=False)
 
-# Menú
+# Menú principal
 seccion = st.sidebar.radio("Menú", ["Registrar expediente", "Ver expedientes"])
 
 # Registro de expediente
@@ -71,7 +71,7 @@ if seccion == "Registrar expediente":
         else:
             st.warning("Por favor completa los campos requeridos.")
 
-# Visualización y carga de archivo posterior
+# Consulta y carga de archivo
 elif seccion == "Ver expedientes":
     st.header("Listado de expedientes laborales")
     df = cargar_expedientes()
@@ -87,7 +87,9 @@ elif seccion == "Ver expedientes":
         st.write(f"**Cliente:** {expediente['cliente']}")
         st.write(f"**Materia:** {expediente['materia']}")
         st.write(f"**Número de expediente:** {expediente['numero_expediente']}")
-        st.write(f"**Fecha de inicio:** {expediente['fecha_inicio']}")
+        # Corregimos el formato de fecha aquí también
+        fecha_formateada = pd.to_datetime(expediente['fecha_inicio'], errors='coerce').strftime("%d/%m/%Y")
+        st.write(f"**Fecha de inicio:** {fecha_formateada}")
 
         if expediente["archivo"]:
             archivo_path = os.path.join(DOCS_PATH, expediente["archivo"])
