@@ -159,11 +159,30 @@ elif st.session_state.vista_actual == "Chat":
 # Vista: Expedientes
 elif st.session_state.vista_actual == "Expedientes":
     st.subheader("📁 Listado de expedientes")
-    df = cargar_expedientes()
-    df_mostrar = df.copy()
-    df_mostrar["Fecha de Inicio"] = pd.to_datetime(df_mostrar["fecha_inicio"], errors="coerce").dt.strftime("%d/%m/%Y")
-    df_mostrar = df_mostrar.rename(columns={"numero_expediente": "Expediente"})
-    df_mostrar = df_mostrar[["cliente", "Expediente", "Fecha de Inicio"]]
+    df_expedientes = cargar_expedientes()
+    df_eventos = cargar_eventos()
+
+    # Obtener las próximas audiencias
+    futuras = df_eventos[(df_eventos["tipo_evento"] == "Audiencia") & (df_eventos["fecha"] >= pd.to_datetime(date.today()))]
+    futuras = futuras.sort_values("fecha")
+
+    # Unir las próximas audiencias a los expedientes
+    df_expedientes["Proxima Audiencia"] = df_expedientes["id"].apply(
+        lambda x: futuras[futuras["expediente_id"] == x]["fecha"].min() if x in futuras["expediente_id"].values else None
+    )
+
+    # Renombrar columnas y mostrar la tabla
+    df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia"]]
+    df_mostrar["Proxima Audiencia"] = pd.to_datetime(df_mostrar["Proxima Audiencia"], errors="coerce")
+    df_mostrar["Proxima Audiencia"] = df_mostrar["Proxima Audiencia"].dt.strftime("%d/%m/%Y")
+
+    # Renombrar las columnas a los nombres deseados
+    df_mostrar = df_mostrar.rename(columns={
+        "cliente": "Cliente",
+        "numero_expediente": "Expediente",
+        "Proxima Audiencia": "Próxima Audiencia"
+    })
+
     st.dataframe(df_mostrar, use_container_width=True)
 
 # Vista: Audiencias
