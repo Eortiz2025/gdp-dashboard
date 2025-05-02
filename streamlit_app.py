@@ -76,7 +76,7 @@ if col2.button("💬 Chat expediente"):
     st.session_state.vista_actual = "Chat"
 if col3.button("📁 Ver expedientes"):
     st.session_state.vista_actual = "Expedientes"
-if col4.button("📅 Próximas audiencias"):
+if col4.button("📅 Próximas audiencias"):  # Agregar el botón para ver próximas audiencias
     st.session_state.vista_actual = "Audiencias"
 
 st.markdown("---")
@@ -166,7 +166,7 @@ elif st.session_state.vista_actual == "Expedientes":
         lambda x: futuras[futuras["expediente_id"] == x]["fecha"].min() if x in futuras["expediente_id"].values else None
     )
 
-    # Mostrar los expedientes con la "Próxima Audiencia"
+    # Mostrar los expedientes
     df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia"]]
     df_mostrar["Proxima Audiencia"] = pd.to_datetime(df_mostrar["Proxima Audiencia"], errors="coerce")
     df_mostrar["Proxima Audiencia"] = df_mostrar["Proxima Audiencia"].dt.strftime("%d/%m/%Y")
