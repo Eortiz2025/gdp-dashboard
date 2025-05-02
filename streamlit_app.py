@@ -140,11 +140,11 @@ elif st.session_state.vista_actual == "Chat":
                 mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
                 for idx, row in mensajes.iterrows():
                     st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
-                    with st.expander("📅 Agendar como evento", expanded=False):
+                    with st.expander("📅 Agendar un evento", expanded=False):  # Cambiado el texto aquí
                         with st.form(f"form_evento_chat_{idx}"):
                             fecha_evento = st.date_input("Fecha del evento", value=date.today(), key=f"fecha_evento_chat_{idx}")
                             tipo_evento = st.selectbox("Tipo de evento", EVENTOS_TIPOS, key=f"tipo_evento_chat_{idx}")
-                            descripcion = st.text_area("Descripción del evento", value=row["mensaje"], key=f"desc_evento_chat_{idx}")
+                            descripcion = st.text_area("Descripción del evento", value="", key=f"desc_evento_chat_{idx}")  # Descripción limpia
                             submit = st.form_submit_button("Guardar evento")
                             if submit:
                                 guardar_evento(expediente["id"], fecha_evento, tipo_evento, descripcion)
