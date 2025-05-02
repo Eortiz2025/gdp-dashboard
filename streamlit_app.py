@@ -166,11 +166,8 @@ elif st.session_state.vista_actual == "Expedientes":
         lambda x: futuras[futuras["expediente_id"] == x]["fecha"].min() if x in futuras["expediente_id"].values else None
     )
 
-    # Mostrar los expedientes con un checkbox para ver el chat
-    df_expedientes["Ver Chat"] = df_expedientes["id"].apply(lambda x: st.checkbox(f"Ver chat", key=f"chat_{x}"))
-
-    # Renombrar columnas y mostrar la tabla
-    df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia", "Ver Chat"]]
+    # Mostrar los expedientes sin checkbox para el chat
+    df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia"]]
     df_mostrar["Proxima Audiencia"] = pd.to_datetime(df_mostrar["Proxima Audiencia"], errors="coerce")
     df_mostrar["Proxima Audiencia"] = df_mostrar["Proxima Audiencia"].dt.strftime("%d/%m/%Y")
 
@@ -178,17 +175,22 @@ elif st.session_state.vista_actual == "Expedientes":
     df_mostrar = df_mostrar.rename(columns={
         "cliente": "Cliente",
         "numero_expediente": "Expediente",
-        "Proxima Audiencia": "Próxima Audiencia",
-        "Ver Chat": "Ver Chat"
+        "Proxima Audiencia": "Próxima Audiencia"
     })
 
     st.dataframe(df_mostrar, use_container_width=True)
 
-    # Si el checkbox está marcado, mostrar el chat
-    for idx, row in df_mostrar.iterrows():
-        if row["Ver Chat"]:
-            st.subheader(f"Chat de {row['Expediente']} - {row['Cliente']}")
+    # Al seleccionar un expediente, mostrar su chat
+    expediente_seleccionado = st.selectbox("Selecciona un expediente para ver el chat", [f"{num} - {cliente}" for num, cliente in zip(df_expedientes["numero_expediente"], df_expedientes["cliente"])], key="expediente_chat")
+    
+    if expediente_seleccionado != "Selecciona un expediente":
+        expediente_numero = expediente_seleccionado.split(" - ")[0]
+        expediente = df_expedientes[df_expedientes["numero_expediente"] == expediente_numero]
+
+        if not expediente.empty:
+            expediente = expediente.iloc[0]  # Accedemos al primer expediente encontrado
+            st.subheader(f"Chat de {expediente['numero_expediente']} - {expediente['cliente']}")
             df_chat = cargar_chat()
-            mensajes = df_chat[df_chat["expediente_id"] == row["Expediente"]].sort_values("fecha_hora")
+            mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
             for msg_idx, msg_row in mensajes.iterrows():
                 st.markdown(f"🗓️ `{msg_row['fecha_hora']}` **{msg_row['autor']}**: {msg_row['mensaje']}")
