@@ -76,7 +76,7 @@ if col2.button("💬 Chat expediente"):
     st.session_state.vista_actual = "Chat"
 if col3.button("📁 Ver expedientes"):
     st.session_state.vista_actual = "Expedientes"
-if col4.button("📅 Próximas audiencias"):  # Agregar el botón para ver próximas audiencias
+if col4.button("📅 Próximas audiencias"):
     st.session_state.vista_actual = "Audiencias"
 
 st.markdown("---")
@@ -114,17 +114,14 @@ elif st.session_state.vista_actual == "Chat":
     df_expedientes = cargar_expedientes()
 
     if not df_expedientes.empty:
-        # Cambiar "Selecciona expediente" como opción predeterminada en selectbox
         seleccionado = st.selectbox("Selecciona expediente", ["Selecciona un expediente"] + [f"{num} - {cliente}" for num, cliente in zip(df_expedientes["numero_expediente"], df_expedientes["cliente"])], key="chat_exp")
-        
-        # Asegurarse de que no se procese si no hay selección aún
+
         if seleccionado != "Selecciona un expediente":
-            # Dividir el número de expediente y el cliente
             expediente_numero = seleccionado.split(" - ")[0]
             expediente = df_expedientes[df_expedientes["numero_expediente"] == expediente_numero]
 
             if not expediente.empty:
-                expediente = expediente.iloc[0]  # Accedemos al primer expediente encontrado
+                expediente = expediente.iloc[0]
 
                 autor = st.text_input("Tu nombre o iniciales", key="autor_chat")
                 mensaje = st.text_area("Mensaje", key="mensaje_chat")
@@ -140,6 +137,17 @@ elif st.session_state.vista_actual == "Chat":
                 mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
                 for idx, row in mensajes.iterrows():
                     st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
+
+                # ✅ Reactivado: formulario para agendar evento desde el chat
+                with st.expander("📅 Agendar un evento", expanded=False):
+                    with st.form("form_evento_chat"):
+                        fecha_evento = st.date_input("Fecha del evento", value=date.today())
+                        tipo_evento = st.selectbox("Tipo de evento", EVENTOS_TIPOS)
+                        descripcion = st.text_area("Descripción del evento")
+                        submit = st.form_submit_button("Guardar evento")
+                        if submit:
+                            guardar_evento(expediente["id"], fecha_evento, tipo_evento, descripcion)
+                            st.success("✅ Evento guardado.")
             else:
                 st.warning("No se encontró el expediente seleccionado.")
         else:
@@ -153,25 +161,20 @@ elif st.session_state.vista_actual == "Expedientes":
     df_expedientes = cargar_expedientes()
     df_eventos = cargar_eventos()
 
-    # Asegurarse de que la columna 'fecha' en los eventos sea de tipo datetime
     df_eventos["fecha"] = pd.to_datetime(df_eventos["fecha"], errors="coerce")
     hoy = pd.to_datetime(date.today())
 
-    # Obtener las próximas audiencias
     futuras = df_eventos[(df_eventos["tipo_evento"] == "Audiencia") & (df_eventos["fecha"] >= hoy)]
     futuras = futuras.sort_values("fecha")
 
-    # Unir las próximas audiencias a los expedientes
     df_expedientes["Proxima Audiencia"] = df_expedientes["id"].apply(
         lambda x: futuras[futuras["expediente_id"] == x]["fecha"].min() if x in futuras["expediente_id"].values else None
     )
 
-    # Mostrar los expedientes
     df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia"]]
     df_mostrar["Proxima Audiencia"] = pd.to_datetime(df_mostrar["Proxima Audiencia"], errors="coerce")
     df_mostrar["Proxima Audiencia"] = df_mostrar["Proxima Audiencia"].dt.strftime("%d/%m/%Y")
 
-    # Renombrar las columnas a los nombres deseados
     df_mostrar = df_mostrar.rename(columns={
         "cliente": "Cliente",
         "numero_expediente": "Expediente",
