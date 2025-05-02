@@ -3,39 +3,30 @@ import pandas as pd
 import os
 from datetime import date, datetime
 from uuid import uuid4
-from PyPDF2 import PdfReader
 
 # Configuración general
 st.set_page_config(page_title="Sistema Bravo & Asociados", layout="centered")
 st.title("📂 Sistema Bravo & Asociados")
 
-# Rutas de datos
+# Rutas de archivos
 DATA_PATH = "data"
 EXPEDIENTES_FILE = os.path.join(DATA_PATH, "expedientes.csv")
-DOCS_PATH = os.path.join(DATA_PATH, "documentos")
 EVENTOS_FILE = os.path.join(DATA_PATH, "eventos.csv")
 CHAT_FILE = os.path.join(DATA_PATH, "chat.csv")
+DOCS_PATH = os.path.join(DATA_PATH, "documentos")
 EVENTOS_TIPOS = ["Audiencia", "Escrito presentado", "Acuerdo", "Resolución", "Otro"]
 
-# Asegurar carpetas
 os.makedirs(DATA_PATH, exist_ok=True)
 os.makedirs(DOCS_PATH, exist_ok=True)
 
-# Inicializar archivos si no existen
 if not os.path.exists(EXPEDIENTES_FILE):
-    df_init = pd.DataFrame(columns=["id", "cliente", "materia", "numero_expediente", "fecha_inicio", "archivo"])
-    df_init.to_csv(EXPEDIENTES_FILE, index=False)
-
+    pd.DataFrame(columns=["id", "cliente", "materia", "numero_expediente", "fecha_inicio", "archivo"]).to_csv(EXPEDIENTES_FILE, index=False)
 if not os.path.exists(EVENTOS_FILE):
-    df_eventos_init = pd.DataFrame(columns=["expediente_id", "fecha", "tipo_evento", "descripcion"])
-    df_eventos_init.to_csv(EVENTOS_FILE, index=False)
-
+    pd.DataFrame(columns=["expediente_id", "fecha", "tipo_evento", "descripcion"]).to_csv(EVENTOS_FILE, index=False)
 if not os.path.exists(CHAT_FILE):
-    df_chat_init = pd.DataFrame(columns=["expediente_id", "fecha_hora", "autor", "mensaje"])
-    df_chat_init.to_csv(CHAT_FILE, index=False)
+    pd.DataFrame(columns=["expediente_id", "fecha_hora", "autor", "mensaje"]).to_csv(CHAT_FILE, index=False)
 
-# Funciones de carga y guardado
-
+# Funciones auxiliares
 def cargar_expedientes():
     df = pd.read_csv(EXPEDIENTES_FILE)
     df["fecha_inicio"] = pd.to_datetime(df["fecha_inicio"], errors="coerce")
@@ -74,7 +65,7 @@ def guardar_mensaje_chat(expediente_id, autor, mensaje):
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
     df.to_csv(CHAT_FILE, index=False)
 
-# Navegación por vista actual
+# Menú principal
 if "vista_actual" not in st.session_state:
     st.session_state.vista_actual = "Inicio"
 
@@ -103,7 +94,6 @@ if st.session_state.vista_actual == "Registro":
             if numero_expediente in df_existente["numero_expediente"].astype(str).values:
                 st.error("Ya existe un expediente con ese número.")
             else:
-    st.info("No hay expedientes disponibles.")
                 expediente_id = str(uuid4())[:8]
                 nuevo = {
                     "id": expediente_id,
@@ -154,6 +144,7 @@ elif st.session_state.vista_actual == "Chat":
     else:
         st.info("No hay expedientes disponibles.")
 
+# Vista: Expedientes
 elif st.session_state.vista_actual == "Expedientes":
     st.subheader("📁 Listado de expedientes")
     df = cargar_expedientes()
@@ -163,7 +154,7 @@ elif st.session_state.vista_actual == "Expedientes":
     df_mostrar = df_mostrar[["cliente", "Expediente", "Fecha de Inicio"]]
     st.dataframe(df_mostrar, use_container_width=True)
 
-# Vista: Próximas audiencias
+# Vista: Audiencias
 elif st.session_state.vista_actual == "Audiencias":
     st.subheader("📅 Próximas audiencias")
     df_eventos = cargar_eventos()
@@ -181,5 +172,5 @@ elif st.session_state.vista_actual == "Audiencias":
             exp_id = row['expediente_id']
             expediente = df_expedientes[df_expedientes['id'] == exp_id]
             numero_exp = expediente['numero_expediente'].values[0] if not expediente.empty else "(no encontrado)"
-            st.markdown(f"""📌 **{fecha}** | **Expediente:** `{numero_exp}`  
+            st.markdown(f"""📌 {fecha} | Expediente: {numero_exp} ({expediente['cliente'].values[0]})  
 📝 {row['descripcion']}""")
