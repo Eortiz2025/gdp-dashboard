@@ -167,44 +167,28 @@ elif st.session_state.vista_actual == "Expedientes":
     )
 
     # Mostrar los expedientes con un checkbox para ver el chat
-    for idx, row in df_expedientes.iterrows():
-        if st.checkbox(f"Ver Chat de Expediente {row['numero_expediente']} - {row['cliente']}", key=f"chat_{row['id']}"):
-            st.subheader(f"Chat de Expediente {row['numero_expediente']} - {row['cliente']}")
-            df_chat = cargar_chat()
-            mensajes = df_chat[df_chat["expediente_id"] == row["id"]].sort_values("fecha_hora")
-            for msg_idx, msg_row in mensajes.iterrows():
-                st.markdown(f"🗓️ `{msg_row['fecha_hora']}` **{msg_row['autor']}**: {msg_row['mensaje']}")
+    df_expedientes["Ver Chat"] = df_expedientes["id"].apply(lambda x: st.checkbox(f"Ver chat", key=f"chat_{x}"))
 
     # Renombrar columnas y mostrar la tabla
-    df_expedientes["Proxima Audiencia"] = pd.to_datetime(df_expedientes["Proxima Audiencia"], errors="coerce")
-    df_expedientes["Proxima Audiencia"] = df_expedientes["Proxima Audiencia"].dt.strftime("%d/%m/%Y")
+    df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia", "Ver Chat"]]
+    df_mostrar["Proxima Audiencia"] = pd.to_datetime(df_mostrar["Proxima Audiencia"], errors="coerce")
+    df_mostrar["Proxima Audiencia"] = df_mostrar["Proxima Audiencia"].dt.strftime("%d/%m/%Y")
 
-    df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia"]]
+    # Renombrar las columnas a los nombres deseados
     df_mostrar = df_mostrar.rename(columns={
         "cliente": "Cliente",
         "numero_expediente": "Expediente",
-        "Proxima Audiencia": "Próxima Audiencia"
+        "Proxima Audiencia": "Próxima Audiencia",
+        "Ver Chat": "Ver Chat"
     })
 
     st.dataframe(df_mostrar, use_container_width=True)
 
-# Vista: Audiencias
-elif st.session_state.vista_actual == "Audiencias":
-    st.subheader("📅 Próximas audiencias")
-    df_eventos = cargar_eventos()
-    df_expedientes = cargar_expedientes()
-    df_eventos["fecha"] = pd.to_datetime(df_eventos["fecha"], errors="coerce")
-    hoy = pd.to_datetime(date.today())
-    futuras = df_eventos[(df_eventos["tipo_evento"] == "Audiencia") & (df_eventos["fecha"] >= hoy)]
-    futuras = futuras.sort_values("fecha")
-
-    if futuras.empty:
-        st.info("No hay audiencias futuras registradas.")
-    else:
-        for _, row in futuras.iterrows():
-            fecha = row['fecha'].strftime("%d/%m/%Y")
-            exp_id = row['expediente_id']
-            expediente = df_expedientes[df_expedientes['id'] == exp_id]
-            numero_exp = expediente['numero_expediente'].values[0] if not expediente.empty else "(no encontrado)"
-            st.markdown(f"""📌 {fecha} | Expediente: {numero_exp} ({expediente['cliente'].values[0]})  
-📝 {row['descripcion']}""")
+    # Si el checkbox está marcado, mostrar el chat
+    for idx, row in df_mostrar.iterrows():
+        if row["Ver Chat"]:
+            st.subheader(f"Chat de {row['Expediente']} - {row['Cliente']}")
+            df_chat = cargar_chat()
+            mensajes = df_chat[df_chat["expediente_id"] == row["Expediente"]].sort_values("fecha_hora")
+            for msg_idx, msg_row in mensajes.iterrows():
+                st.markdown(f"🗓️ `{msg_row['fecha_hora']}` **{msg_row['autor']}**: {msg_row['mensaje']}")
