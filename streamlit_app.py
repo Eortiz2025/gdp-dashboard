@@ -65,19 +65,23 @@ def guardar_mensaje_chat(expediente_id, autor, mensaje):
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
     df.to_csv(CHAT_FILE, index=False)
 
-# Menú principal
+# Menú principal con botones del mismo tamaño
 if "vista_actual" not in st.session_state:
     st.session_state.vista_actual = "Inicio"
 
 col1, col2, col3, col4 = st.columns(4)
-if col1.button("➕ Registrar expediente"):
-    st.session_state.vista_actual = "Registro"
-if col2.button("💬 Chat expediente"):
-    st.session_state.vista_actual = "Chat"
-if col3.button("📁 Ver expedientes"):
-    st.session_state.vista_actual = "Expedientes"
-if col4.button("📅 Próximas audiencias"):
-    st.session_state.vista_actual = "Audiencias"
+with col1:
+    if st.button("➕ Registrar expediente", use_container_width=True):
+        st.session_state.vista_actual = "Registro"
+with col2:
+    if st.button("💬 Chat expediente", use_container_width=True):
+        st.session_state.vista_actual = "Chat"
+with col3:
+    if st.button("📁 Ver expedientes", use_container_width=True):
+        st.session_state.vista_actual = "Expedientes"
+with col4:
+    if st.button("📅 Próximas audiencias", use_container_width=True):
+        st.session_state.vista_actual = "Audiencias"
 
 st.markdown("---")
 
@@ -138,7 +142,7 @@ elif st.session_state.vista_actual == "Chat":
                 for idx, row in mensajes.iterrows():
                     st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
 
-                # ✅ Reactivado: formulario para agendar evento desde el chat
+                # Formulario para agendar evento
                 with st.expander("📅 Agendar un evento", expanded=False):
                     with st.form("form_evento_chat"):
                         fecha_evento = st.date_input("Fecha del evento", value=date.today())
