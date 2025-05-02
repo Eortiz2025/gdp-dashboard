@@ -201,9 +201,11 @@ elif st.session_state.vista_actual == "Audiencias":
         st.info("No hay audiencias futuras registradas.")
     else:
         for _, row in futuras.iterrows():
-            fecha = row['fecha'].strftime("%d/%m/%Y")
+            fecha = row['fecha']
+            fecha_str = f"{fecha.day} de {fecha.strftime('%B').capitalize()}"
             exp_id = row['expediente_id']
             expediente = df_expedientes[df_expedientes['id'] == exp_id]
             numero_exp = expediente['numero_expediente'].values[0] if not expediente.empty else "(no encontrado)"
-            st.markdown(f"""📌 {fecha} | Expediente: {numero_exp} ({expediente['cliente'].values[0]})  
+            cliente = expediente['cliente'].values[0] if not expediente.empty else "(no encontrado)"
+            st.markdown(f"""📌 {fecha_str} | {numero_exp} ({cliente})  
 📝 {row['descripcion']}""")
