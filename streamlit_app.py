@@ -140,7 +140,6 @@ elif st.session_state.vista_actual == "Chat":
                 mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
                 for idx, row in mensajes.iterrows():
                     st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
-
             else:
                 st.warning("No se encontró el expediente seleccionado.")
         else:
@@ -167,11 +166,11 @@ elif st.session_state.vista_actual == "Expedientes":
         lambda x: futuras[futuras["expediente_id"] == x]["fecha"].min() if x in futuras["expediente_id"].values else None
     )
 
-    # Crear la columna 'Chat' con el checkbox
-    df_expedientes["Chat"] = df_expedientes["id"].apply(lambda x: st.checkbox(f"Ver Chat {x}", key=f"chat_{x}"))
+    # Mostrar los expedientes con un checkbox para ver el chat
+    df_expedientes["Ver Chat"] = df_expedientes["id"].apply(lambda x: st.checkbox(f"Ver chat de expediente {x}", key=f"chat_{x}"))
 
     # Renombrar columnas y mostrar la tabla
-    df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia", "Chat"]]
+    df_mostrar = df_expedientes[["cliente", "numero_expediente", "Proxima Audiencia", "Ver Chat"]]
     df_mostrar["Proxima Audiencia"] = pd.to_datetime(df_mostrar["Proxima Audiencia"], errors="coerce")
     df_mostrar["Proxima Audiencia"] = df_mostrar["Proxima Audiencia"].dt.strftime("%d/%m/%Y")
 
@@ -180,7 +179,7 @@ elif st.session_state.vista_actual == "Expedientes":
         "cliente": "Cliente",
         "numero_expediente": "Expediente",
         "Proxima Audiencia": "Próxima Audiencia",
-        "Chat": "Ver Chat"
+        "Ver Chat": "Ver Chat"
     })
 
     st.dataframe(df_mostrar, use_container_width=True)
