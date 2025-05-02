@@ -162,8 +162,12 @@ elif st.session_state.vista_actual == "Expedientes":
     df_expedientes = cargar_expedientes()
     df_eventos = cargar_eventos()
 
+    # Asegurarse de que la columna 'fecha' en los eventos sea de tipo datetime
+    df_eventos["fecha"] = pd.to_datetime(df_eventos["fecha"], errors="coerce")
+    hoy = pd.to_datetime(date.today())
+
     # Obtener las próximas audiencias
-    futuras = df_eventos[(df_eventos["tipo_evento"] == "Audiencia") & (df_eventos["fecha"] >= pd.to_datetime(date.today()))]
+    futuras = df_eventos[(df_eventos["tipo_evento"] == "Audiencia") & (df_eventos["fecha"] >= hoy)]
     futuras = futuras.sort_values("fecha")
 
     # Unir las próximas audiencias a los expedientes
