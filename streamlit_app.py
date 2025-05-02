@@ -115,12 +115,12 @@ elif st.session_state.vista_actual == "Chat":
 
     if not df_expedientes.empty:
         # Cambiar "Selecciona expediente" como opción predeterminada en selectbox
-        seleccionado = st.selectbox("Selecciona expediente", ["Selecciona un expediente"] + df_expedientes["numero_expediente"] + " - " + df_expedientes["cliente"].tolist(), key="chat_exp")
+        seleccionado = st.selectbox("Selecciona expediente", ["Selecciona un expediente"] + [f"{num} - {cliente}" for num, cliente in zip(df_expedientes["numero_expediente"], df_expedientes["cliente"])], key="chat_exp")
         
-        # Asegurar que no se procese si no hay selección aún
+        # Asegurarse de que no se procese si no hay selección aún
         if seleccionado != "Selecciona un expediente":
-            # Buscar el número de expediente y cliente
-            expediente_numero = seleccionado.split(" - ")[0]  # Obtener solo el número del expediente
+            # Dividir el número de expediente y el cliente
+            expediente_numero = seleccionado.split(" - ")[0]
             expediente = df_expedientes[df_expedientes["numero_expediente"] == expediente_numero]
 
             if not expediente.empty:
