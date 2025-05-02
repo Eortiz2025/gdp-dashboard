@@ -119,31 +119,38 @@ elif st.session_state.vista_actual == "Chat":
         
         # Asegurar que no se procese si no hay selección aún
         if seleccionado != "Selecciona un expediente":
-            expediente = df_expedientes[df_expedientes["numero_expediente"] == seleccionado.split(" - ")[0]].iloc[0]
+            # Buscar el número de expediente y cliente
+            expediente_numero = seleccionado.split(" - ")[0]  # Obtener solo el número del expediente
+            expediente = df_expedientes[df_expedientes["numero_expediente"] == expediente_numero]
 
-            autor = st.text_input("Tu nombre o iniciales", key="autor_chat")
-            mensaje = st.text_area("Mensaje", key="mensaje_chat")
-            if st.button("Enviar mensaje"):
-                if autor.strip() and mensaje.strip():
-                    guardar_mensaje_chat(expediente["id"], autor.strip(), mensaje.strip())
-                    st.success("Mensaje enviado.")
-                else:
-                    st.warning("Completa autor y mensaje.")
+            if not expediente.empty:
+                expediente = expediente.iloc[0]  # Accedemos al primer expediente encontrado
 
-            st.markdown("### Historial del chat")
-            df_chat = cargar_chat()
-            mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
-            for idx, row in mensajes.iterrows():
-                st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
-                with st.expander("📅 Agendar como evento", expanded=False):
-                    with st.form(f"form_evento_chat_{idx}"):
-                        fecha_evento = st.date_input("Fecha del evento", value=date.today(), key=f"fecha_evento_chat_{idx}")
-                        tipo_evento = st.selectbox("Tipo de evento", EVENTOS_TIPOS, key=f"tipo_evento_chat_{idx}")
-                        descripcion = st.text_area("Descripción del evento", value=row["mensaje"], key=f"desc_evento_chat_{idx}")
-                        submit = st.form_submit_button("Guardar evento")
-                        if submit:
-                            guardar_evento(expediente["id"], fecha_evento, tipo_evento, descripcion)
-                            st.success("✅ Evento guardado desde el mensaje.")
+                autor = st.text_input("Tu nombre o iniciales", key="autor_chat")
+                mensaje = st.text_area("Mensaje", key="mensaje_chat")
+                if st.button("Enviar mensaje"):
+                    if autor.strip() and mensaje.strip():
+                        guardar_mensaje_chat(expediente["id"], autor.strip(), mensaje.strip())
+                        st.success("Mensaje enviado.")
+                    else:
+                        st.warning("Completa autor y mensaje.")
+
+                st.markdown("### Historial del chat")
+                df_chat = cargar_chat()
+                mensajes = df_chat[df_chat["expediente_id"] == expediente["id"]].sort_values("fecha_hora")
+                for idx, row in mensajes.iterrows():
+                    st.markdown(f"🗓️ `{row['fecha_hora']}` **{row['autor']}**: {row['mensaje']}")
+                    with st.expander("📅 Agendar como evento", expanded=False):
+                        with st.form(f"form_evento_chat_{idx}"):
+                            fecha_evento = st.date_input("Fecha del evento", value=date.today(), key=f"fecha_evento_chat_{idx}")
+                            tipo_evento = st.selectbox("Tipo de evento", EVENTOS_TIPOS, key=f"tipo_evento_chat_{idx}")
+                            descripcion = st.text_area("Descripción del evento", value=row["mensaje"], key=f"desc_evento_chat_{idx}")
+                            submit = st.form_submit_button("Guardar evento")
+                            if submit:
+                                guardar_evento(expediente["id"], fecha_evento, tipo_evento, descripcion)
+                                st.success("✅ Evento guardado desde el mensaje.")
+            else:
+                st.warning("No se encontró el expediente seleccionado.")
         else:
             st.info("Por favor selecciona un expediente.")
     else:
