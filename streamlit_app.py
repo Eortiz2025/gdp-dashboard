@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import pytz
 import os
 
 # Configuración
 st.set_page_config(page_title="Comentarios del Día", layout="centered")
 st.title("🗣️ Registro de Comentarios del Día")
+
+# Zona horaria de Pacífico (Mazatlán, Sinaloa, etc.)
+zona_pacifico = pytz.timezone("America/Mazatlan")
 
 # Archivo CSV
 DATA_FILE = "comentarios.csv"
@@ -22,8 +26,9 @@ with st.form("formulario_comentario"):
 
     if enviado:
         if nombre and comentario:
+            ahora = datetime.now(zona_pacifico).strftime("%Y-%m-%d %H:%M:%S")
             nueva_fila = {
-                "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "fecha": ahora,
                 "nombre": nombre,
                 "comentario": comentario
             }
@@ -45,7 +50,7 @@ if password == "1001":
     df = df.sort_values(by="fecha", ascending=False)
     st.dataframe(df, use_container_width=True)
 
-    # Convertir a CSV (más seguro en la nube)
+    # Convertir a CSV
     csv_data = df.to_csv(index=False).encode("utf-8")
 
     st.download_button(
