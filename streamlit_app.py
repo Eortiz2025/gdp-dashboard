@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-from io import BytesIO
 
 # Configuración
 st.set_page_config(page_title="Comentarios del Día", layout="centered")
@@ -11,7 +10,7 @@ st.title("🗣️ Registro de Comentarios del Día")
 # Archivo CSV
 DATA_FILE = "comentarios.csv"
 
-# Crear si no existe
+# Crear archivo si no existe
 if not os.path.exists(DATA_FILE):
     pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
 
@@ -46,21 +45,14 @@ if password == "1001":
     df = df.sort_values(by="fecha", ascending=False)
     st.dataframe(df, use_container_width=True)
 
-    # Convertir a Excel en memoria
-    def convertir_a_excel(df):
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Comentarios')
-        output.seek(0)
-        return output
-
-    excel_file = convertir_a_excel(df)
+    # Convertir a CSV (más seguro en la nube)
+    csv_data = df.to_csv(index=False).encode("utf-8")
 
     st.download_button(
-        label="📥 Descargar comentarios en Excel",
-        data=excel_file,
-        file_name="comentarios.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        label="📥 Descargar comentarios en CSV",
+        data=csv_data,
+        file_name="comentarios.csv",
+        mime="text/csv"
     )
 elif password:
     st.error("❌ Contraseña incorrecta.")
