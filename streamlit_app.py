@@ -18,7 +18,7 @@ DATA_FILE = "comentarios.csv"
 if not os.path.exists(DATA_FILE):
     pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
 
-# Formulario
+# Formulario para comentarios
 with st.form("formulario_comentario"):
     nombre = st.text_input("Tu nombre")
     comentario = st.text_area("Escribe tu comentario del día")
@@ -39,7 +39,7 @@ with st.form("formulario_comentario"):
         else:
             st.error("❌ Por favor, completa tu nombre y comentario.")
 
-# Zona de dirección con contraseña
+# Zona de dirección protegida
 st.markdown("---")
 st.subheader("🔒 Zona de Dirección")
 
@@ -50,14 +50,22 @@ if password == "1001":
     df = df.sort_values(by="fecha", ascending=False)
     st.dataframe(df, use_container_width=True)
 
-    # Convertir a CSV
+    # Botón para descargar CSV
     csv_data = df.to_csv(index=False).encode("utf-8")
-
     st.download_button(
         label="📥 Descargar comentarios en CSV",
         data=csv_data,
         file_name="comentarios.csv",
         mime="text/csv"
     )
-elif password:
-    st.error("❌ Contraseña incorrecta.")
+
+    # Botón para borrar todo
+    if st.button("🗑️ Borrar todos los comentarios"):
+        confirmar = st.radio("¿Estás seguro?", ["No", "Sí"], index=0)
+        if confirmar == "Sí":
+            pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
+            st.success("⚠️ Todos los comentarios han sido eliminados.")
+            st.experimental_rerun()
+else:
+    if password:
+        st.error("❌ Contraseña incorrecta.")
