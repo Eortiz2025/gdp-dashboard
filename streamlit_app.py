@@ -1,88 +1,54 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
-import pytz
-import os
+import datetime
 
-# Configuración
-st.set_page_config(page_title="Comentarios del Día", layout="centered")
-st.title("🗣️ Registro de Comentarios del Día")
+st.set_page_config(page_title="4DX Dashboard", layout="centered")
+st.title("📊 Tablero de Ejecución 4DX")
 
-# Zona horaria del Pacífico
-zona_pacifico = pytz.timezone("America/Mazatlan")
+# Datos de ejemplo iniciales
+data = {
+    "Meta Crucialmente Importante": [
+        "Aumentar satisfacción del cliente",
+        "Incrementar ventas trimestrales"
+    ],
+    "Medida Histórica": ["NPS mensual", "Ventas mensuales"],
+    "Medidas Predictivas": ["# de seguimientos post-venta", "# de llamadas de venta semanales"],
+    "Meta": [80, 15000],
+    "Resultado Actual": [65, 12000],
+}
+df = pd.DataFrame(data)
 
-# Archivo CSV
-DATA_FILE = "comentarios.csv"
+def calcular_avance(actual, meta):
+    return round((actual / meta) * 100 if meta > 0 else 0, 2)
 
-# Crear archivo si no existe
-if not os.path.exists(DATA_FILE):
-    pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
+# Calcular avance
+df["% Avance"] = df.apply(lambda row: calcular_avance(row["Resultado Actual"], row["Meta"]), axis=1)
 
-# Formulario para comentarios
-with st.form("formulario_comentario"):
-    nombre = st.text_input("Tu nombre")
-    comentario = st.text_area("Escribe tu comentario del día")
-    enviado = st.form_submit_button("Enviar comentario")
+# Mostrar dashboard
+st.subheader("Resumen de Metas Clave")
+st.dataframe(df, use_container_width=True)
 
-    if enviado:
-        if nombre and comentario:
-            ahora = datetime.now(zona_pacifico).strftime("%Y-%m-%d %H:%M:%S")
-            nueva_fila = {
-                "fecha": ahora,
-                "nombre": nombre,
-                "comentario": comentario
-            }
-            df = pd.read_csv(DATA_FILE)
-            df = pd.concat([df, pd.DataFrame([nueva_fila])], ignore_index=True)
-            df.to_csv(DATA_FILE, index=False)
-            st.success("✅ Comentario registrado exitosamente.")
-        else:
-            st.error("❌ Por favor, completa tu nombre y comentario.")
+# Formulario para actualizar resultados
+st.subheader("🔄 Actualizar Resultados")
+with st.form("update_form"):
+    objetivo = st.selectbox("Selecciona la meta a actualizar", df["Meta Crucialmente Importante"])
+    nuevo_valor = st.number_input("Nuevo resultado actual", min_value=0, step=1)
+    submitted = st.form_submit_button("Actualizar")
 
-# Zona protegida para dirección
-st.markdown("---")
-st.subheader("🔒 Zona de Dirección")
-
-password = st.text_input("Ingresa la contraseña para ver los comentarios", type="password")
-
-if password == "1001":
-    df = pd.read_csv(DATA_FILE)
-    df = df.sort_values(by="fecha", ascending=False)
-
-    if df.empty:
-        st.info("📭 No hay comentarios registrados.")
-    else:
+    if submitted:
+        idx = df[df["Meta Crucialmente Importante"] == objetivo].index[0]
+        df.at[idx, "Resultado Actual"] = nuevo_valor
+        df["% Avance"] = df.apply(lambda row: calcular_avance(row["Resultado Actual"], row["Meta"]), axis=1)
+        st.success("Resultado actualizado.")
         st.dataframe(df, use_container_width=True)
 
-        # Botón de descarga
-        csv_data = df.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="📥 Descargar comentarios en CSV",
-            data=csv_data,
-            file_name="comentarios.csv",
-            mime="text/csv"
-        )
+# Nota visual
+st.markdown("""
+<style>
+    .stDataFrame th, .stDataFrame td {
+        text-align: center !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-    # Confirmación para borrar comentarios
-    st.markdown("### ⚠️ Borrar todos los comentarios")
-    if "confirmar_borrado" not in st.session_state:
-        st.session_state.confirmar_borrado = False
-
-    if not st.session_state.confirmar_borrado:
-        if st.button("🗑️ Quiero borrar todos los comentarios"):
-            st.session_state.confirmar_borrado = True
-    else:
-        st.warning("Esta acción eliminará todos los comentarios. ¿Confirmas?")
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✅ Sí, borrar todo"):
-                # Eliminar contenido
-                pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
-                st.success("🧹 Todos los comentarios han sido eliminados. Recarga la página para verificar.")
-                st.session_state.confirmar_borrado = False
-        with col2:
-            if st.button("❌ Cancelar"):
-                st.session_state.confirmar_borrado = False
-else:
-    if password:
-        st.error("❌ Contraseña incorrecta.")
+st.info("Este dashboard está basado en la Disciplina 3 de 4DX: Crear un tablero de resultados convincente. Puedes integrarlo con más disciplinas como seguimiento semanal (Disciplina 4).")
