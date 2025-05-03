@@ -16,18 +16,18 @@ VENDEDORES = [
 # Ruta de almacenamiento
 FILE_PATH = "reflexiones.csv"
 
-# Preguntas con intención empática y formativa
+# Preguntas optimizadas para edades 20-30 años
 PREGUNTAS = [
-    "¿Qué momento del día te hizo sentir orgulloso de tu trabajo hoy?",
-    "¿Qué acción pequeña tuviste hoy que generó una sonrisa o agradecimiento en un cliente?",
-    "¿Qué puedes agradecer del día de hoy en la tienda?",
-    "¿Qué hiciste hoy que ayudó a tus compañeros, aunque fuera algo pequeño?",
-    "¿Qué producto o área crees que merece más atención o cariño en cómo lo presentamos?",
-    "¿Qué escuchaste de los clientes hoy que te hizo pensar diferente?",
-    "¿Cómo sentiste el ambiente en la tienda hoy? ¿Qué podríamos hacer para que se sienta mejor?",
-    "¿Qué idea se te ocurrió hoy para mejorar algo en nuestra papelería?",
-    "¿Qué aprendiste hoy que te gustaría compartir con el equipo?",
-    "¿Qué hiciste hoy para ser mejor que ayer, aunque sea un poco?"
+    "¿Qué hiciste hoy que hizo sonreír o sentirse bien a un cliente?",
+    "¿Qué parte de tu día te hizo sentir que esto no es ‘solo un trabajo’?",
+    "Si fueras tú el cliente hoy, ¿qué detalle te habría sorprendido (para bien o mal)?",
+    "¿Qué idea loca, simple o creativa se te ocurrió hoy para mejorar la tienda?",
+    "¿Quién del equipo te inspiró hoy y por qué?",
+    "¿Qué aprendiste hoy sin que nadie te lo dijera?",
+    "¿En qué momento del día pensaste: ‘esto podríamos hacerlo mejor’?",
+    "¿Qué hiciste hoy que te gustaría repetir todos los días?",
+    "¿Qué viste hoy que te hizo pensar: ‘esto sí es calidez’?",
+    "¿Qué agradeces de este día en la tienda, por mínimo que sea?"
 ]
 
 # Cargar historial
