@@ -38,32 +38,34 @@ else:
 
 st.subheader("✏️ Registrar Reflexión del Día")
 
-with st.form("formulario"):
-    nombre = st.selectbox("Selecciona tu nombre", VENDEDORES)
+nombre = st.selectbox("Selecciona tu nombre", ["Selecciona..."] + VENDEDORES)
 
-    # Obtener preguntas ya respondidas por el usuario
-    preguntas_respondidas = historial[historial["Vendedor"] == nombre]["Pregunta"].tolist()
-    preguntas_disponibles = [p for p in PREGUNTAS if p not in preguntas_respondidas]
+if nombre != "Selecciona...":
+    with st.form("formulario"):
+        # Obtener preguntas ya respondidas por el usuario
+        preguntas_respondidas = historial[historial["Vendedor"] == nombre]["Pregunta"].tolist()
+        preguntas_disponibles = [p for p in PREGUNTAS if p not in preguntas_respondidas]
 
-    if preguntas_disponibles:
-        pregunta = random.choice(preguntas_disponibles)
-    else:
-        pregunta = random.choice(PREGUNTAS)  # Reinicio si ya contestó todas
+        if preguntas_disponibles:
+            pregunta = random.choice(preguntas_disponibles)
+        else:
+            pregunta = random.choice(PREGUNTAS)  # Reinicio si ya contestó todas
 
-    st.markdown(f"**Pregunta para hoy:** _{pregunta}_")
-    respuesta = st.text_area("Tu respuesta")
-    enviar = st.form_submit_button("Enviar reflexión")
+        st.markdown(f"**Pregunta para hoy:** _{pregunta}_")
+        respuesta = st.text_area("Tu respuesta")
+        enviar = st.form_submit_button("Enviar reflexión")
 
-    if enviar and respuesta.strip():
-        nueva_fila = pd.DataFrame([[date.today(), nombre, pregunta, respuesta]], columns=["Fecha", "Vendedor", "Pregunta", "Respuesta"])
-        historial = pd.concat([historial, nueva_fila], ignore_index=True)
-        historial.to_csv(FILE_PATH, index=False)
-        st.success("Gracias por compartir tu reflexión.")
+        if enviar and respuesta.strip():
+            nueva_fila = pd.DataFrame([[date.today(), nombre, pregunta, respuesta]], columns=["Fecha", "Vendedor", "Pregunta", "Respuesta"])
+            historial = pd.concat([historial, nueva_fila], ignore_index=True)
+            historial.to_csv(FILE_PATH, index=False)
+            st.success("Gracias por compartir tu reflexión.")
 
 st.subheader("📘 Historial de Reflexiones")
-filtrar = st.selectbox("Filtrar por vendedor", ["Todos"] + VENDEDORES)
+filtrar = st.selectbox("Filtrar por vendedor", ["Selecciona..."] + VENDEDORES)
 
-if filtrar != "Todos":
+if filtrar != "Selecciona...":
     historial = historial[historial["Vendedor"] == filtrar]
-
-st.dataframe(historial.sort_values(by="Fecha", ascending=False), use_container_width=True)
+    st.dataframe(historial.sort_values(by="Fecha", ascending=False), use_container_width=True)
+else:
+    st.info("Selecciona un nombre para ver el historial correspondiente.")
