@@ -2,20 +2,20 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+from io import BytesIO
 
-# Configuración de la app
+# Configuración
 st.set_page_config(page_title="Comentarios del Día", layout="centered")
 st.title("🗣️ Registro de Comentarios del Día")
 
-# Archivo donde se guardan los comentarios
+# Archivo CSV
 DATA_FILE = "comentarios.csv"
 
-# Crear archivo si no existe
+# Crear si no existe
 if not os.path.exists(DATA_FILE):
-    df_vacio = pd.DataFrame(columns=["fecha", "nombre", "comentario"])
-    df_vacio.to_csv(DATA_FILE, index=False)
+    pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
 
-# Formulario para capturar comentario
+# Formulario
 with st.form("formulario_comentario"):
     nombre = st.text_input("Tu nombre")
     comentario = st.text_area("Escribe tu comentario del día")
@@ -35,7 +35,7 @@ with st.form("formulario_comentario"):
         else:
             st.error("❌ Por favor, completa tu nombre y comentario.")
 
-# Sección protegida con contraseña
+# Zona de dirección con contraseña
 st.markdown("---")
 st.subheader("🔒 Zona de Dirección")
 
@@ -46,16 +46,19 @@ if password == "1001":
     df = df.sort_values(by="fecha", ascending=False)
     st.dataframe(df, use_container_width=True)
 
-    # Descargar como Excel
-    @st.cache_data
-    def convertir_excel(df):
-        return df.to_excel(index=False, engine='openpyxl')
+    # Convertir a Excel en memoria
+    def convertir_a_excel(df):
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Comentarios')
+        output.seek(0)
+        return output
 
-    excel_data = convertir_excel(df)
+    excel_file = convertir_a_excel(df)
 
     st.download_button(
         label="📥 Descargar comentarios en Excel",
-        data=excel_data,
+        data=excel_file,
         file_name="comentarios.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
