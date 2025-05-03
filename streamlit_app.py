@@ -8,7 +8,7 @@ import os
 st.set_page_config(page_title="Comentarios del Día", layout="centered")
 st.title("🗣️ Registro de Comentarios del Día")
 
-# Zona horaria del Pacífico (Sinaloa, etc.)
+# Zona horaria del Pacífico
 zona_pacifico = pytz.timezone("America/Mazatlan")
 
 # Archivo CSV
@@ -18,7 +18,7 @@ DATA_FILE = "comentarios.csv"
 if not os.path.exists(DATA_FILE):
     pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
 
-# Formulario de registro
+# Formulario para comentarios
 with st.form("formulario_comentario"):
     nombre = st.text_input("Tu nombre")
     comentario = st.text_area("Escribe tu comentario del día")
@@ -39,7 +39,7 @@ with st.form("formulario_comentario"):
         else:
             st.error("❌ Por favor, completa tu nombre y comentario.")
 
-# Zona de dirección con contraseña
+# Zona protegida para dirección
 st.markdown("---")
 st.subheader("🔒 Zona de Dirección")
 
@@ -48,18 +48,22 @@ password = st.text_input("Ingresa la contraseña para ver los comentarios", type
 if password == "1001":
     df = pd.read_csv(DATA_FILE)
     df = df.sort_values(by="fecha", ascending=False)
-    st.dataframe(df, use_container_width=True)
 
-    # Descargar como CSV
-    csv_data = df.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        label="📥 Descargar comentarios en CSV",
-        data=csv_data,
-        file_name="comentarios.csv",
-        mime="text/csv"
-    )
+    if df.empty:
+        st.info("📭 No hay comentarios registrados.")
+    else:
+        st.dataframe(df, use_container_width=True)
 
-    # Confirmación segura para borrar
+        # Botón de descarga
+        csv_data = df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="📥 Descargar comentarios en CSV",
+            data=csv_data,
+            file_name="comentarios.csv",
+            mime="text/csv"
+        )
+
+    # Confirmación para borrar comentarios
     st.markdown("### ⚠️ Borrar todos los comentarios")
     if "confirmar_borrado" not in st.session_state:
         st.session_state.confirmar_borrado = False
@@ -72,10 +76,10 @@ if password == "1001":
         col1, col2 = st.columns(2)
         with col1:
             if st.button("✅ Sí, borrar todo"):
+                # Eliminar contenido
                 pd.DataFrame(columns=["fecha", "nombre", "comentario"]).to_csv(DATA_FILE, index=False)
-                st.success("🧹 Todos los comentarios han sido eliminados.")
+                st.success("🧹 Todos los comentarios han sido eliminados. Recarga la página para verificar.")
                 st.session_state.confirmar_borrado = False
-                st.experimental_rerun()
         with col2:
             if st.button("❌ Cancelar"):
                 st.session_state.confirmar_borrado = False
