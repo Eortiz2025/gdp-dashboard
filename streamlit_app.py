@@ -33,12 +33,31 @@ with st.form("formulario_comentario"):
             df.to_csv(DATA_FILE, index=False)
             st.success("✅ Comentario registrado exitosamente.")
         else:
-            st.error("Por favor, completa tu nombre y comentario.")
+            st.error("❌ Por favor, completa tu nombre y comentario.")
 
-# Mostrar historial de comentarios
+# Sección protegida con contraseña
 st.markdown("---")
-st.subheader("📋 Comentarios registrados recientemente")
+st.subheader("🔒 Zona de Dirección")
 
-df = pd.read_csv(DATA_FILE)
-df = df.sort_values(by="fecha", ascending=False)
-st.dataframe(df, use_container_width=True)
+password = st.text_input("Ingresa la contraseña para ver los comentarios", type="password")
+
+if password == "1001":
+    df = pd.read_csv(DATA_FILE)
+    df = df.sort_values(by="fecha", ascending=False)
+    st.dataframe(df, use_container_width=True)
+
+    # Descargar como Excel
+    @st.cache_data
+    def convertir_excel(df):
+        return df.to_excel(index=False, engine='openpyxl')
+
+    excel_data = convertir_excel(df)
+
+    st.download_button(
+        label="📥 Descargar comentarios en Excel",
+        data=excel_data,
+        file_name="comentarios.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+elif password:
+    st.error("❌ Contraseña incorrecta.")
