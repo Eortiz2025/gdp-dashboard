@@ -1,71 +1,65 @@
 import streamlit as st
 import pandas as pd
-from datetime import date
-import os
-import random
+import numpy as np
+from datetime import datetime
 
-st.set_page_config(page_title="Reflexión Estratégica Diaria", layout="centered")
-st.title("🌱 Reflexión con Propósito - Papelería")
+st.set_page_config(page_title="Compras con MLE", page_icon="📈")
+st.title("📦 Planificador de Compras con MLE")
 
-# Vendedores
-VENDEDORES = [
-    "Carlos", "Dereck", "Edna", "Estefania",
-    "Janeth", "Kyoto", "Lorena", "Selena", "Zaid"
-]
+st.markdown("Sube un archivo con las ventas mensuales históricas de productos. Luego, puedes ir subiendo las ventas acumuladas del mes actual para que el sistema calcule automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
 
-# Ruta de almacenamiento
-FILE_PATH = "reflexiones.csv"
+# Subir archivo principal con ventas históricas
+archivo_hist = st.file_uploader("🗂️ Archivo de ventas históricas (Excel o CSV)", type=["xlsx", "csv"])
 
-# Preguntas optimizadas para edades 20-30 años
-PREGUNTAS = [
-    "¿Qué hiciste hoy que hizo sonreír o sentirse bien a un cliente?",
-    "¿Qué parte de tu día te hizo sentir que esto no es ‘solo un trabajo’?",
-    "Si fueras tú el cliente hoy, ¿qué detalle te habría sorprendido (para bien o mal)?",
-    "¿Qué idea loca, simple o creativa se te ocurrió hoy para mejorar la tienda?",
-    "¿Quién del equipo te inspiró hoy y por qué?",
-    "¿Qué aprendiste hoy sin que nadie te lo dijera?",
-    "¿En qué momento del día pensaste: ‘esto podríamos hacerlo mejor’?",
-    "¿Qué hiciste hoy que te gustaría repetir todos los días?",
-    "¿Qué viste hoy que te hizo pensar: ‘esto sí es calidez’?",
-    "¿Qué agradeces de este día en la tienda, por mínimo que sea?"
-]
+# Subir archivo mensual actual
+archivo_mes = st.file_uploader("📆 Archivo de ventas acumuladas del mes actual", type=["xlsx", "csv"])
 
-# Cargar historial
-if os.path.exists(FILE_PATH):
-    historial = pd.read_csv(FILE_PATH)
-else:
-    historial = pd.DataFrame(columns=["Fecha", "Vendedor", "Pregunta", "Respuesta"])
+# Ingresar días efectivos del mes actual (automático o manual)
+dias_efectivos = st.number_input("🕒 Días útiles de venta del mes actual", min_value=1, max_value=31, value=26)
 
-st.subheader("✏️ Registrar Reflexión del Día")
-
-nombre = st.selectbox("Selecciona tu nombre", ["Selecciona..."] + VENDEDORES)
-
-if nombre != "Selecciona...":
-    with st.form("formulario"):
-        # Obtener preguntas ya respondidas por el usuario
-        preguntas_respondidas = historial[historial["Vendedor"] == nombre]["Pregunta"].tolist()
-        preguntas_disponibles = [p for p in PREGUNTAS if p not in preguntas_respondidas]
-
-        if preguntas_disponibles:
-            pregunta = random.choice(preguntas_disponibles)
+if archivo_hist and archivo_mes:
+    try:
+        # Cargar histórico
+        if archivo_hist.name.endswith(".csv"):
+            df_hist = pd.read_csv(archivo_hist)
         else:
-            pregunta = random.choice(PREGUNTAS)  # Reinicio si ya contestó todas
+            df_hist = pd.read_excel(archivo_hist)
 
-        st.markdown(f"**Pregunta para hoy:** _{pregunta}_")
-        respuesta = st.text_area("Tu respuesta")
-        enviar = st.form_submit_button("Enviar reflexión")
+        # Cargar mes actual
+        if archivo_mes.name.endswith(".csv"):
+            df_mes = pd.read_csv(archivo_mes)
+        else:
+            df_mes = pd.read_excel(archivo_mes)
 
-        if enviar and respuesta.strip():
-            nueva_fila = pd.DataFrame([[date.today(), nombre, pregunta, respuesta]], columns=["Fecha", "Vendedor", "Pregunta", "Respuesta"])
-            historial = pd.concat([historial, nueva_fila], ignore_index=True)
-            historial.to_csv(FILE_PATH, index=False)
-            st.success("Gracias por compartir tu reflexión.")
+        # Validaciones mínimas
+        if not {'Producto', 'Mes', 'Ventas'}.issubset(df_hist.columns):
+            st.error("El archivo histórico debe tener columnas: Producto, Mes, Ventas")
+            st.stop()
 
-st.subheader("📘 Historial de Reflexiones")
-filtrar = st.selectbox("Filtrar por vendedor", ["Selecciona..."] + VENDEDORES)
+        if not {'Producto', 'VentasAcumuladas'}.issubset(df_mes.columns):
+            st.error("El archivo del mes debe tener columnas: Producto, VentasAcumuladas")
+            st.stop()
 
-if filtrar != "Selecciona...":
-    historial = historial[historial["Vendedor"] == filtrar]
-    st.dataframe(historial.sort_values(by="Fecha", ascending=False), use_container_width=True)
-else:
-    st.info("Selecciona un nombre para ver el historial correspondiente.")
+        # Agrupar histórico por producto
+        df_hist['DiasMes'] = df_hist['Mes'].apply(lambda x: 30 if 'abr' in x.lower() else 31)  # ajustar si se desea
+        df_grouped = df_hist.groupby('Producto').agg({
+            'Ventas': 'sum',
+            'DiasMes': 'sum'
+        }).reset_index()
+
+        df_grouped['LambdaMLE'] = df_grouped['Ventas'] / df_grouped['DiasMes']
+        df_grouped = df_grouped.merge(df_mes, on='Producto', how='left')
+
+        df_grouped['DemandaEsperada'] = df_grouped['LambdaMLE'] * dias_efectivos
+        df_grouped['CompraSugerida'] = (df_grouped['DemandaEsperada'] - df_grouped['VentasAcumuladas']).clip(lower=0).round()
+
+        st.success("✅ Cálculo completado. Aquí están tus compras sugeridas:")
+        st.dataframe(df_grouped[['Producto', 'LambdaMLE', 'DemandaEsperada', 'VentasAcumuladas', 'CompraSugerida']])
+
+        # Descarga
+        output = df_grouped[['Producto', 'LambdaMLE', 'DemandaEsperada', 'VentasAcumuladas', 'CompraSugerida']]
+        st.download_button("📥 Descargar Excel de resultados", data=output.to_csv(index=False),
+                           file_name="compras_mle.csv", mime="text/csv")
+
+    except Exception as e:
+        st.error(f"Error al procesar los archivos: {e}")
