@@ -22,12 +22,13 @@ if archivo_hist and archivo_mes:
 
         df_mes = pd.read_html(io.BytesIO(archivo_mes.read()), header=0)[0]
 
-        # Convertir archivo histórico de ancho a largo
-        col_base = 'Codigo' if 'Codigo' in df_hist.columns else 'Producto'
-        cols_mes = [col for col in df_hist.columns if col not in [col_base, 'Nombre']]
-        df_hist = df_hist.melt(id_vars=[col_base, 'Nombre'], value_vars=cols_mes,
+        # Asegurar nombres de columnas esperados
+        df_hist = df_hist.rename(columns={'Codigo': 'Producto'})
+
+        # Convertir de formato ancho a largo
+        cols_mes = [col for col in df_hist.columns if col not in ['Producto', 'Nombre']]
+        df_hist = df_hist.melt(id_vars=['Producto', 'Nombre'], value_vars=cols_mes,
                                var_name='Mes', value_name='Ventas')
-        df_hist = df_hist.rename(columns={col_base: 'Producto'})
 
         # Validaciones mínimas
         if not {'Producto', 'Cantidad vendida', 'Stock (total)'}.issubset(df_mes.columns):
