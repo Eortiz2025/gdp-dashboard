@@ -22,7 +22,7 @@ st.markdown("""
 <div class='title'>🧘‍♀️ Meditación Guiada por Áreas de Vida</div>
 """, unsafe_allow_html=True)
 
-# Áreas disponibles con instrucciones respiratorias repetidas 3 veces
+# Áreas disponibles con instrucciones respiratorias repetidas 3 veces + integración sensorial
 areas = {
     "🩺 Salud": [
         ("Respiración Curativa", [
@@ -45,7 +45,12 @@ areas = {
             "La inteligencia que me creó me restaura ahora.",
             "Mi subconsciente actúa con poder curativo.",
             "Gracias. Así es. Así será. Ya está hecho."
-        ], 4)
+        ], 4),
+        ("Integración Sensorial (Método Silva)", [
+            "🔍 ¿Qué estoy viendo ahora que mi cuerpo ya irradia salud y energía?",
+            "❤️ ¿Cómo se siente mi cuerpo al moverse libre, fuerte y en armonía?",
+            "👂 ¿Qué escucho decir a mi interior o a los demás sobre mi bienestar renovado?"
+        ], 10)
     ],
     "💰 Abundancia": [
         ("Respiración de Abundancia", [
@@ -66,7 +71,12 @@ areas = {
             "Todo lo bueno que me pertenece viene a mí en armonía perfecta.",
             "Estoy abierto a la riqueza, la abundancia y el orden divino.",
             "Gracias. Así es. Así será. Lo acepto con alegría y certeza."
-        ], 4)
+        ], 4),
+        ("Integración Sensorial (Método Silva)", [
+            "🔍 ¿Qué veo en mi entorno ahora que la abundancia fluye con naturalidad?",
+            "❤️ ¿Cómo se siente en mi cuerpo y corazón el vivir sin miedo, con plenitud?",
+            "👂 ¿Qué escucho al recibir oportunidades, agradecimientos y confirmaciones?"
+        ], 10)
     ],
     "💞 Relaciones": [
         ("Respiración en el Corazón", [
@@ -88,7 +98,12 @@ areas = {
             "Estoy en paz con todos los seres del universo.",
             "Lo que doy, vuelve a mí multiplicado en armonía.",
             "El amor divino gobierna mis relaciones."
-        ], 4)
+        ], 4),
+        ("Integración Sensorial (Método Silva)", [
+            "🔍 ¿Qué imágenes vienen a mí ahora que hay paz y amor en mis vínculos?",
+            "❤️ ¿Qué emociones fluyen en mí cuando comparto con otros desde el corazón?",
+            "👂 ¿Qué palabras de armonía, perdón o gratitud escucho resonar?"
+        ], 10)
     ],
     "🧭 Propósito y Paz": [
         ("Respiración de Paz Interior", [
@@ -110,7 +125,12 @@ areas = {
             "La inteligencia infinita me guía en cada paso.",
             "Cada día estoy más alineado con mi propósito.",
             "Confío. Estoy en el camino correcto."
-        ], 4)
+        ], 4),
+        ("Integración Sensorial (Método Silva)", [
+            "🔍 ¿Qué veo cuando estoy caminando en mi propósito con claridad y certeza?",
+            "❤️ ¿Qué sensaciones me recorren al saber que estoy alineado con mi alma?",
+            "👂 ¿Qué escucho desde mi guía interior o el universo que me confirma este camino?"
+        ], 10)
     ]
 }
 
