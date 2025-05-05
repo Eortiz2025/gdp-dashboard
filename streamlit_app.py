@@ -22,17 +22,21 @@ st.markdown("""
 <div class='title'>🧘‍♀️ Meditación Guiada por Áreas de Vida</div>
 """, unsafe_allow_html=True)
 
-# Áreas disponibles con instrucciones respiratorias repetidas 3 veces + integración sensorial
+# Imágenes simbólicas por área
+imagenes = {
+    "🩺 Salud": "https://images.unsplash.com/photo-1552068751-34cb6b48b5bc?fit=crop&w=800&q=80",
+    "💰 Abundancia": "https://images.unsplash.com/photo-1526401485004-2fa806b5dca3?fit=crop&w=800&q=80",
+    "💞 Relaciones": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?fit=crop&w=800&q=80",
+    "🧭 Propósito y Paz": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?fit=crop&w=800&q=80"
+}
+
 areas = {
     "🩺 Salud": [
         ("Respiración Curativa", [
             "Respira profundamente y coloca tu atención en tu cuerpo.",
-            "Inhala calma…",
-            "Exhala tensión…",
-            "Inhala calma…",
-            "Exhala tensión…",
-            "Inhala calma…",
-            "Exhala tensión…",
+            "Inhala calma…", "Exhala tensión…",
+            "Inhala calma…", "Exhala tensión…",
+            "Inhala calma…", "Exhala tensión…",
             "Imagina que cada célula recibe inteligencia sanadora.",
             "Di mentalmente: Estoy completamente sano y en equilibrio."
         ], 4),
@@ -54,12 +58,9 @@ areas = {
     ],
     "💰 Abundancia": [
         ("Respiración de Abundancia", [
-            "Inhala expansión…",
-            "Exhala limitaciones…",
-            "Inhala expansión…",
-            "Exhala limitaciones…",
-            "Inhala expansión…",
-            "Exhala limitaciones…",
+            "Inhala expansión…", "Exhala limitaciones…",
+            "Inhala expansión…", "Exhala limitaciones…",
+            "Inhala expansión…", "Exhala limitaciones…",
             "Relaja todo el cuerpo, siente espacio."
         ], 4),
         ("Visualización de Flujo", [
@@ -81,12 +82,9 @@ areas = {
     "💞 Relaciones": [
         ("Respiración en el Corazón", [
             "Coloca tu mano en el pecho.",
-            "Inhala paz…",
-            "Exhala resentimiento…",
-            "Inhala paz…",
-            "Exhala resentimiento…",
-            "Inhala paz…",
-            "Exhala resentimiento…",
+            "Inhala paz…", "Exhala resentimiento…",
+            "Inhala paz…", "Exhala resentimiento…",
+            "Inhala paz…", "Exhala resentimiento…",
             "Siente compasión hacia ti y hacia los demás."
         ], 4),
         ("Visualización de Armonía", [
@@ -107,12 +105,9 @@ areas = {
     ],
     "🧭 Propósito y Paz": [
         ("Respiración de Paz Interior", [
-            "Inhala confianza…",
-            "Exhala temor…",
-            "Inhala confianza…",
-            "Exhala temor…",
-            "Inhala confianza…",
-            "Exhala temor…",
+            "Inhala confianza…", "Exhala temor…",
+            "Inhala confianza…", "Exhala temor…",
+            "Inhala confianza…", "Exhala temor…",
             "Siente el centro de tu pecho en calma.",
             "Permanece unos segundos en ese vacío fértil."
         ], 4),
@@ -134,12 +129,11 @@ areas = {
     ]
 }
 
-# Mostrar botones
 seleccion = st.radio("Selecciona un área para trabajar hoy:", list(areas.keys()), index=None)
 
-# Mostrar rutina paso a paso
 if seleccion:
     st.markdown(f"<div class='subtitle'>Has seleccionado: {seleccion}</div>", unsafe_allow_html=True)
+    st.image(imagenes[seleccion], use_column_width=True)
     contenedor = st.empty()
 
     for titulo, frases, pausa in areas[seleccion]:
