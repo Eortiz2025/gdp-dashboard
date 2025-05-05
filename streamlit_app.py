@@ -19,16 +19,8 @@ st.markdown("""
         font-weight: bold;
     }
 </style>
-<div class='title'>🧘‍♀️ Meditación Guiada </div>
+<div class='title'>🧘‍♀️ Meditación Guiada por Áreas de Vida</div>
 """, unsafe_allow_html=True)
-
-# Imágenes simbólicas por área
-imagenes = {
-    "🩺 Salud": "https://images.unsplash.com/photo-1552068751-34cb6b48b5bc?fit=crop&w=800&q=80",
-    "💰 Abundancia": "https://images.unsplash.com/photo-1526401485004-2fa806b5dca3?fit=crop&w=800&q=80",
-    "💞 Relaciones": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?fit=crop&w=800&q=80",
-    "🧭 Propósito y Paz": "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?fit=crop&w=800&q=80"
-}
 
 areas = {
     "🩺 Salud": [
@@ -44,7 +36,7 @@ areas = {
             "Visualiza una luz blanca envolviendo tu cuerpo.",
             "Esa luz armoniza tus órganos, nervios y emociones.",
             "Observa tu cuerpo fuerte, en paz y en movimiento libre."
-        ], 5, True),
+        ], 5),
         ("Decretos de Sanación", [
             "La inteligencia que me creó me restaura ahora.",
             "Mi subconsciente actúa con poder curativo.",
@@ -67,7 +59,7 @@ areas = {
             "Imagina un río dorado entrando a tu vida.",
             "Ese río representa el bien, el dinero, las oportunidades.",
             "Obsérvate recibiendo con alegría y compartiendo sin miedo."
-        ], 5, True),
+        ], 5),
         ("Decretos de Abundancia", [
             "Todo lo bueno que me pertenece viene a mí en armonía perfecta.",
             "Estoy abierto a la riqueza, la abundancia y el orden divino.",
@@ -91,7 +83,7 @@ areas = {
             "Imagina a la persona con quien necesitas sanar.",
             "Visualiza un lazo de luz entre ustedes, desde el corazón.",
             "Di mentalmente: Te suelto en paz. Me libero. Somos libres."
-        ], 5, True),
+        ], 5),
         ("Decretos de Amor", [
             "Estoy en paz con todos los seres del universo.",
             "Lo que doy, vuelve a mí multiplicado en armonía.",
@@ -115,7 +107,7 @@ areas = {
             "Visualiza tu día ideal, tu trabajo perfecto, tu forma de servir al mundo.",
             "Observa alegría, claridad y sentido.",
             "Di mentalmente: Estoy guiado. Estoy alineado con lo mejor en mí."
-        ], 5, True),
+        ], 5),
         ("Decretos de Guía", [
             "La inteligencia infinita me guía en cada paso.",
             "Cada día estoy más alineado con mi propósito.",
@@ -136,8 +128,6 @@ if seleccion:
     contenedor = st.empty()
 
     for paso in areas[seleccion]:
-        if len(paso) == 4 and paso[3]:
-            st.image(imagenes[seleccion], use_container_width=True)
         titulo, frases, pausa = paso[:3]
         for i in range(len(frases)):
             with contenedor:
