@@ -4,13 +4,17 @@ import time
 st.set_page_config(page_title="Meditación por Áreas - Murphy, Silva y Shinn", layout="centered")
 st.title("🧘‍♀️ Meditación Guiada por Áreas de Vida")
 
-# Áreas disponibles
+# Áreas disponibles con instrucciones respiratorias repetidas 3 veces
 areas = {
     "🩺 Salud": [
         ("Respiración curativa", [
-            "Cierra los ojos y coloca tu atención en tu cuerpo.",
+            "Respira profundamente y coloca tu atención en tu cuerpo.",
             "Inhala calma…",
-            "Exhala luz…",
+            "Exhala tension…",
+            "Inhala calma…",
+            "Exhala tension…",
+            "Inhala calma…",
+            "Exhala tension…",
             "Imagina que cada célula recibe inteligencia sanadora.",
             "Di mentalmente: Estoy completamente sano y en equilibrio."
         ], 4),
@@ -22,13 +26,17 @@ areas = {
         ("Decretos finales", [
             "La inteligencia que me creó me restaura ahora.",
             "Mi subconsciente actúa con poder curativo.",
-            "Gracias. Ya está hecho."
+            "Gracias. Asi es, asi sera, Ya está hecho."
         ], 4)
     ],
     "💰 Abundancia": [
-        ("Respiración de apertura", [
-            "Inhala con la sensación de expansión.",
-            "Exhala limitaciones mentales.",
+        ("Respiración de abundacia", [
+            "Inhala expansión…",
+            "Exhala limitaciones…",
+            "Inhala expansión…",
+            "Exhala limitaciones…",
+            "Inhala expansión…",
+            "Exhala limitaciones…",
             "Relaja todo el cuerpo, siente espacio."
         ], 4),
         ("Visualización de flujo", [
@@ -39,13 +47,18 @@ areas = {
         ("Decretos afirmativos", [
             "Todo lo bueno que me pertenece viene a mí en armonía perfecta.",
             "Estoy abierto a la riqueza, la abundancia y el orden divino.",
-            "Gracias. Lo acepto con alegría."
+            "Gracias. Asi es, asi sera, lo acepto con alegría."
         ], 4)
     ],
     "💞 Relaciones": [
         ("Respiración en el corazón", [
             "Coloca tu mano en el pecho.",
-            "Inhala paz, exhala resentimientos.",
+            "Inhala paz…",
+            "Exhala resentimiento…",
+            "Inhala paz…",
+            "Exhala resentimiento…",
+            "Inhala paz…",
+            "Exhala resentimiento…",
             "Siente compasión hacia ti y hacia los demás."
         ], 4),
         ("Visualización de armonía", [
@@ -60,8 +73,13 @@ areas = {
         ], 4)
     ],
     "🧭 Propósito y Paz": [
-        ("Respiración profunda", [
-            "Inhala confianza… Exhala ruido mental.",
+        ("Respiración de Paz", [
+            "Inhala confianza…",
+            "Exhala temor…",
+            "Inhala confianza…",
+            "Exhala temor…",
+            "Inhala confianza…",
+            "Exhala temor…",
             "Siente el centro de tu pecho en calma.",
             "Permanece unos segundos en ese vacío fértil."
         ], 4),
@@ -94,3 +112,5 @@ if seleccion:
             time.sleep(pausa)
 
     contenedor.success("🌟 Has completado tu sesión. Quédate unos segundos más en silencio si lo deseas.")
+
+
