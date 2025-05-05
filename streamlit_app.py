@@ -7,20 +7,22 @@ from datetime import datetime
 st.set_page_config(page_title="Compras con MLE", page_icon="📈")
 st.title("📦 Planificador de Compras con MLE")
 
-st.markdown("Sube un archivo con las ventas históricas de productos (en formato por columnas mes a mes). Luego, sube sólo los productos vendidos este mes con sus cantidades e inventario actual (desde tu ERP), y el sistema calculará automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
+st.markdown("Sube un archivo con las ventas históricas de productos (en formato por columnas mes a mes). Luego, sube sólo los productos vendidos este mes con sus cantidades e inventario actual (desde tu ERP convertido a Excel), y el sistema calculará automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
 
 archivo_hist = st.file_uploader("🗂️ Archivo de ventas históricas por producto (Excel o CSV)", type=["xlsx", "csv"])
-archivo_mes = st.file_uploader("📆 Archivo del mes actual exportado desde ERP (.xls tipo HTML)", type=["xls"])
+archivo_mes = st.file_uploader("📆 Archivo del mes actual exportado desde ERP (convertido a Excel)", type=["xlsx"])
 dias_efectivos = st.number_input("🕒 Días útiles de venta del mes actual", min_value=1, max_value=31, value=26)
 
 if archivo_hist and archivo_mes:
     try:
+        # Leer archivo histórico
         if archivo_hist.name.endswith(".csv"):
             df_hist = pd.read_csv(archivo_hist)
         else:
             df_hist = pd.read_excel(archivo_hist)
 
-        df_mes = pd.read_html(io.BytesIO(archivo_mes.read()), header=0)[0]
+        # Leer archivo mensual desde Excel
+        df_mes = pd.read_excel(archivo_mes)
 
         # Renombrar columnas del mes actual para que coincidan con el modelo
         df_mes = df_mes.rename(columns={
