@@ -1,138 +1,95 @@
 import streamlit as st
 import time
 
-st.set_page_config(page_title="Meditación por Áreas - Murphy, Silva y Shinn", layout="centered")
+st.set_page_config(page_title="Reprogramación Subconsciente - Murphy & Shinn", layout="centered")
 st.markdown("""
 <style>
     .title {
-        font-size: 2.5em;
+        font-size: 2.6em;
         font-weight: bold;
         color: #4B8BBE;
         text-align: center;
+        margin-bottom: 10px;
     }
     .subtitle {
-        font-size: 1.3em;
-        color: #306998;
-    }
-    .section-title {
+        font-size: 1.2em;
         color: #2C3E50;
-        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .step {
+        font-size: 1.2em;
+        line-height: 1.6em;
     }
 </style>
-<div class='title'>🧘‍♀️ Meditación Guiada por Áreas de Vida</div>
+<div class='title'>🌟 Conexión Profunda con tu Subconsciente</div>
+<div class='subtitle'>Inspirado en Joseph Murphy y Florence Scovel Shinn</div>
 """, unsafe_allow_html=True)
 
 areas = {
-    "🩺 Salud": [
-        ("Respiración Curativa", [
-            "Respira profundamente y coloca tu atención en tu cuerpo.",
-            "Inhala calma…", "Exhala tensión…",
-            "Inhala calma…", "Exhala tensión…",
-            "Inhala calma…", "Exhala tensión…",
-            "Imagina que cada célula recibe una gran fuerza sanadora.",
-            "Di mentalmente: Estoy completamente sano y en equilibrio."
-        ], 4),
-        ("Visualización de Salud", [
-            "Visualiza una luz blanca envolviendo tu cuerpo.",
-            "Esa luz armoniza tus órganos, nervios y emociones.",
-            "Observa tu cuerpo fuerte, en paz y en movimiento libre."
+    "🩺 Restauración del Cuerpo": [
+        ("Armonía Interior", [
+            "Cierra los ojos. Respira serenamente. Permite que tu atención descienda al corazón.",
+            "Inhala paz… Exhala toda tensión… (x3)",
+            "Siente cómo una luz dorada envuelve tu cuerpo físico y etérico.",
+            "Di mentalmente: 'Estoy en armonía perfecta con la Ley Divina de salud.'"
         ], 5),
-        ("Decretos de Sanación", [
-            "La divina fuerza que me creó me restaura ahora.",
-            "Mi subconsciente actúa con poder curativo.",
-            "Gracias. Así es. Así será. Ya está hecho."
-        ], 4),
-        ("Integración Sensorial (Método Silva)", [
-            "🔍 ¿Como veo a mi cuerpo, ahora que irradia salud y energía?",
-            "❤️ ¿Cómo siento a mi cuerpo al moverse libre, fuerte y en armonía?",
-            "👂 ¿Qué escucho decir a mi interior o a los demás sobre mi bienestar renovado?"
-        ], 10)
+        ("Decretos Sagrados", [
+            "La Inteligencia Infinita guía cada célula de mi cuerpo a su perfecto equilibrio.",
+            "La salud es mi derecho divino. La acepto con gozo y gratitud.",
+            "Soy restaurado por la Sabiduría que me creó."
+        ], 5)
     ],
-    "💰 Abundancia": [
-        ("Respiración de Abundancia", [
-            "Inhala expansión…", "Exhala limitaciones…",
-            "Inhala expansión…", "Exhala limitaciones…",
-            "Inhala expansión…", "Exhala limitaciones…",
-            "Relaja todo el cuerpo, siente espacio."
-        ], 4),
-        ("Visualización de Flujo", [
-            "Imagina un ríos dorados que entran a tu vida.",
-            "Ese río representa el bien, el dinero, las oportunidades.",
-            "Obsérvate recibiendo con alegría y compartiendo sin miedo."
+    "💰 Receptividad a la Abundancia": [
+        ("Apertura al Bien", [
+            "Coloca tu mano sobre el pecho. Inhala profundo desde la gratitud.",
+            "Inhala certeza… Exhala toda carencia… (x3)",
+            "Imagina una lluvia dorada descendiendo suavemente sobre ti, bendiciendo cada aspecto de tu vida."
         ], 5),
-        ("Decretos de Abundancia", [
-            "Todo lo bueno que me pertenece viene a mí en armonía perfecta.",
-            "Estoy abierto a la riqueza, la abundancia y el orden divino.",
-            "Gracias. Así es. Así será. Lo acepto con alegría y certeza."
-        ], 4),
-        ("Integración Sensorial (Método Silva)", [
-            "🔍 ¿Qué veo en mi entorno ahora que la abundancia fluye con naturalidad?",
-            "❤️ ¿Cómo se siente en mi cuerpo y corazón el vivir sin miedo, con plenitud?",
-            "👂 ¿Qué escucho al recibir oportunidades, agradecimientos y confirmaciones?"
-        ], 10)
+        ("Afirmaciones de Riqueza Espiritual", [
+            "La fuente divina me provee ilimitadamente. Estoy siempre sostenido.",
+            "Lo que me pertenece por derecho divino viene a mí sin esfuerzo, en orden perfecto.",
+            "Acepto el flujo constante de provisión, paz y propósito."
+        ], 5)
     ],
-    "💞 Relaciones": [
-        ("Respiración en el Corazón", [
-            "Coloca tu mano en el pecho.",
-            "Inhala paz y conexion…", "Exhala resentimiento…",
-            "Inhala paz y conexion…", "Exhala resentimiento…",
-            "Inhala paz y conexion…", "Exhala resentimiento…",
-            "Siente compasión hacia ti y hacia los demás."
-        ], 4),
-        ("Visualización de Armonía", [
-            "Imagina a la persona con quien necesitas sanar.",
-            "Visualiza un lazo de luz entre ustedes, desde el corazón.",
-            "Di mentalmente: Te suelto en paz. Me libero. Somos libres."
+    "💞 Relaciones en Armonía": [
+        ("Amor Liberador", [
+            "Lleva tu conciencia al centro del pecho. Siente tu corazón expandirse.",
+            "Inhala amor… Exhala todo resentimiento… (x3)",
+            "Visualiza a quienes necesitas liberar envueltos en una esfera de luz rosa."
         ], 5),
-        ("Decretos de Amor", [
+        ("Decretos de Unidad y Perdón", [
             "Estoy en paz con todos los seres del universo.",
-            "Lo que doy, vuelve a mí multiplicado en armonía.",
-            "El amor divino gobierna mis relaciones."
-        ], 4),
-        ("Integración Sensorial (Método Silva)", [
-            "🔍 ¿Qué imágenes vienen a mí ahora que hay paz y amor en mis vínculos?",
-            "❤️ ¿Qué emociones fluyen en mí cuando comparto con otros desde el corazón?",
-            "👂 ¿Qué palabras de armonía, perdón o gratitud escucho resonar?"
-        ], 10)
+            "El amor divino fluye en mí, a través de mí y hacia todos mis vínculos.",
+            "Perdono. Libero. Amo. Y soy libre."
+        ], 5)
     ],
-    "🧭 Propósito y Paz": [
-        ("Respiración de Paz Interior", [
-            "Inhala confianza…", "Exhala temor…",
-            "Inhala confianza…", "Exhala temor…",
-            "Inhala confianza…", "Exhala temor…",
-            "Siente el centro de tu pecho en calma.",
-            "Permanece unos segundos en ese vacío fértil."
-        ], 4),
-        ("Visualización con Propósito", [
-            "Visualiza tu día ideal, tu trabajo perfecto, tu forma de servir al mundo.",
-            "Observa alegría, claridad y sentido.",
-            "Di mentalmente: Estoy guiado. Estoy alineado con lo mejor en mí."
+    "🧭 Propósito y Dirección": [
+        ("Sintonía con la Voluntad Superior", [
+            "Permite que tu mente descanse en silencio. Respira y siente que eres guiado.",
+            "Inhala confianza… Exhala confusión… (x3)",
+            "Visualiza un sendero claro ante ti, guiado por la luz de tu alma."
         ], 5),
-        ("Decretos de Guía", [
-            "La inteligencia infinita me guía en cada paso.",
-            "Cada día estoy más alineado con mi propósito.",
-            "Confío. Estoy en el camino correcto."
-        ], 4),
-        ("Integración Sensorial (Método Silva)", [
-            "🔍 ¿Qué veo cuando estoy caminando en mi propósito con claridad y certeza?",
-            "❤️ ¿Qué sensaciones me recorren al saber que estoy alineado con mi alma?",
-            "👂 ¿Qué escucho desde mi guía interior o el universo que me confirma este camino?"
-        ], 10)
+        ("Decretos de Alineación Divina", [
+            "El plan perfecto para mi vida se despliega ahora con gracia.",
+            "Cada paso que doy es guiado por la Sabiduría interior que sabe.",
+            "Estoy en el lugar correcto, haciendo lo correcto, guiado por el Amor divino."
+        ], 5)
     ]
 }
 
-seleccion = st.radio("Selecciona un área para trabajar hoy:", list(areas.keys()), index=None)
+seleccion = st.radio("Selecciona un camino para tu práctica de hoy:", list(areas.keys()), index=None)
 
 if seleccion:
-    st.markdown(f"<div class='subtitle'>Has seleccionado: {seleccion}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='subtitle'>Has elegido: {seleccion}</div>", unsafe_allow_html=True)
     contenedor = st.empty()
 
     for paso in areas[seleccion]:
-        titulo, frases, pausa = paso[:3]
+        titulo, frases, pausa = paso
         for i in range(len(frases)):
             with contenedor:
                 st.markdown(f"### {titulo}")
-                st.markdown("\n\n".join(frases[:i+1]))
+                st.markdown(f"<div class='step'>{'<br><br>'.join(frases[:i+1])}</div>", unsafe_allow_html=True)
             time.sleep(pausa)
 
-    contenedor.success("🌟 Has completado tu sesión. Quédate unos segundos más en silencio si lo deseas.")
+    contenedor.success("✨ Has sembrado semillas de verdad en tu subconsciente. Permanece en gratitud unos momentos más.")
