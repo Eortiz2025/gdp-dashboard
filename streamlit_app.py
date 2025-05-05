@@ -38,8 +38,11 @@ if archivo_hist and archivo_mes:
 
         df_hist = df_hist.rename(columns={codigo_col: 'Producto'})
 
-        # Convertir de formato ancho a largo
+        # Convertir nombres de columna a string para evitar errores de concatenación
+        df_hist.columns = df_hist.columns.map(str)
         cols_mes = [col for col in df_hist.columns if col not in ['Producto', 'Nombre']]
+
+        # Convertir de formato ancho a largo
         df_hist = df_hist.melt(id_vars=['Producto', 'Nombre'], value_vars=cols_mes,
                                var_name='Mes', value_name='Ventas')
 
