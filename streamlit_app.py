@@ -76,7 +76,7 @@ areas = {
             "Coloca tu mano en el pecho.",
             "Inhala paz y conexion…", "Exhala resentimiento…",
             "Inhala paz y conexion…", "Exhala resentimiento…",
-            "Inhala paz y conexcion…", "Exhala resentimiento…",
+            "Inhala paz y conexion…", "Exhala resentimiento…",
             "Siente compasión hacia ti y hacia los demás."
         ], 4),
         ("Visualización de Armonía", [
