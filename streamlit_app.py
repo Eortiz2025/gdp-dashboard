@@ -44,7 +44,7 @@ areas = {
             "Visualiza una luz blanca envolviendo tu cuerpo.",
             "Esa luz armoniza tus órganos, nervios y emociones.",
             "Observa tu cuerpo fuerte, en paz y en movimiento libre."
-        ], 5),
+        ], 5, True),
         ("Decretos de Sanación", [
             "La inteligencia que me creó me restaura ahora.",
             "Mi subconsciente actúa con poder curativo.",
@@ -67,7 +67,7 @@ areas = {
             "Imagina un río dorado entrando a tu vida.",
             "Ese río representa el bien, el dinero, las oportunidades.",
             "Obsérvate recibiendo con alegría y compartiendo sin miedo."
-        ], 5),
+        ], 5, True),
         ("Decretos de Abundancia", [
             "Todo lo bueno que me pertenece viene a mí en armonía perfecta.",
             "Estoy abierto a la riqueza, la abundancia y el orden divino.",
@@ -91,7 +91,7 @@ areas = {
             "Imagina a la persona con quien necesitas sanar.",
             "Visualiza un lazo de luz entre ustedes, desde el corazón.",
             "Di mentalmente: Te suelto en paz. Me libero. Somos libres."
-        ], 5),
+        ], 5, True),
         ("Decretos de Amor", [
             "Estoy en paz con todos los seres del universo.",
             "Lo que doy, vuelve a mí multiplicado en armonía.",
@@ -115,7 +115,7 @@ areas = {
             "Visualiza tu día ideal, tu trabajo perfecto, tu forma de servir al mundo.",
             "Observa alegría, claridad y sentido.",
             "Di mentalmente: Estoy guiado. Estoy alineado con lo mejor en mí."
-        ], 5),
+        ], 5, True),
         ("Decretos de Guía", [
             "La inteligencia infinita me guía en cada paso.",
             "Cada día estoy más alineado con mi propósito.",
@@ -133,10 +133,12 @@ seleccion = st.radio("Selecciona un área para trabajar hoy:", list(areas.keys()
 
 if seleccion:
     st.markdown(f"<div class='subtitle'>Has seleccionado: {seleccion}</div>", unsafe_allow_html=True)
-    st.image(imagenes[seleccion], use_column_width=True)
     contenedor = st.empty()
 
-    for titulo, frases, pausa in areas[seleccion]:
+    for paso in areas[seleccion]:
+        if len(paso) == 4 and paso[3]:
+            st.image(imagenes[seleccion], use_container_width=True)
+        titulo, frases, pausa = paso[:3]
         for i in range(len(frases)):
             with contenedor:
                 st.markdown(f"### {titulo}")
