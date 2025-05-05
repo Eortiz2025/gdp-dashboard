@@ -57,7 +57,7 @@ if archivo_hist and archivo_mes:
         productos_mes = df_mes['Producto'].unique()
         df_hist = df_hist[df_hist['Producto'].isin(productos_mes)]
 
-        df_grouped = df_hist.groupby('Producto').agg({
+        df_grouped = df_hist.groupby(['Producto', 'Nombre']).agg({
             'Ventas': 'sum',
             'DiasMes': 'sum'
         }).reset_index()
@@ -74,9 +74,10 @@ if archivo_hist and archivo_mes:
         ).clip(lower=0).round()
 
         st.success("✅ Cálculo completado. Aquí están tus compras sugeridas:")
-        st.dataframe(df_grouped[['Producto', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']])
+        columnas_mostrar = ['Producto', 'Nombre', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']
+        st.dataframe(df_grouped[columnas_mostrar])
 
-        output = df_grouped[['Producto', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']]
+        output = df_grouped[columnas_mostrar]
         st.download_button("📥 Descargar Excel de resultados", data=output.to_csv(index=False),
                            file_name="compras_mle.csv", mime="text/csv")
 
