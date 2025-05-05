@@ -43,6 +43,9 @@ if archivo_hist and archivo_mes:
         df_hist = df_hist.melt(id_vars=['Producto', 'Nombre'], value_vars=cols_mes,
                                var_name='Mes', value_name='Ventas')
 
+        # Usar un promedio estándar de días por mes (30.42)
+        df_hist['DiasMes'] = 30.42
+
         # Validaciones mínimas
         if not {'Producto', 'Cantidad vendida', 'Stock (total)'}.issubset(df_mes.columns):
             st.error("El archivo del mes debe tener columnas: Producto, Cantidad vendida, Stock (total)")
@@ -51,7 +54,6 @@ if archivo_hist and archivo_mes:
         productos_mes = df_mes['Producto'].unique()
         df_hist = df_hist[df_hist['Producto'].isin(productos_mes)]
 
-        df_hist['DiasMes'] = df_hist['Mes'].apply(lambda x: 30 if str(x).lower().startswith("abr") else 31)
         df_grouped = df_hist.groupby('Producto').agg({
             'Ventas': 'sum',
             'DiasMes': 'sum'
