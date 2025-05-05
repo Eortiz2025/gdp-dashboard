@@ -29,7 +29,7 @@ areas = {
             "Inhala calma…", "Exhala tensión…",
             "Inhala calma…", "Exhala tensión…",
             "Inhala calma…", "Exhala tensión…",
-            "Imagina que cada célula recibe inteligencia sanadora.",
+            "Imagina que cada célula recibe una gran fuerza sanadora.",
             "Di mentalmente: Estoy completamente sano y en equilibrio."
         ], 4),
         ("Visualización de Salud", [
@@ -38,13 +38,13 @@ areas = {
             "Observa tu cuerpo fuerte, en paz y en movimiento libre."
         ], 5),
         ("Decretos de Sanación", [
-            "La inteligencia que me creó me restaura ahora.",
+            "La divina fuerza que me creó me restaura ahora.",
             "Mi subconsciente actúa con poder curativo.",
             "Gracias. Así es. Así será. Ya está hecho."
         ], 4),
         ("Integración Sensorial (Método Silva)", [
-            "🔍 ¿Qué estoy viendo ahora que mi cuerpo ya irradia salud y energía?",
-            "❤️ ¿Cómo se siente mi cuerpo al moverse libre, fuerte y en armonía?",
+            "🔍 ¿Como veo a mi cuerpo, ahora que irradia salud y energía?",
+            "❤️ ¿Cómo siento a mi cuerpo al moverse libre, fuerte y en armonía?",
             "👂 ¿Qué escucho decir a mi interior o a los demás sobre mi bienestar renovado?"
         ], 10)
     ],
@@ -56,7 +56,7 @@ areas = {
             "Relaja todo el cuerpo, siente espacio."
         ], 4),
         ("Visualización de Flujo", [
-            "Imagina un río dorado entrando a tu vida.",
+            "Imagina un ríos dorados que entran a tu vida.",
             "Ese río representa el bien, el dinero, las oportunidades.",
             "Obsérvate recibiendo con alegría y compartiendo sin miedo."
         ], 5),
