@@ -1,35 +1,33 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import io
 from datetime import datetime
 
 st.set_page_config(page_title="Compras con MLE", page_icon="📈")
 st.title("📦 Planificador de Compras con MLE")
 
-st.markdown("Sube un archivo con las ventas mensuales históricas de productos. Luego, puedes subir solo los productos que se están vendiendo este mes con sus cantidades e inventario actual, y el sistema calculará cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
+st.markdown("Sube un archivo con las ventas mensuales históricas de productos. Luego, puedes subir sólo los productos vendidos este mes con sus cantidades e inventario actual (desde tu ERP), y el sistema calculará automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
 
 # Subir archivo principal con ventas históricas
 archivo_hist = st.file_uploader("🗂️ Archivo de ventas históricas (Excel o CSV)", type=["xlsx", "csv"])
 
-# Subir archivo mensual actual (sólo productos activos del mes)
-archivo_mes = st.file_uploader("📆 Archivo de ventas e inventario del mes actual (sólo productos a calcular)", type=["xlsx", "csv"])
+# Subir archivo mensual actual (ERP exportado como .xls HTML)
+archivo_mes = st.file_uploader("📆 Archivo del mes actual exportado desde ERP (.xls tipo HTML)", type=["xls"])
 
 # Ingresar días efectivos del mes actual
 dias_efectivos = st.number_input("🕒 Días útiles de venta del mes actual", min_value=1, max_value=31, value=26)
 
 if archivo_hist and archivo_mes:
     try:
-        # Cargar histórico
+        # Leer archivo histórico
         if archivo_hist.name.endswith(".csv"):
             df_hist = pd.read_csv(archivo_hist)
         else:
             df_hist = pd.read_excel(archivo_hist)
 
-        # Cargar mes actual
-        if archivo_mes.name.endswith(".csv"):
-            df_mes = pd.read_csv(archivo_mes)
-        else:
-            df_mes = pd.read_excel(archivo_mes)
+        # Leer archivo mensual actual como HTML (desde ERP)
+        df_mes = pd.read_html(io.BytesIO(archivo_mes.read()), header=0)[0]
 
         # Validaciones mínimas
         if not {'Producto', 'Mes', 'Ventas'}.issubset(df_hist.columns):
@@ -54,8 +52,8 @@ if archivo_hist and archivo_mes:
         df_grouped['LambdaMLE'] = df_grouped['Ventas'] / df_grouped['DiasMes']
         df_grouped = df_grouped.merge(df_mes, on='Producto', how='left')
 
-        df_grouped['Cantidad vendida'] = df_grouped['Cantidad vendida'].fillna(0)
-        df_grouped['Stock (total)'] = df_grouped['Stock (total)'].fillna(0)
+        df_grouped['Cantidad vendida'] = pd.to_numeric(df_grouped['Cantidad vendida'], errors='coerce').fillna(0)
+        df_grouped['Stock (total)'] = pd.to_numeric(df_grouped['Stock (total)'], errors='coerce').fillna(0)
 
         df_grouped['DemandaEsperada'] = df_grouped['LambdaMLE'] * dias_efectivos
         df_grouped['CompraSugerida'] = (
