@@ -5,12 +5,12 @@ st.set_page_config(page_title="Meditación Guiada", layout="centered")
 st.title("🧘‍♂️ Meditación Guiada en Silencio")
 st.markdown(
     """
-    Respira profundo. Deja que cada palabra te acompañe suavemente.  
-    El texto se mostrará paso a paso, sin necesidad de presionar nada.
+    Respira profundo. Cada etapa aparecerá automáticamente, reemplazando la anterior.  
+    Deja que cada palabra te lleve hacia adentro.
     """
 )
 
-# Pasos con tiempos optimizados
+# Lista de pasos con texto y duración (en segundos)
 pasos = [
     ("🌀 **Inicio**",
      "Bienvenido. Comencemos con una respiración consciente.\n\nInhala calma… Exhala luz… Repite esto tres veces con intención.",
@@ -37,12 +37,15 @@ pasos = [
      10)
 ]
 
-# Mostrar los pasos uno a uno automáticamente
-for titulo, contenido, duracion in pasos:
-    st.markdown(f"### {titulo}")
-    st.markdown(contenido)
-    time.sleep(duracion)
-    st.empty()
+# Crear un contenedor dinámico
+contenedor = st.empty()
 
-# Mensaje final
-st.success("🌟 Has completado la meditación. Quédate unos segundos más en silencio si lo deseas.")
+# Mostrar un paso a la vez
+for titulo, contenido, duracion in pasos:
+    with contenedor:
+        st.markdown(f"### {titulo}")
+        st.markdown(contenido)
+    time.sleep(duracion)
+
+# Mostrar mensaje final
+contenedor.success("🌟 Has completado la meditación. Quédate unos segundos más en silencio si lo deseas.")
