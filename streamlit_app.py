@@ -2,35 +2,53 @@ import streamlit as st
 import time
 
 st.set_page_config(page_title="Meditación por Áreas - Murphy, Silva y Shinn", layout="centered")
-st.title("🧘‍♀️ Meditación Guiada por Áreas de Vida")
+st.markdown("""
+<style>
+    .title {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #4B8BBE;
+        text-align: center;
+    }
+    .subtitle {
+        font-size: 1.3em;
+        color: #306998;
+    }
+    .section-title {
+        color: #2C3E50;
+        font-weight: bold;
+    }
+</style>
+<div class='title'>🧘‍♀️ Meditación Guiada por Áreas de Vida</div>
+""", unsafe_allow_html=True)
 
 # Áreas disponibles con instrucciones respiratorias repetidas 3 veces
 areas = {
     "🩺 Salud": [
-        ("Respiración curativa", [
+        ("Respiración Curativa", [
             "Respira profundamente y coloca tu atención en tu cuerpo.",
             "Inhala calma…",
-            "Exhala tension…",
+            "Exhala tensión…",
             "Inhala calma…",
-            "Exhala tension…",
+            "Exhala tensión…",
             "Inhala calma…",
-            "Exhala tension…",
+            "Exhala tensión…",
             "Imagina que cada célula recibe inteligencia sanadora.",
             "Di mentalmente: Estoy completamente sano y en equilibrio."
         ], 4),
-        ("Visualización Silva", [
+        ("Visualización de Salud", [
             "Visualiza una luz blanca envolviendo tu cuerpo.",
             "Esa luz armoniza tus órganos, nervios y emociones.",
             "Observa tu cuerpo fuerte, en paz y en movimiento libre."
         ], 5),
-        ("Decretos finales", [
+        ("Decretos de Sanación", [
             "La inteligencia que me creó me restaura ahora.",
             "Mi subconsciente actúa con poder curativo.",
-            "Gracias. Asi es, asi sera, Ya está hecho."
+            "Gracias. Así es. Así será. Ya está hecho."
         ], 4)
     ],
     "💰 Abundancia": [
-        ("Respiración de abundacia", [
+        ("Respiración de Abundancia", [
             "Inhala expansión…",
             "Exhala limitaciones…",
             "Inhala expansión…",
@@ -39,19 +57,19 @@ areas = {
             "Exhala limitaciones…",
             "Relaja todo el cuerpo, siente espacio."
         ], 4),
-        ("Visualización de flujo", [
+        ("Visualización de Flujo", [
             "Imagina un río dorado entrando a tu vida.",
             "Ese río representa el bien, el dinero, las oportunidades.",
             "Obsérvate recibiendo con alegría y compartiendo sin miedo."
         ], 5),
-        ("Decretos afirmativos", [
+        ("Decretos de Abundancia", [
             "Todo lo bueno que me pertenece viene a mí en armonía perfecta.",
             "Estoy abierto a la riqueza, la abundancia y el orden divino.",
-            "Gracias. Asi es, asi sera, lo acepto con alegría."
+            "Gracias. Así es. Así será. Lo acepto con alegría y certeza."
         ], 4)
     ],
     "💞 Relaciones": [
-        ("Respiración en el corazón", [
+        ("Respiración en el Corazón", [
             "Coloca tu mano en el pecho.",
             "Inhala paz…",
             "Exhala resentimiento…",
@@ -61,19 +79,19 @@ areas = {
             "Exhala resentimiento…",
             "Siente compasión hacia ti y hacia los demás."
         ], 4),
-        ("Visualización de armonía", [
+        ("Visualización de Armonía", [
             "Imagina a la persona con quien necesitas sanar.",
             "Visualiza un lazo de luz entre ustedes, desde el corazón.",
             "Di mentalmente: Te suelto en paz. Me libero. Somos libres."
         ], 5),
-        ("Decretos amorosos", [
+        ("Decretos de Amor", [
             "Estoy en paz con todos los seres del universo.",
             "Lo que doy, vuelve a mí multiplicado en armonía.",
             "El amor divino gobierna mis relaciones."
         ], 4)
     ],
     "🧭 Propósito y Paz": [
-        ("Respiración de Paz", [
+        ("Respiración de Paz Interior", [
             "Inhala confianza…",
             "Exhala temor…",
             "Inhala confianza…",
@@ -83,12 +101,12 @@ areas = {
             "Siente el centro de tu pecho en calma.",
             "Permanece unos segundos en ese vacío fértil."
         ], 4),
-        ("Visualización con propósito", [
+        ("Visualización con Propósito", [
             "Visualiza tu día ideal, tu trabajo perfecto, tu forma de servir al mundo.",
             "Observa alegría, claridad y sentido.",
             "Di mentalmente: Estoy guiado. Estoy alineado con lo mejor en mí."
         ], 5),
-        ("Decretos de guía", [
+        ("Decretos de Guía", [
             "La inteligencia infinita me guía en cada paso.",
             "Cada día estoy más alineado con mi propósito.",
             "Confío. Estoy en el camino correcto."
@@ -101,7 +119,7 @@ seleccion = st.radio("Selecciona un área para trabajar hoy:", list(areas.keys()
 
 # Mostrar rutina paso a paso
 if seleccion:
-    st.markdown(f"## {seleccion}")
+    st.markdown(f"<div class='subtitle'>Has seleccionado: {seleccion}</div>", unsafe_allow_html=True)
     contenedor = st.empty()
 
     for titulo, frases, pausa in areas[seleccion]:
@@ -112,5 +130,3 @@ if seleccion:
             time.sleep(pausa)
 
     contenedor.success("🌟 Has completado tu sesión. Quédate unos segundos más en silencio si lo deseas.")
-
-
