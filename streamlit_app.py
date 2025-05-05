@@ -7,43 +7,37 @@ from datetime import datetime
 st.set_page_config(page_title="Compras con MLE", page_icon="📈")
 st.title("📦 Planificador de Compras con MLE")
 
-st.markdown("Sube un archivo con las ventas mensuales históricas de productos. Luego, puedes subir sólo los productos vendidos este mes con sus cantidades e inventario actual (desde tu ERP), y el sistema calculará automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
+st.markdown("Sube un archivo con las ventas históricas de productos (en formato por columnas mes a mes). Luego, sube sólo los productos vendidos este mes con sus cantidades e inventario actual (desde tu ERP), y el sistema calculará automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
 
-# Subir archivo principal con ventas históricas
-archivo_hist = st.file_uploader("🗂️ Archivo de ventas históricas (Excel o CSV)", type=["xlsx", "csv"])
-
-# Subir archivo mensual actual (ERP exportado como .xls HTML)
+archivo_hist = st.file_uploader("🗂️ Archivo de ventas históricas por producto (Excel o CSV)", type=["xlsx", "csv"])
 archivo_mes = st.file_uploader("📆 Archivo del mes actual exportado desde ERP (.xls tipo HTML)", type=["xls"])
-
-# Ingresar días efectivos del mes actual
 dias_efectivos = st.number_input("🕒 Días útiles de venta del mes actual", min_value=1, max_value=31, value=26)
 
 if archivo_hist and archivo_mes:
     try:
-        # Leer archivo histórico
         if archivo_hist.name.endswith(".csv"):
             df_hist = pd.read_csv(archivo_hist)
         else:
             df_hist = pd.read_excel(archivo_hist)
 
-        # Leer archivo mensual actual como HTML (desde ERP)
         df_mes = pd.read_html(io.BytesIO(archivo_mes.read()), header=0)[0]
 
-        # Validaciones mínimas
-        if not {'Producto', 'Mes', 'Ventas'}.issubset(df_hist.columns):
-            st.error("El archivo histórico debe tener columnas: Producto, Mes, Ventas")
-            st.stop()
+        # Convertir archivo histórico de ancho a largo
+        col_base = 'Codigo' if 'Codigo' in df_hist.columns else 'Producto'
+        cols_mes = [col for col in df_hist.columns if col not in [col_base, 'Nombre']]
+        df_hist = df_hist.melt(id_vars=[col_base, 'Nombre'], value_vars=cols_mes,
+                               var_name='Mes', value_name='Ventas')
+        df_hist = df_hist.rename(columns={col_base: 'Producto'})
 
+        # Validaciones mínimas
         if not {'Producto', 'Cantidad vendida', 'Stock (total)'}.issubset(df_mes.columns):
             st.error("El archivo del mes debe tener columnas: Producto, Cantidad vendida, Stock (total)")
             st.stop()
 
-        # Filtrar histórico para solo productos activos este mes
         productos_mes = df_mes['Producto'].unique()
         df_hist = df_hist[df_hist['Producto'].isin(productos_mes)]
 
-        # Agrupar histórico por producto
-        df_hist['DiasMes'] = df_hist['Mes'].apply(lambda x: 30 if 'abr' in x.lower() else 31)
+        df_hist['DiasMes'] = df_hist['Mes'].apply(lambda x: 30 if str(x).lower().startswith("abr") else 31)
         df_grouped = df_hist.groupby('Producto').agg({
             'Ventas': 'sum',
             'DiasMes': 'sum'
@@ -63,7 +57,6 @@ if archivo_hist and archivo_mes:
         st.success("✅ Cálculo completado. Aquí están tus compras sugeridas:")
         st.dataframe(df_grouped[['Producto', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']])
 
-        # Descarga
         output = df_grouped[['Producto', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']]
         st.download_button("📥 Descargar Excel de resultados", data=output.to_csv(index=False),
                            file_name="compras_mle.csv", mime="text/csv")
