@@ -22,6 +22,12 @@ if archivo_hist and archivo_mes:
 
         df_mes = pd.read_html(io.BytesIO(archivo_mes.read()), header=0)[0]
 
+        # Renombrar columnas del mes actual para que coincidan con el modelo
+        df_mes = df_mes.rename(columns={
+            'Codigo': 'Producto',
+            'Stock': 'Stock (total)'
+        })
+
         # Detectar nombre de columna que actúe como 'Codigo'
         codigo_col = next((col for col in df_hist.columns if col.lower().strip() in ['codigo', 'código', 'producto']), None)
         if not codigo_col:
