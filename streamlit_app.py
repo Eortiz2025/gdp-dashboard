@@ -27,7 +27,8 @@ if archivo_hist and archivo_mes:
         # Renombrar columnas del mes actual para que coincidan con el modelo
         df_mes = df_mes.rename(columns={
             'Codigo': 'Producto',
-            'Stock': 'Stock (total)'
+            'Stock': 'Stock (total)',
+            'Nombre': 'NombreProducto'
         })
 
         # Detectar nombre de columna que actúe como 'Codigo'
@@ -57,13 +58,14 @@ if archivo_hist and archivo_mes:
         productos_mes = df_mes['Producto'].unique()
         df_hist = df_hist[df_hist['Producto'].isin(productos_mes)]
 
-        df_grouped = df_hist.groupby(['Producto', 'Nombre']).agg({
+        df_grouped = df_hist.groupby('Producto').agg({
             'Ventas': 'sum',
             'DiasMes': 'sum'
         }).reset_index()
 
         df_grouped['LambdaMLE'] = df_grouped['Ventas'] / df_grouped['DiasMes']
-        df_grouped = df_grouped.merge(df_mes, on='Producto', how='left')
+
+        df_grouped = df_grouped.merge(df_mes[['Producto', 'NombreProducto', 'Cantidad vendida', 'Stock (total)']], on='Producto', how='left')
 
         df_grouped['Cantidad vendida'] = pd.to_numeric(df_grouped['Cantidad vendida'], errors='coerce').fillna(0)
         df_grouped['Stock (total)'] = pd.to_numeric(df_grouped['Stock (total)'], errors='coerce').fillna(0)
@@ -74,7 +76,7 @@ if archivo_hist and archivo_mes:
         ).clip(lower=0).round()
 
         st.success("✅ Cálculo completado. Aquí están tus compras sugeridas:")
-        columnas_mostrar = ['Producto', 'Nombre', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']
+        columnas_mostrar = ['Producto', 'NombreProducto', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']
         st.dataframe(df_grouped[columnas_mostrar])
 
         output = df_grouped[columnas_mostrar]
