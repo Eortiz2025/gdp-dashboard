@@ -22,8 +22,13 @@ if archivo_hist and archivo_mes:
 
         df_mes = pd.read_html(io.BytesIO(archivo_mes.read()), header=0)[0]
 
-        # Asegurar nombres de columnas esperados
-        df_hist = df_hist.rename(columns={'Codigo': 'Producto'})
+        # Detectar nombre de columna que actúe como 'Codigo'
+        codigo_col = next((col for col in df_hist.columns if col.lower().strip() in ['codigo', 'código', 'producto']), None)
+        if not codigo_col:
+            st.error("No se encontró una columna tipo 'Codigo' o 'Producto' en el archivo histórico.")
+            st.stop()
+
+        df_hist = df_hist.rename(columns={codigo_col: 'Producto'})
 
         # Convertir de formato ancho a largo
         cols_mes = [col for col in df_hist.columns if col not in ['Producto', 'Nombre']]
