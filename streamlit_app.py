@@ -1,87 +1,39 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
+from gtts import gTTS
+from pydub.generators import Sine
+from pydub import AudioSegment
 import io
-from datetime import datetime
 
-st.set_page_config(page_title="Compras con MLE", page_icon="📈")
-st.title("📦 Planificador de Compras con MLE")
+st.set_page_config(page_title="Meditación Guiada", layout="centered")
+st.title("🧘‍♂️ Meditación Guiada con Afirmaciones")
 
-st.markdown("Sube un archivo con las ventas históricas de productos (en formato por columnas mes a mes). Luego, sube sólo los productos vendidos este mes con sus cantidades e inventario actual (desde tu ERP convertido a Excel), y el sistema calculará automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
+# Textos para cada fase
+frases = {
+    "Intro": "Bienvenido. Comencemos con una respiración profunda. Inhala calma... exhala tensión.",
+    "Silencio": "Ahora, simplemente observa tu respiración. No hagas nada más. Permanece en silencio y presencia.",
+    "Deseo": "Lentamente, pregúntate: ¿Qué deseo experimentar sinceramente? Escucha con el corazón.",
+    "Visualización": "Ahora visualiza: imagina que tu deseo ya es real. Siente cómo se ve, cómo suena, cómo vibra.",
+    "Afirmación": "Repite conmigo: Estoy en paz. Estoy guiado. Lo que es mío por derecho divino viene a mí ahora.",
+    "Cierre": "Gracias. Ya está hecho. Confío plenamente. Puedes abrir los ojos cuando estés listo."
+}
 
-archivo_hist = st.file_uploader("🗂️ Archivo de ventas históricas por producto (Excel o CSV)", type=["xlsx", "csv"])
-archivo_mes = st.file_uploader("📆 Archivo del mes actual exportado desde ERP (convertido a Excel)", type=["xlsx"])
-dias_efectivos = st.number_input("🕒 Días útiles de venta del mes actual", min_value=1, max_value=31, value=26)
+# Selección de partes
+seleccion = st.multiselect("Selecciona las partes que deseas incluir:", list(frases.keys()), default=list(frases.keys()))
 
-if archivo_hist and archivo_mes:
-    try:
-        # Leer archivo histórico
-        if archivo_hist.name.endswith(".csv"):
-            df_hist = pd.read_csv(archivo_hist)
-        else:
-            df_hist = pd.read_excel(archivo_hist)
+# Botón para generar y reproducir audio
+if st.button("🎧 Generar Meditación"):
+    for etapa in seleccion:
+        with st.spinner(f"Generando voz para: {etapa}..."):
+            tts = gTTS(frases[etapa], lang="es")
+            mp3_fp = io.BytesIO()
+            tts.write_to_fp(mp3_fp)
+            mp3_fp.seek(0)
+            st.audio(mp3_fp, format="audio/mp3")
 
-        # Leer archivo mensual desde Excel
-        df_mes = pd.read_excel(archivo_mes)
-
-        # Renombrar columnas del mes actual para que coincidan con el modelo
-        df_mes = df_mes.rename(columns={
-            'Codigo': 'Producto',
-            'Stock': 'Stock (total)',
-            'Nombre': 'NombreProducto'
-        })
-
-        # Detectar nombre de columna que actúe como 'Codigo'
-        codigo_col = next((col for col in df_hist.columns if col.lower().strip() in ['codigo', 'código', 'producto']), None)
-        if not codigo_col:
-            st.error("No se encontró una columna tipo 'Codigo' o 'Producto' en el archivo histórico.")
-            st.stop()
-
-        df_hist = df_hist.rename(columns={codigo_col: 'Producto'})
-
-        # Convertir nombres de columna a string para evitar errores de concatenación
-        df_hist.columns = df_hist.columns.map(str)
-        cols_mes = [col for col in df_hist.columns if col not in ['Producto', 'Nombre']]
-
-        # Convertir de formato ancho a largo
-        df_hist = df_hist.melt(id_vars=['Producto', 'Nombre'], value_vars=cols_mes,
-                               var_name='Mes', value_name='Ventas')
-
-        # Usar un promedio estándar de días por mes (30.42)
-        df_hist['DiasMes'] = 30.42
-
-        # Validaciones mínimas
-        if not {'Producto', 'Cantidad vendida', 'Stock (total)'}.issubset(df_mes.columns):
-            st.error("El archivo del mes debe tener columnas: Producto, Cantidad vendida, Stock (total)")
-            st.stop()
-
-        productos_mes = df_mes['Producto'].unique()
-        df_hist = df_hist[df_hist['Producto'].isin(productos_mes)]
-
-        df_grouped = df_hist.groupby('Producto').agg({
-            'Ventas': 'sum',
-            'DiasMes': 'sum'
-        }).reset_index()
-
-        df_grouped['LambdaMLE'] = df_grouped['Ventas'] / df_grouped['DiasMes']
-
-        df_grouped = df_grouped.merge(df_mes[['Producto', 'NombreProducto', 'Cantidad vendida', 'Stock (total)']], on='Producto', how='left')
-
-        df_grouped['Cantidad vendida'] = pd.to_numeric(df_grouped['Cantidad vendida'], errors='coerce').fillna(0)
-        df_grouped['Stock (total)'] = pd.to_numeric(df_grouped['Stock (total)'], errors='coerce').fillna(0)
-
-        df_grouped['DemandaEsperada'] = df_grouped['LambdaMLE'] * dias_efectivos
-        df_grouped['CompraSugerida'] = (
-            df_grouped['DemandaEsperada'] - df_grouped['Cantidad vendida'] - df_grouped['Stock (total)']
-        ).clip(lower=0).round()
-
-        st.success("✅ Cálculo completado. Aquí están tus compras sugeridas:")
-        columnas_mostrar = ['Producto', 'NombreProducto', 'LambdaMLE', 'DemandaEsperada', 'Cantidad vendida', 'Stock (total)', 'CompraSugerida']
-        st.dataframe(df_grouped[columnas_mostrar])
-
-        output = df_grouped[columnas_mostrar]
-        st.download_button("📥 Descargar Excel de resultados", data=output.to_csv(index=False),
-                           file_name="compras_mle.csv", mime="text/csv")
-
-    except Exception as e:
-        st.error(f"Error al procesar los archivos: {e}")
+    # Gong al final
+    st.markdown("### 🔔 Sonido final tipo gong:")
+    gong_audio = Sine(440).to_audio_segment(duration=1000).fade_in(200).fade_out(200)
+    buffer = io.BytesIO()
+    gong_audio.export(buffer, format="mp3")
+    buffer.seek(0)
+    st.audio(buffer, format="audio/mp3")
