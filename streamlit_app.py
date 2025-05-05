@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 
-st.set_page_config(page_title="Reprogramación Subconsciente - Murphy & Shinn", layout="centered")
+st.set_page_config(page_title="Reprogramación Diaria - Murphy & Shinn", layout="centered")
 st.markdown("""
 <style>
     .title {
@@ -22,74 +22,46 @@ st.markdown("""
         line-height: 1.6em;
     }
 </style>
-<div class='title'>🌟 Conexión Profunda con tu Subconsciente</div>
-<div class='subtitle'>Inspirado en Joseph Murphy y Florence Scovel Shinn</div>
+<div class='title'>🌟 Ritual Diario de Reprogramación Subconsciente</div>
+<div class='subtitle'>Basado en las enseñanzas de Joseph Murphy y Florence Scovel Shinn</div>
 """, unsafe_allow_html=True)
 
-areas = {
-    "🩺 Restauración del Cuerpo": [
-        ("Armonía Interior", [
-            "Cierra los ojos. Respira serenamente. Permite que tu atención descienda al corazón.",
-            "Inhala paz… Exhala toda tensión… (x3)",
-            "Siente cómo una luz dorada envuelve tu cuerpo físico y etérico.",
-            "Di mentalmente: 'Estoy en armonía perfecta con la Ley Divina de salud.'"
-        ], 5),
-        ("Decretos Sagrados", [
-            "La Inteligencia Infinita guía cada célula de mi cuerpo a su perfecto equilibrio.",
-            "La salud es mi derecho divino. La acepto con gozo y gratitud.",
-            "Soy restaurado por la Sabiduría que me creó."
-        ], 5)
-    ],
-    "💰 Receptividad a la Abundancia": [
-        ("Apertura al Bien", [
-            "Coloca tu mano sobre el pecho. Inhala profundo desde la gratitud.",
-            "Inhala certeza… Exhala toda carencia… (x3)",
-            "Imagina una lluvia dorada descendiendo suavemente sobre ti, bendiciendo cada aspecto de tu vida."
-        ], 5),
-        ("Afirmaciones de Riqueza Espiritual", [
-            "La fuente divina me provee ilimitadamente. Estoy siempre sostenido.",
-            "Lo que me pertenece por derecho divino viene a mí sin esfuerzo, en orden perfecto.",
-            "Acepto el flujo constante de provisión, paz y propósito."
-        ], 5)
-    ],
-    "💞 Relaciones en Armonía": [
-        ("Amor Liberador", [
-            "Lleva tu conciencia al centro del pecho. Siente tu corazón expandirse.",
-            "Inhala amor… Exhala todo resentimiento… (x3)",
-            "Visualiza a quienes necesitas liberar envueltos en una esfera de luz rosa."
-        ], 5),
-        ("Decretos de Unidad y Perdón", [
-            "Estoy en paz con todos los seres del universo.",
-            "El amor divino fluye en mí, a través de mí y hacia todos mis vínculos.",
-            "Perdono. Libero. Amo. Y soy libre."
-        ], 5)
-    ],
-    "🧭 Propósito y Dirección": [
-        ("Sintonía con la Voluntad Superior", [
-            "Permite que tu mente descanse en silencio. Respira y siente que eres guiado.",
-            "Inhala confianza… Exhala confusión… (x3)",
-            "Visualiza un sendero claro ante ti, guiado por la luz de tu alma."
-        ], 5),
-        ("Decretos de Alineación Divina", [
-            "El plan perfecto para mi vida se despliega ahora con gracia.",
-            "Cada paso que doy es guiado por la Sabiduría interior que sabe.",
-            "Estoy en el lugar correcto, haciendo lo correcto, guiado por el Amor divino."
-        ], 5)
-    ]
-}
+ritual_diario = [
+    ("🕊️ Fase 1: Silencio y Respiración", [
+        "Cierra tus ojos. Lleva tu atención al corazón.",
+        "Inhala fe… Exhala preocupación…",
+        "Inhala paz… Exhala juicio…",
+        "Inhala amor… Exhala resistencia…",
+        "Siente cómo entras en el templo interior de tu mente subconsciente."
+    ], 5),
 
-seleccion = st.radio("Selecciona un camino para tu práctica de hoy:", list(areas.keys()), index=None)
+    ("💬 Fase 2: Afirmaciones Conscientes", [
+        "Estoy alineado con la Verdad divina que me guía en todo momento.",
+        "Lo que me pertenece por derecho divino llega a mí ahora, con gracia y sin esfuerzo.",
+        "Soy salud, abundancia, amor y paz. Esto es la verdad de mi ser."
+    ], 5),
 
-if seleccion:
-    st.markdown(f"<div class='subtitle'>Has elegido: {seleccion}</div>", unsafe_allow_html=True)
-    contenedor = st.empty()
+    ("🌅 Fase 3: Visualización Creativa", [
+        "Imagina la escena perfecta: tu cuerpo sano, tu hogar lleno de armonía, tu propósito cumplido.",
+        "Observa con detalle. ¿Qué colores ves? ¿Qué palabras escuchas? ¿Cómo se siente tu corazón?",
+        "Siéntelo como real. Ya lo eres. Ya está hecho."
+    ], 6),
 
-    for paso in areas[seleccion]:
-        titulo, frases, pausa = paso
-        for i in range(len(frases)):
-            with contenedor:
-                st.markdown(f"### {titulo}")
-                st.markdown(f"<div class='step'>{'<br><br>'.join(frases[:i+1])}</div>", unsafe_allow_html=True)
-            time.sleep(pausa)
+    ("🙏 Fase 4: Entrega y Agradecimiento", [
+        "Entrego este deseo al Espíritu. Confío plenamente en el orden divino.",
+        "Gracias por la manifestación que ya está en camino.",
+        "Esto, o algo mejor, se manifiesta ahora bajo la gracia y de manera perfecta."
+    ], 5)
+]
 
-    contenedor.success("✨ Has sembrado semillas de verdad en tu subconsciente. Permanece en gratitud unos momentos más.")
+contenedor = st.empty()
+st.markdown("<div class='subtitle'>Prepara tu corazón. Este es un momento sagrado.</div>", unsafe_allow_html=True)
+
+for titulo, frases, pausa in ritual_diario:
+    for i in range(len(frases)):
+        with contenedor:
+            st.markdown(f"### {titulo}")
+            st.markdown(f"<div class='step'>{'<br><br>'.join(frases[:i+1])}</div>", unsafe_allow_html=True)
+        time.sleep(pausa)
+
+contenedor.success("🌟 Tu subconsciente ha recibido semillas de verdad. Permanece unos instantes en silencio si lo deseas.")
