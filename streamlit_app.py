@@ -19,7 +19,7 @@ st.markdown("""
         font-weight: bold;
     }
 </style>
-<div class='title'>🧘‍♀️ Meditación Guiada por Áreas de Vida</div>
+<div class='title'>🧘‍♀️ Meditación Guiada </div>
 """, unsafe_allow_html=True)
 
 # Imágenes simbólicas por área
