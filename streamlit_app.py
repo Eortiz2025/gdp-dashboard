@@ -6,15 +6,15 @@ from datetime import datetime
 st.set_page_config(page_title="Compras con MLE", page_icon="📈")
 st.title("📦 Planificador de Compras con MLE")
 
-st.markdown("Sube un archivo con las ventas mensuales históricas de productos. Luego, puedes ir subiendo las ventas acumuladas y el inventario del mes actual para que el sistema calcule automáticamente cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
+st.markdown("Sube un archivo con las ventas mensuales históricas de productos. Luego, puedes subir solo los productos que se están vendiendo este mes con sus cantidades e inventario actual, y el sistema calculará cuánto deberías comprar usando el modelo de Máxima Verosimilitud (MLE).")
 
 # Subir archivo principal con ventas históricas
 archivo_hist = st.file_uploader("🗂️ Archivo de ventas históricas (Excel o CSV)", type=["xlsx", "csv"])
 
-# Subir archivo mensual actual
-archivo_mes = st.file_uploader("📆 Archivo de ventas acumuladas e inventario actual", type=["xlsx", "csv"])
+# Subir archivo mensual actual (sólo productos activos del mes)
+archivo_mes = st.file_uploader("📆 Archivo de ventas e inventario del mes actual (sólo productos a calcular)", type=["xlsx", "csv"])
 
-# Ingresar días efectivos del mes actual (automático o manual)
+# Ingresar días efectivos del mes actual
 dias_efectivos = st.number_input("🕒 Días útiles de venta del mes actual", min_value=1, max_value=31, value=26)
 
 if archivo_hist and archivo_mes:
@@ -40,8 +40,12 @@ if archivo_hist and archivo_mes:
             st.error("El archivo del mes debe tener columnas: Producto, Cantidad vendida, Stock (total)")
             st.stop()
 
+        # Filtrar histórico para solo productos activos este mes
+        productos_mes = df_mes['Producto'].unique()
+        df_hist = df_hist[df_hist['Producto'].isin(productos_mes)]
+
         # Agrupar histórico por producto
-        df_hist['DiasMes'] = df_hist['Mes'].apply(lambda x: 30 if 'abr' in x.lower() else 31)  # ajustar si se desea
+        df_hist['DiasMes'] = df_hist['Mes'].apply(lambda x: 30 if 'abr' in x.lower() else 31)
         df_grouped = df_hist.groupby('Producto').agg({
             'Ventas': 'sum',
             'DiasMes': 'sum'
