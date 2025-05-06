@@ -49,6 +49,10 @@ afirmaciones_dia = {
 st.set_page_config(page_title="42 Afirmaciones: 21 días", layout="centered")
 st.title("🌄 Afirmaciones Mañana y Noche")
 
+# Inicializar progreso si no existe
+if 'progreso' not in st.session_state:
+    st.session_state.progreso = {d: {"mañana": False, "noche": False} for d in range(1, 22)}
+
 # Selección de día y momento
 dia = st.number_input("Selecciona el día (1-21):", 1, 21, 1)
 momento = st.radio("¿Cuál afirmación deseas ver?", ("mañana", "noche"))
@@ -59,8 +63,18 @@ if afirmaciones_dia.get(dia):
     st.subheader(f"Día {dia} - {'🌞' if momento == 'mañana' else '🌙'} Afirmación de la {momento.capitalize()}")
     st.markdown(f"> *{afirmacion}*")
     st.success("Lee esta afirmación en voz alta, repítela con convicción y siéntela como si ya fuera real.")
+
+    # Checkbox de progreso
+    checkbox_key = f"check_{dia}_{momento}"
+    completado = st.checkbox("✅ Marcar este momento como completado", value=st.session_state.progreso[dia][momento], key=checkbox_key)
+    st.session_state.progreso[dia][momento] = completado
 else:
     st.warning("Selecciona un día válido entre 1 y 21.")
+
+# Mostrar progreso general
+total_completado = sum([1 for d in st.session_state.progreso for m in ["mañana", "noche"] if st.session_state.progreso[d][m]])
+st.progress(total_completado / 42.0)
+st.caption(f"Progreso: {total_completado} de 42 sesiones completadas")
 
 # Botón de ayuda práctica diaria
 if st.button("¿Cómo debo hacer la práctica diaria?"):
