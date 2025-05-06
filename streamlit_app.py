@@ -62,21 +62,42 @@ if afirmaciones_dia.get(dia):
 else:
     st.warning("Selecciona un día válido entre 1 y 21.")
 
-# Botón informativo
+# Botón de ayuda práctica diaria
 if st.button("¿Cómo debo hacer la práctica diaria?"):
     st.markdown("""
 ### 🧘‍♀️ Cómo debo hacer la práctica diaria:
 
-**Lo crucial, según las fuentes, es la naturaleza y la calidad de las afirmaciones (o "palabras", "súplicas", "plegarias", "decretos", "sugestiones") y cómo se utilizan:**
-
-1. **El Poder de la Palabra y el Pensamiento:** Las palabras y pensamientos tienen una fuerza vibratoria tremenda y dan forma a tu vida. Hay que reemplazar ideas negativas con positivas.
-2. **La Importancia de la Fe y la Convicción:** El subconsciente responde a lo que se siente como verdadero. La convicción produce resultados.
-3. **Ser Específico y Positivo:** Usa frases claras, positivas y constructivas. Evita pensamientos negativos o contradictorios.
-4. **Sentir como si Ya lo Tuvieras:** Actúa y siente que tu deseo ya se ha cumplido. La emoción es clave.
-5. **Repetición y Constancia:** La repetición constante, especialmente por la mañana y la noche, graba las ideas en el subconsciente.
-6. **Momentos Ideales:** Justo al despertar y antes de dormir, tu subconsciente está más receptivo.
-7. **Visualización e Imaginación:** Imagina vívidamente el resultado deseado, siéntelo real.
-8. **Relajación y Soltar:** Suelta el control, confía y relájate. La tensión bloquea, la calma permite.
-
-**Conclusión:** Usa las afirmaciones con intención, emoción y perseverancia, especialmente al comenzar y terminar el día.
+1. Practica al despertar y antes de dormir.
+2. Relájate profundamente antes de comenzar.
+3. Repite la afirmación con emoción y convicción.
+4. Siéntela como una verdad presente.
+5. Visualiza el resultado cumplido.
+6. Termina con gratitud.
 """)
+
+# Botón para abrir guía extendida
+if st.button("🧠 Guía completa para sembrar ideas en el subconsciente"):
+    with st.expander("1. Vigila tus pensamientos y palabras"):
+        st.write("Tu subconsciente graba literalmente cada palabra y pensamiento. Usa palabras constructivas y evita frases como 'no puedo'.")
+    with st.expander("2. Usa afirmaciones y decretos con convicción"):
+        st.write("Rompe patrones mentales negativos repitiendo afirmaciones en voz alta, lenta y con sentimiento.")
+    with st.expander("3. Formula tus peticiones correctamente"):
+        st.write("Haz afirmaciones como: 'por la gracia y de una manera perfecta'. No supliques: agradece como si ya hubieras recibido.")
+    with st.expander("4. Visualiza y usa la imaginación"):
+        st.write("Imagina el resultado cumplido. Sé constante y específico. Usa la imaginación como si ya lo vivieras.")
+    with st.expander("5. Siente la fe y la convicción"):
+        st.write("Cree que tu deseo ya se ha cumplido. No uses frases débiles. Reafirma tu fe con emoción y certeza.")
+    with st.expander("6. Utiliza el estado de somnolencia"):
+        st.write("Poco antes de dormir o al despertar, repite afirmaciones o visualiza. El subconsciente está más receptivo.")
+    with st.expander("7. Practica la relajación y el no esfuerzo"):
+        st.write("No fuerces mentalmente. Relájate y confía en la Inteligencia Infinita. La calma activa el poder interior.")
+    with st.expander("8. Sé persistente y no desistas"):
+        st.write("Una vez hecha la petición, mantén tu posición. No te contradigas ni dudes.")
+    with st.expander("9. Pide guía divina/intuición"):
+        st.write("Pide dirección clara y actúa según la intuición. La guía llega en pensamientos, libros, personas.")
+    with st.expander("10. Libérate de obstáculos mentales y emocionales"):
+        st.write("Perdona, elimina el rencor, deja de criticar y supera los miedos. Estos bloquean tu bien.")
+    with st.expander("11. Da y recibe con alegría"):
+        st.write("Dar activa el flujo de la abundancia. Da con alegría y recibe con gratitud.")
+    with st.expander("12. Mantén tu mente en armonía"):
+        st.write("Mantén pensamientos de paz, salud y fe. La armonía interior se refleja en el exterior.")
