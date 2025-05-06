@@ -67,15 +67,15 @@ sesion = [
     ], False)
 ]
 
-# Función para generar y reproducir el audio
-def reproducir_texto(texto):
+# Función para reproducir voz y sincronizar
+def reproducir_texto(texto, duracion=9):
     tts = gTTS(text=texto, lang='es')
     with NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
         tts.save(tmpfile.name)
         st.audio(tmpfile.name, format="audio/mp3")
-        return tmpfile.name
+        time.sleep(duracion)
 
-# Mostrar botón inicial
+# Botón para comenzar la sesión
 if st.button("🌀 Iniciar sesión guiada"):
     contenedor = st.empty()
 
@@ -84,8 +84,9 @@ if st.button("🌀 Iniciar sesión guiada"):
             with contenedor:
                 st.markdown(f"### {titulo}")
                 st.markdown(f"<div class='step'>{frase}</div>", unsafe_allow_html=True)
-                if usar_audio:
-                    archivo = reproducir_texto(frase)
-            time.sleep(9)
+            if usar_audio:
+                reproducir_texto(frase)
+            else:
+                time.sleep(9)
 
     contenedor.success("🌟 Has sembrado nuevas creencias. Permanece unos momentos en gratitud y silencio. Todo está en marcha.")
