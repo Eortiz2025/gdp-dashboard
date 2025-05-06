@@ -61,3 +61,22 @@ if afirmaciones_dia.get(dia):
     st.success("Lee esta afirmación en voz alta, repítela con convicción y siéntela como si ya fuera real.")
 else:
     st.warning("Selecciona un día válido entre 1 y 21.")
+
+# Botón informativo
+if st.button("¿Cómo debo hacer la práctica diaria?"):
+    st.markdown("""
+### 🧘‍♀️ Cómo debo hacer la práctica diaria:
+
+**Lo crucial, según las fuentes, es la naturaleza y la calidad de las afirmaciones (o "palabras", "súplicas", "plegarias", "decretos", "sugestiones") y cómo se utilizan:**
+
+1. **El Poder de la Palabra y el Pensamiento:** Las palabras y pensamientos tienen una fuerza vibratoria tremenda y dan forma a tu vida. Hay que reemplazar ideas negativas con positivas.
+2. **La Importancia de la Fe y la Convicción:** El subconsciente responde a lo que se siente como verdadero. La convicción produce resultados.
+3. **Ser Específico y Positivo:** Usa frases claras, positivas y constructivas. Evita pensamientos negativos o contradictorios.
+4. **Sentir como si Ya lo Tuvieras:** Actúa y siente que tu deseo ya se ha cumplido. La emoción es clave.
+5. **Repetición y Constancia:** La repetición constante, especialmente por la mañana y la noche, graba las ideas en el subconsciente.
+6. **Momentos Ideales:** Justo al despertar y antes de dormir, tu subconsciente está más receptivo.
+7. **Visualización e Imaginación:** Imagina vívidamente el resultado deseado, siéntelo real.
+8. **Relajación y Soltar:** Suelta el control, confía y relájate. La tensión bloquea, la calma permite.
+
+**Conclusión:** Usa las afirmaciones con intención, emoción y perseverancia, especialmente al comenzar y terminar el día.
+""")
