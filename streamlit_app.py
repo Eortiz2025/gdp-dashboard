@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 
-st.set_page_config(page_title="Reprogramación Diaria - Murphy & Shinn", layout="centered")
+st.set_page_config(page_title="Sesión de Reprogramación - Murphy & Shinn", layout="centered")
 st.markdown("""
 <style>
     .title {
@@ -22,46 +22,47 @@ st.markdown("""
         line-height: 1.6em;
     }
 </style>
-<div class='title'>🌟 Ritual Diario de Reprogramación Subconsciente</div>
-<div class='subtitle'>Basado en las enseñanzas de Joseph Murphy y Florence Scovel Shinn</div>
+<div class='title'>🌟 Sesión Transformadora de Reprogramación</div>
+<div class='subtitle'>Basada en Joseph Murphy y Florence Scovel Shinn</div>
 """, unsafe_allow_html=True)
 
-ritual_diario = [
-    ("🕊️ Fase 1: Silencio y Respiración", [
-        "Cierra tus ojos. Lleva tu atención al corazón.",
-        "Inhala fe… Exhala preocupación…",
-        "Inhala paz… Exhala juicio…",
-        "Inhala amor… Exhala resistencia…",
-        "Siente cómo entras en el templo interior de tu mente subconsciente."
+# Etapas de la sesión combinando ambas metodologías
+sesion = [
+    ("🕊️ 1. Preparación y Aquietamiento", [
+        "Cierra tus ojos. Lleva tu atención a tu corazón.",
+        "Inhala profundamente… Exhala tensión… (3 ciclos)",
+        "Entra en el templo sagrado de tu ser interno.",
+        "Aquí y ahora, el subconsciente se abre a nuevas semillas de verdad."
     ], 5),
 
-    ("💬 Fase 2: Afirmaciones Conscientes", [
-        "Estoy alineado con la Verdad divina que me guía en todo momento.",
-        "Lo que me pertenece por derecho divino llega a mí ahora, con gracia y sin esfuerzo.",
-        "Soy salud, abundancia, amor y paz. Esto es la verdad de mi ser."
-    ], 5),
-
-    ("🌅 Fase 3: Visualización Creativa", [
-        "Imagina la escena perfecta: tu cuerpo sano, tu hogar lleno de armonía, tu propósito cumplido.",
-        "Observa con detalle. ¿Qué colores ves? ¿Qué palabras escuchas? ¿Cómo se siente tu corazón?",
-        "Siéntelo como real. Ya lo eres. Ya está hecho."
+    ("💬 2. Afirmaciones con Fe y Convicción", [
+        "Estoy alineado con la Sabiduría y el Bien Divino.",
+        "La salud, la abundancia, el amor y la paz son mi estado natural.",
+        "Lo que me pertenece por derecho divino llega a mí sin esfuerzo y en armonía.",
+        "Declaro la Verdad y esta se manifiesta en mi vida."
     ], 6),
 
-    ("🙏 Fase 4: Entrega y Agradecimiento", [
-        "Entrego este deseo al Espíritu. Confío plenamente en el orden divino.",
-        "Gracias por la manifestación que ya está en camino.",
-        "Esto, o algo mejor, se manifiesta ahora bajo la gracia y de manera perfecta."
+    ("🌅 3. Visualización Creativa y Sentida", [
+        "Visualiza con detalle tu vida ideal: en salud, paz, gozo y propósito.",
+        "Siente que ya estás ahí. Observa, escucha, toca, agradece.",
+        "Permite que cada imagen sea una semilla viva que el subconsciente reconoce como real."
+    ], 6),
+
+    ("🙏 4. Entrega y Gratitud", [
+        "Entrego este deseo al orden divino. No necesito saber el cómo.",
+        "Confío en que todo se resuelve de forma perfecta y en el momento perfecto.",
+        "Gracias. Esto, o algo mejor, se manifiesta ahora bajo la gracia."
     ], 5)
 ]
 
 contenedor = st.empty()
-st.markdown("<div class='subtitle'>Prepara tu corazón. Este es un momento sagrado.</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>Este es un momento sagrado. Deja que la Verdad te transforme.</div>", unsafe_allow_html=True)
 
-for titulo, frases, pausa in ritual_diario:
+for titulo, frases, pausa in sesion:
     for i in range(len(frases)):
         with contenedor:
             st.markdown(f"### {titulo}")
             st.markdown(f"<div class='step'>{'<br><br>'.join(frases[:i+1])}</div>", unsafe_allow_html=True)
         time.sleep(pausa)
 
-contenedor.success("🌟 Tu subconsciente ha recibido semillas de verdad. Permanece unos instantes en silencio si lo deseas.")
+contenedor.success("🌟 Has sembrado nuevas creencias. Permanece unos momentos en gratitud y silencio. Todo está en marcha.")
