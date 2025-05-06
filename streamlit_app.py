@@ -49,14 +49,14 @@ sesion = [
     ], 6),
 
     ("🙏 4. Entrega y Gratitud", [
-        "Entrego este deseo al orden divino. No necesito saber el cómo.",
+        "Entrego este deseo al orden divino. El sabe el cómo.",
         "Confío en que todo se resuelve de forma perfecta y en el momento perfecto.",
         "Gracias. Esto, o algo mejor, se manifiesta ahora bajo la gracia."
     ], 5)
 ]
 
 contenedor = st.empty()
-st.markdown("<div class='subtitle'>Este es un momento sagrado. Deja que la Verdad te transforme.</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>Este es un momento sagrado. Dejo que la Verdad me transforme.</div>", unsafe_allow_html=True)
 
 for titulo, frases, pausa in sesion:
     for i in range(len(frases)):
