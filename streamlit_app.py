@@ -45,3 +45,73 @@ afirmaciones_dia = {
     21: {"mañana": "Planto pensamientos positivos en mi mente cada día, y mi realidad florece con ellos.",
          "noche": "Mi subconsciente cuida de mí, reestableciendo equilibrio, salud y bienestar continuo."},
 }
+
+st.set_page_config(page_title="42 Afirmaciones: 21 días", layout="centered")
+st.title("🌄 Afirmaciones Mañana y Noche")
+
+# Inicializar progreso si no existe
+if 'progreso' not in st.session_state:
+    st.session_state.progreso = {d: {"mañana": False, "noche": False} for d in range(1, 22)}
+
+# Selección de día y momento
+dia = st.number_input("Selecciona el día (1-21):", 1, 21, 1)
+momento = st.radio("¿Cuál afirmación deseas ver?", ("mañana", "noche"))
+
+# Mostrar afirmación correspondiente
+if afirmaciones_dia.get(dia):
+    afirmacion = afirmaciones_dia[dia][momento]
+    st.subheader(f"Día {dia} - {'🌞' if momento == 'mañana' else '🌙'} Afirmación de la {momento.capitalize()}")
+    st.markdown(f"> *{afirmacion}*")
+    st.success("Lee esta afirmación en voz alta, repítela con convicción y siéntela como si ya fuera real.")
+
+    # Checkbox de progreso
+    checkbox_key = f"check_{dia}_{momento}"
+    completado = st.checkbox("✅ Marcar este momento como completado", value=st.session_state.progreso[dia][momento], key=checkbox_key)
+    st.session_state.progreso[dia][momento] = completado
+else:
+    st.warning("Selecciona un día válido entre 1 y 21.")
+
+# Mostrar progreso general
+total_completado = sum([1 for d in st.session_state.progreso for m in ["mañana", "noche"] if st.session_state.progreso[d][m]])
+st.progress(total_completado / 42.0)
+st.caption(f"Progreso: {total_completado} de 42 sesiones completadas")
+
+# Botón de ayuda práctica diaria
+if st.button("¿Cómo debo hacer la práctica diaria?"):
+    st.markdown("""
+### 🧘‍♀️ Cómo debo hacer la práctica diaria:
+
+1. Practica al despertar y antes de dormir.
+2. Relájate profundamente antes de comenzar.
+3. Repite la afirmación con emoción y convicción.
+4. Siéntela como una verdad presente.
+5. Visualiza el resultado cumplido.
+6. Termina con gratitud.
+""")
+
+# Botón para abrir guía extendida
+if st.button("🧠 Guía completa para sembrar ideas en el subconsciente"):
+    with st.expander("1. Vigila tus pensamientos y palabras"):
+        st.write("Tu subconsciente graba literalmente cada palabra y pensamiento. Usa palabras constructivas y evita frases como 'no puedo'.")
+    with st.expander("2. Usa afirmaciones y decretos con convicción"):
+        st.write("Rompe patrones mentales negativos repitiendo afirmaciones en voz alta, lenta y con sentimiento.")
+    with st.expander("3. Formula tus peticiones correctamente"):
+        st.write("Haz afirmaciones como: 'por la gracia y de una manera perfecta'. No supliques: agradece como si ya hubieras recibido.")
+    with st.expander("4. Visualiza y usa la imaginación"):
+        st.write("Imagina el resultado cumplido. Sé constante y específico. Usa la imaginación como si ya lo vivieras.")
+    with st.expander("5. Siente la fe y la convicción"):
+        st.write("Cree que tu deseo ya se ha cumplido. No uses frases débiles. Reafirma tu fe con emoción y certeza.")
+    with st.expander("6. Utiliza el estado de somnolencia"):
+        st.write("Poco antes de dormir o al despertar, repite afirmaciones o visualiza. El subconsciente está más receptivo.")
+    with st.expander("7. Practica la relajación y el no esfuerzo"):
+        st.write("No fuerces mentalmente. Relájate y confía en la Inteligencia Infinita. La calma activa el poder interior.")
+    with st.expander("8. Sé persistente y no desistas"):
+        st.write("Una vez hecha la petición, mantén tu posición. No te contradigas ni dudes.")
+    with st.expander("9. Pide guía divina/intuición"):
+        st.write("Pide dirección clara y actúa según la intuición. La guía llega en pensamientos, libros, personas.")
+    with st.expander("10. Libérate de obstáculos mentales y emocionales"):
+        st.write("Perdona, elimina el rencor, deja de criticar y supera los miedos. Estos bloquean tu bien.")
+    with st.expander("11. Da y recibe con alegría"):
+        st.write("Dar activa el flujo de la abundancia. Da con alegría y recibe con gratitud.")
+    with st.expander("12. Mantén tu mente en armonía"):
+        st.write("Mantén pensamientos de paz, salud y fe. La armonía interior se refleja en el exterior.")
