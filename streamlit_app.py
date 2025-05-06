@@ -53,5 +53,33 @@ if dia_actual in daily_plan:
 else:
     st.warning("Por favor, selecciona un día válido entre 1 y 21.")
 
+# Botón de ayuda
+if st.button("¿Cómo debo hacer la práctica diaria?"):
+    st.markdown("""
+---
+### 📘 Cómo debo hacer la práctica diaria:
+
+**Lo crucial, según las fuentes, es la naturaleza y la calidad de las afirmaciones (o "palabras", "súplicas", "plegarias", "decretos", "sugestiones") y cómo se utilizan:**
+
+1. **El Poder de la Palabra y el Pensamiento:** Tus palabras te justifican o condenan. Las palabras y pensamientos tienen una fuerza vibratoria tremenda y dan forma a tu vida y cuerpo. El subconsciente lo graba todo y lo realiza. Es como un disco que graba, y hay que romper los "discos malos" y grabar nuevos.
+
+2. **La Importancia de la Fe y la Convicción:** Debes tener una fe integral en la palabra que pronuncias. La mente subconsciente responde a la naturaleza de tus pensamientos o sugerencias. No es la cosa en la que crees, sino la creencia en tu mente lo que trae resultados.
+
+3. **Ser Específico y Positivo:** Pronuncia tus afirmaciones correctamente. Pide la "selección divina" y evita las "vanas palabras" o pensamientos como "no lo puedo comprar". No tengas duda o conflicto interno.
+
+4. **Sentir como si Ya lo Tuvieras:** Declara que ya has recibido lo que deseas. Regocíjate y siéntelo.
+
+5. **Repetición y Constancia:** La impresión en el subconsciente requiere repetición constante y con emoción. Mañana y noche son momentos ideales.
+
+6. **Momentos Ideales (Mañana y Noche):** Poco antes de dormir y al despertar, la mente está más receptiva.
+
+7. **Visualización e Imaginación:** Visualiza el resultado deseado con claridad y emoción.
+
+8. **Relajación y Soltar:** La mente subconsciente responde a la confianza y no al esfuerzo excesivo. Relájate y permite que actúe.
+
+**En resumen:** La clave es convicción, fe, especificidad, sentimiento real y repetición consistente.
+---
+""")
+
 st.markdown("---")
 st.markdown("Creado para tu práctica diaria consciente ✨")
