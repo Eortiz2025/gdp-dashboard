@@ -5,6 +5,7 @@ from gtts import gTTS
 from tempfile import NamedTemporaryFile
 
 st.set_page_config(page_title="Sesión de Reprogramación - Murphy & Shinn", layout="centered")
+
 st.markdown("""
 <style>
     .title {
@@ -66,9 +67,7 @@ sesion = [
     ], False)
 ]
 
-contenedor = st.empty()
-
-# Función para generar y reproducir audio temporalmente
+# Función para generar y reproducir el audio
 def reproducir_texto(texto):
     tts = gTTS(text=texto, lang='es')
     with NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
@@ -76,14 +75,17 @@ def reproducir_texto(texto):
         st.audio(tmpfile.name, format="audio/mp3")
         return tmpfile.name
 
-# Mostrar cada frase con audio opcional
-for titulo, frases, usar_audio in sesion:
-    for frase in frases:
-        with contenedor:
-            st.markdown(f"### {titulo}")
-            st.markdown(f"<div class='step'>{frase}</div>", unsafe_allow_html=True)
-            if usar_audio:
-                archivo = reproducir_texto(frase)
-        time.sleep(9)
+# Mostrar botón inicial
+if st.button("🌀 Iniciar sesión guiada"):
+    contenedor = st.empty()
 
-contenedor.success("🌟 Has sembrado nuevas creencias. Permanece unos momentos en gratitud y silencio. Todo está en marcha.")
+    for titulo, frases, usar_audio in sesion:
+        for frase in frases:
+            with contenedor:
+                st.markdown(f"### {titulo}")
+                st.markdown(f"<div class='step'>{frase}</div>", unsafe_allow_html=True)
+                if usar_audio:
+                    archivo = reproducir_texto(frase)
+            time.sleep(9)
+
+    contenedor.success("🌟 Has sembrado nuevas creencias. Permanece unos momentos en gratitud y silencio. Todo está en marcha.")
