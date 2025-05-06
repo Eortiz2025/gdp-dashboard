@@ -15,6 +15,13 @@ st.markdown("""
         font-size: 1.2em;
         color: #2C3E50;
         text-align: center;
+        margin-bottom: 5px;
+    }
+    .reflection {
+        font-size: 1em;
+        font-style: italic;
+        color: #555;
+        text-align: center;
         margin-bottom: 30px;
     }
     .step {
@@ -24,8 +31,10 @@ st.markdown("""
 </style>
 <div class='title'>🌟 Sesión Transformadora de Reprogramación</div>
 <div class='subtitle'>Basada en Joseph Murphy y Florence Scovel Shinn</div>
+<div class='reflection'>Este es un momento sagrado. Dejo que la Verdad me transforme.</div>
 """, unsafe_allow_html=True)
 
+# Etapas de la sesión
 sesion = [
     ("🕊️ 1. Preparación y Aquietamiento", [
         "Cierra tus ojos. Lleva tu atención a tu corazón.",
@@ -52,7 +61,6 @@ sesion = [
 ]
 
 contenedor = st.empty()
-st.markdown("<div class='subtitle'>Este es un momento sagrado. Dejo que la Verdad me transforme.</div>", unsafe_allow_html=True)
 
 for titulo, frases in sesion:
     for frase in frases:
