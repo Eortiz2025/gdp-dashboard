@@ -1,85 +1,63 @@
 import streamlit as st
-import datetime
 
-# Diccionario completo del plan de 21 días
-daily_plan = {
-    1: {"tema": "El Tesoro Interior y el Poder del Subconsciente", "afirmacion": "El tesoro está dentro de mí. La Inteligencia Infinita de mi subconsciente conoce todas las respuestas y está trabajando para mí ahora."},
-    2: {"tema": "La Mente como Jardín", "afirmacion": "Mi mente es un jardín fértil. Hoy siembro semillas de paz, salud, alegría y prosperidad."},
-    3: {"tema": "La Ley de la Acción y Reacción (Pensamiento Habitual)", "afirmacion": "Mis pensamientos habituales son positivos y constructivos. Mi subconsciente responde ahora a la naturaleza de mis pensamientos de bien."},
-    4: {"tema": "Superando el Miedo y la Duda", "afirmacion": "El Padre que hay en mí actúa ahora. Estoy bajo la inspiración directa, liberado de todo miedo y duda. La inteligencia infinita me guía."},
-    5: {"tema": "El Poder de Elegir", "afirmacion": "Yo tengo el poder de elegir. Elijo la salud, la felicidad, la paz y la abundancia. Elijo creer que algo bueno me sucederá ahora."},
-    6: {"tema": "La Fe y la No Resistencia", "afirmacion": "Reposo en el Señor y espero con tranquilidad. Me fío de Él y Él me satisfará. Mi fe es inquebrantable."},
-    7: {"tema": "El Poder de la Gratitud", "afirmacion": "Gracias te doy, Padre, por la prosperidad / la salud / la guía / el bien que ya he recibido."},
-    8: {"tema": "Salud Perfecta", "afirmacion": "Una divina perfección se expresa ahora a través de mí. La idea de la salud perfecta llena mi mente subconsciente. Mi subconsciente recrea mi cuerpo de acuerdo con la imagen perfecta de la salud."},
-    9: {"tema": "Curación Específica", "afirmacion": "Cada célula, tejido, músculo y nervio de mi cuerpo se está rehaciendo totalmente ahora. Quedan sanos y perfectos."},
-    10: {"tema": "Prosperidad y Riqueza (Convicción Interna)", "afirmacion": "Mis asuntos prosperan más día y noche. La riqueza fluye hacia mí."},
-    11: {"tema": "Atraer el Dinero Necesario", "afirmacion": "El espíritu nunca se retrasa. La riqueza está siempre al alcance de mis manos. El dinero necesario fluye hacia mí ahora."},
-    12: {"tema": "Éxito y Propósito Divino", "afirmacion": "La inteligencia infinita de mi mente subconsciente me revela mi verdadero sitio en la vida y me guía al éxito y la expresión de mi propósito divino."},
-    13: {"tema": "Superando Obstáculos Mentales", "afirmacion": "El poder omnisapiente y omnipotente del subconsciente toma el mando y me guía al éxito."},
-    14: {"tema": "Visualizando Deseos Cumplidos", "afirmacion": "Esto o algo mejor, según el designio divino, se manifiesta ahora."},
-    15: {"tema": "Buscando Guía Divina", "afirmacion": "La Inteligencia Creadora de mi mente subconsciente sabe qué me conviene más. Doy gracias por la respuesta que me llegará."},
-    16: {"tema": "El Subconsciente y el Sueño", "afirmacion": "Duermo en paz y me despierto alegre. Mi subconsciente trabaja para mi bien durante la noche."},
-    17: {"tema": "Atraer la Pareja Ideal / Relaciones Armoniosas", "afirmacion": "Estoy atrayendo a la persona que armoniza conmigo. Irradio amor y buena voluntad hacia todos."},
-    18: {"tema": "El Perdón (Lavar el Alma)", "afirmacion": "Perdono y libero. La paz inunda mi mente."},
-    19: {"tema": "Superando Hábitos Negativos", "afirmacion": "Estoy completamente libre de este hábito. Mi mente está llena de paz, alegría y libertad."},
-    20: {"tema": "La Verdad sobre la Edad", "afirmacion": "La edad es el nacimiento de la sabiduría en mi mente. Soy tan joven como mis pensamientos."},
-    21: {"tema": "Vivir la Verdad (Mantenimiento Continuo)", "afirmacion": "Pienso bien y el bien me sigue. Elijo pensamientos de salud, felicidad y abundancia en cada momento. Practico la Presencia de Dios (la Inteligencia Infinita) a cada minuto."}
+# Afirmaciones clasificadas por día y momento (mañana/noche)
+afirmaciones_dia = {
+    1: {"mañana": "Mi subconsciente es un fiel servidor, y yo le doy órdenes convenientes.",
+        "noche": "Cada uno de mis pensamientos es una causa y una condición, y cada condición es un efecto. Tomo responsabilidad de mis pensamientos."},
+    2: {"mañana": "Cada palabra que digo y cada cosa que pienso se graba dentro de mi subconsciente y se realiza en detalles sorprendentes.",
+        "noche": "Cuando mi mente piensa correctamente, cuando entiendo la verdad, cuando los pensamientos depositados en mi subconsciente son constructivos, armoniosos y llenos de paz, el poder de trabajo de mi subconsciente responde."},
+    3: {"mañana": "Yo rompo y demuelo los discos malos y viejos de mi subconsciente y los sustituyo por los nuevos y bonitos.",
+        "noche": "Soy como el capitán de mi buque, dando órdenes correctas (pensamientos e imágenes) a mi mente subconsciente."},
+    4: {"mañana": "Yo quiebro y demuelo (por mis palabras) todo lo que, dentro de mi subconsciente, es falso. Todo eso regresará a la nada.",
+        "noche": "Yo nunca uso los términos 'yo no puedo hacerlo', 'no puedo comprarlo'. Mi mente subconsciente lo acatará literalmente. Yo digo: 'Puedo hacer todas las cosas a través del poder de mi mente subconsciente'."},
+    5: {"mañana": "Ahora, grabo los nuevos discos por el poder de Cristo que hay en mí, que es la salud, la riqueza, el amor y la expresión perfecta de mi Ser. Ahí está la cuadratura de mi vida, el juego completo.",
+        "noche": "La ley de mi vida es la ley de creer en algo. Mi creencia es un pensamiento en mi mente. Yo creo en el poder de mi mente subconsciente para curar, inspirar, fortalecer y prosperar. A medida que aumento mi fe, mis resultados aumentan también."},
+    6: {"mañana": "Yo puedo cambiar las condiciones de mi vida cambiando las palabras que utilizo. La muerte y la Vida son el poder de mi lengua.",
+        "noche": "Yo cambio mis pensamientos, y así cambio mi destino."},
+    7: {"mañana": "Yo no juzgo a fin de no ser juzgado. Aquello que deseo para el prójimo, eso es lo que atraigo para mí mismo.",
+        "noche": "Tan pronto mi mente subconsciente acepta una idea, comienza a ejecutarla. La ley de mi subconsciente puede trabajar del mismo modo para ideas buenas o malas."},
+    8: {"mañana": "La indecisión es una piedra de obstáculo para mí; por eso repito: 'Yo siempre tengo la inspiración directa, y tomo rápidamente las buenas decisiones'.",
+        "noche": "Mi mente consciente es el vigilante en la puerta, que tiene como función fundamental proteger mi mente subconsciente de las impresiones falsas."},
+    9: {"mañana": "Reconozco que es mucho más fácil temer que tener fe, por eso hago el esfuerzo de mi voluntad para tener fe.",
+        "noche": "Una sugerencia no tiene poder por sí misma, excepto si es mentalmente aceptada por mí. Yo tengo la capacidad para elegir, y elijo la vida, elijo el amor, elijo la salud."},
+    10: {"mañana": "Todo lo que se halla en discordancia a mi alrededor se corresponde con una desarmonía mental dentro de mí, y yo elijo la armonía.",
+        "noche": "Debo dar a mi subconsciente solamente las sugestiones que curan, que elevan y que me inspiran a altos ideales. Mi mente subconsciente no entiende una broma, sino que toma mis palabras al pie de la letra."},
+    11: {"mañana": "Yo niego la pérdida; sé que no hay pérdida alguna en el Entendimiento Divino. Yo libero el rencor y el rechazo a perdonar, que cierran las puertas de mi bien.",
+        "noche": "Cualquiera que sea la premisa que mi mente consciente acepta como verdadera, esto determina la conclusión a la cual llega mi mente subconsciente."},
+    12: {"mañana": "Yo pido directrices nítidas y el camino me es trazado, con facilidad y lleno de éxito.",
+        "noche": "Mi subconsciente no discute ni me replica. Yo estoy bloqueando mi propia bondad y mi propio éxito con pensamientos negativos, pero ahora elijo pensar de manera positiva."},
+    13: {"mañana": "Mi miedo puede superarse por medio de la palabra pronunciada o por el tratamiento.",
+        "noche": "Para llevar a cabo mi deseo y terminar con la frustración, me digo: 'La inteligencia infinita que me sugirió este propósito me guía y me revela el plan perfecto'."},
+    14: {"mañana": "Practico la Presencia de Dios a cada minuto. Le reconozco en todas las direcciones, porque nada es insignificante, ni demasiado importante.",
+        "noche": "Mi subconsciente nunca duerme, nunca descansa. Está siempre trabajando. Controla mis funciones vitales."},
+    15: {"mañana": "Mi resistencia o el querer elegir mi propio camino limitan mi fe y paralizan la manifestación. Yo me entrego a la Inteligencia Infinita, diciendo '¡Mis caminos y no tus caminos!'.",
+        "noche": "Le digo a mi subconsciente antes de dormirme que quiero que se realice cierto asunto, y me sorprenderé al descubrir que mis fuerzas internas empiezan a trabajar."},
+    16: {"mañana": "Tengo la conciencia del oro, de la riqueza, y eso atrae la riqueza a mi vida.",
+        "noche": "Lo que yo imprimo en mi mente subconsciente, se proyecta en la pantalla del espacio como acontecimientos y experiencias. Por lo tanto, escojo cuidadosamente las mejores ideas y los pensamientos."},
+    17: {"mañana": "Al formular mis peticiones, empiezo por el fin, declarando haber recibido ya. Antes de que yo llame, Él responderá.",
+        "noche": "Para obtener los efectos deseados, los imagino y los siento una realidad, esperando que el principio vital infinito responda a mi petición consciente."},
+    18: {"mañana": "Doy gracias constantemente por aquello que ya he recibido. El hecho de alegrarme mientras aún estoy en el desierto abre la vía de mi liberación.",
+        "noche": "El estado de somnolencia antes de dormir o poco antes de despertar es el mejor momento para impregnar mi subconsciente porque en este momento tiene el mayor grado de lucidez."},
+    19: {"mañana": "Yo no vacilo en mi fe. Aquel que vacila no pensará que recibirá lo que es del Señor. Yo no transijo nunca. Una vez que he hecho lo necesario, mantengo mi posición.",
+        "noche": "La acción dinámica de mi mente subconsciente continúa y es mayor durante el sueño. Puedo darle a mi mente subconsciente un buen trabajo mientras caigo en la somnolencia y ella lo ejecutará."},
+    20: {"mañana": "Cuando yo me libero de mi problema y entrego la carga, obtengo una manifestación instantánea.",
+        "noche": "Lleno mi mente con la gran verdad vital y avanzo con luminosa alegría."},
+    21: {"mañana": "Yo soy el jardinero que está plantando semillas (pensamientos) en mi subconsciente basado en mi pensamiento habitual. Tal como siembro, así cosecharé.",
+        "noche": "Mi subconsciente busca preservar mi vida y restaurar mi salud a cualquier precio."},
 }
 
-st.set_page_config(page_title="21 Días para el Subconsciente", layout="centered")
-st.title("🌱 Plan de 21 Días para Reprogramar tu Subconsciente")
+st.set_page_config(page_title="42 Afirmaciones: 21 días", layout="centered")
+st.title("🌄 Afirmaciones Mañana y Noche")
 
-dia_actual = st.number_input("Selecciona el día (1 a 21):", min_value=1, max_value=21, step=1)
-momento = st.radio("¿Es tu práctica de la mañana o de la noche?", ("Mañana", "Noche"))
+# Selección de día y momento
+dia = st.number_input("Selecciona el día (1-21):", 1, 21, 1)
+momento = st.radio("¿Cuál afirmación deseas ver?", ("mañana", "noche"))
 
-if dia_actual in daily_plan:
-    tema = daily_plan[dia_actual]["tema"]
-    afirmacion = daily_plan[dia_actual]["afirmacion"]
-
-    st.subheader(f"Día {dia_actual}: {tema}")
-
-    if momento == "Mañana":
-        st.markdown("### 🌞 Práctica Matutina")
-        st.markdown("**1. Relájate. Respira profundo. Cierra los ojos si lo deseas.**")
-        st.markdown("**2. Lee esta afirmación lentamente, varias veces:**")
-    else:
-        st.markdown("### 🌙 Práctica Nocturna")
-        st.markdown("**1. Relaja cuerpo y mente. Entra en estado de somnolencia.**")
-        st.markdown("**2. Repite la afirmación antes de dormir, con emoción.**")
-
-    st.markdown(f"> 🧘‍♀️ *{afirmacion}*  ")
-
-    st.success("Repite esta afirmación durante al menos 5-10 minutos. Siente la emoción detrás de las palabras. ¡Estás sembrando en tu subconsciente!")
+# Mostrar afirmación correspondiente
+if afirmaciones_dia.get(dia):
+    afirmacion = afirmaciones_dia[dia][momento]
+    st.subheader(f"Día {dia} - {'🌞' if momento == 'mañana' else '🌙'} Afirmación de la {momento.capitalize()}")
+    st.markdown(f"> *{afirmacion}*")
+    st.success("Lee esta afirmación en voz alta, repítela con convicción y siéntela como si ya fuera real.")
 else:
-    st.warning("Por favor, selecciona un día válido entre 1 y 21.")
-
-# Botón de ayuda
-if st.button("¿Cómo debo hacer la práctica diaria?"):
-    st.markdown("""
----
-### 📘 Cómo debo hacer la práctica diaria:
-
-**Lo crucial, según las fuentes, es la naturaleza y la calidad de las afirmaciones (o "palabras", "súplicas", "plegarias", "decretos", "sugestiones") y cómo se utilizan:**
-
-1. **El Poder de la Palabra y el Pensamiento:** Tus palabras te justifican o condenan. Las palabras y pensamientos tienen una fuerza vibratoria tremenda y dan forma a tu vida y cuerpo. El subconsciente lo graba todo y lo realiza. Es como un disco que graba, y hay que romper los "discos malos" y grabar nuevos.
-
-2. **La Importancia de la Fe y la Convicción:** Debes tener una fe integral en la palabra que pronuncias. La mente subconsciente responde a la naturaleza de tus pensamientos o sugerencias. No es la cosa en la que crees, sino la creencia en tu mente lo que trae resultados.
-
-3. **Ser Específico y Positivo:** Pronuncia tus afirmaciones correctamente. Pide la "selección divina" y evita las "vanas palabras" o pensamientos como "no lo puedo comprar". No tengas duda o conflicto interno.
-
-4. **Sentir como si Ya lo Tuvieras:** Declara que ya has recibido lo que deseas. Regocíjate y siéntelo.
-
-5. **Repetición y Constancia:** La impresión en el subconsciente requiere repetición constante y con emoción. Mañana y noche son momentos ideales.
-
-6. **Momentos Ideales (Mañana y Noche):** Poco antes de dormir y al despertar, la mente está más receptiva.
-
-7. **Visualización e Imaginación:** Visualiza el resultado deseado con claridad y emoción.
-
-8. **Relajación y Soltar:** La mente subconsciente responde a la confianza y no al esfuerzo excesivo. Relájate y permite que actúe.
-
-**En resumen:** La clave es convicción, fe, especificidad, sentimiento real y repetición consistente.
----
-""")
-
-st.markdown("---")
-st.markdown("Creado para tu práctica diaria consciente ✨")
+    st.warning("Selecciona un día válido entre 1 y 21.")
