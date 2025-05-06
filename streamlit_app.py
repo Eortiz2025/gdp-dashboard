@@ -1,11 +1,7 @@
 import streamlit as st
 import time
-import os
-from gtts import gTTS
-from tempfile import NamedTemporaryFile
 
 st.set_page_config(page_title="Sesión de Reprogramación - Murphy & Shinn", layout="centered")
-
 st.markdown("""
 <style>
     .title {
@@ -33,60 +29,89 @@ st.markdown("""
         line-height: 1.6em;
     }
 </style>
-<div class='title'>🌟 Sesión Transformadora de Reprogramación</div>
-<div class='subtitle'>Basada en Joseph Murphy y Florence Scovel Shinn</div>
+<div class='title'>🌟 Reprogramación por Áreas de Vida</div>
+<div class='subtitle'>Inspirada en Joseph Murphy y Florence Scovel Shinn</div>
 <div class='reflection'>Este es un momento sagrado. Dejo que la Verdad me transforme.</div>
 """, unsafe_allow_html=True)
 
-# Estructura de la sesión
-sesion = [
-    ("🕊️ 1. Preparación y Aquietamiento", [
-        "Cierra tus ojos. Lleva tu atención a tu corazón.",
-        "Inhala profundamente… Exhala tensión… (3 ciclos)",
-        "Entra en el templo sagrado de tu ser interno.",
-        "Aquí y ahora, el subconsciente se abre a nuevas semillas de verdad."
-    ], False),
+areas = {
+    "🩺 Salud y Equilibrio": [
+        ("Respiración y Preparación", [
+            "Cierra los ojos y lleva tu atención a tu cuerpo.",
+            "Inhala calma… Exhala tensión…",
+            "Entra en un espacio de armonía interior."
+        ]),
+        ("Afirmaciones", [
+            "Mi cuerpo obedece la ley perfecta de la salud divina.",
+            "Cada célula vibra en equilibrio y regeneración.",
+            "Estoy completamente sano y en paz."
+        ]),
+        ("Visualización", [
+            "Visualiza una luz blanca envolviendo todo tu cuerpo.",
+            "Observa cómo irradias vitalidad y bienestar.",
+            "Permanece ahí unos momentos en gratitud."
+        ])
+    ],
+    "💰 Abundancia y Provisión": [
+        ("Respiración y Apertura", [
+            "Inhala expansión… Exhala toda limitación…",
+            "Siente que el universo es un campo de posibilidades infinitas."
+        ]),
+        ("Afirmaciones", [
+            "La provisión divina fluye constantemente en mi vida.",
+            "Recibo con gozo y comparto con amor.",
+            "Soy un canal perfecto de riqueza espiritual y material."
+        ]),
+        ("Visualización", [
+            "Visualiza una corriente dorada entrando a tu vida.",
+            "Siente cómo todo lo que necesitas ya viene en camino.",
+            "Agradece desde ahora todo lo que estás recibiendo."
+        ])
+    ],
+    "💞 Relaciones y Amor": [
+        ("Respiración de Corazón", [
+            "Coloca tu atención en el centro de tu pecho.",
+            "Inhala paz… Exhala resentimiento…",
+            "Abre tu corazón al amor divino."
+        ]),
+        ("Afirmaciones", [
+            "Estoy en armonía con todos los seres.",
+            "El amor divino guía mis vínculos.",
+            "Amo, perdono y soy libre."
+        ]),
+        ("Visualización", [
+            "Visualiza un lazo de luz conectándote en paz con quienes amas.",
+            "Observa cómo se disuelven los juicios.",
+            "Permite que la luz del perdón transforme tus relaciones."
+        ])
+    ],
+    "🧭 Propósito y Paz Interior": [
+        ("Respiración y Silencio", [
+            "Inhala confianza… Exhala dudas…",
+            "Permanece en el centro de tu sabiduría interna."
+        ]),
+        ("Afirmaciones", [
+            "Estoy guiado por la Inteligencia Infinita.",
+            "Mi vida tiene dirección, sentido y propósito.",
+            "Confío en el camino que se despliega ante mí."
+        ]),
+        ("Visualización", [
+            "Visualiza tu día ideal: con propósito, gozo y claridad.",
+            "Siente que ya estás viviendo esa verdad.",
+            "Agradece por tu misión alineada con lo superior."
+        ])
+    ]
+}
 
-    ("💬 2. Afirmaciones con Fe y Convicción", [
-        "Estoy alineado con la Sabiduría y el Bien Divino.",
-        "La salud, la abundancia, el amor y la paz son mi estado natural.",
-        "Lo que me pertenece por derecho divino llega a mí sin esfuerzo y en armonía.",
-        "Declaro la Verdad y esta se manifiesta en mi vida."
-    ], True),
+seleccion = st.radio("Selecciona un área para trabajar hoy:", list(areas.keys()), index=None)
 
-    ("🌅 3. Visualización Creativa y Sentida", [
-        "Visualiza con detalle tu vida ideal: en salud, paz, gozo y propósito.",
-        "Siente que ya estás ahí. Observa, escucha, toca, agradece.",
-        "Permite que cada imagen sea una semilla viva que el subconsciente reconoce como real."
-    ], True),
-
-    ("🙏 4. Entrega y Gratitud", [
-        "Entrego este deseo al orden divino. Él sabe el cómo.",
-        "Confío en que todo se resuelve de forma perfecta y en el momento perfecto.",
-        "Gracias. Esto, o algo mejor, se manifiesta ahora bajo la gracia."
-    ], False)
-]
-
-# Función para reproducir voz y sincronizar
-def reproducir_texto(texto, duracion=9):
-    tts = gTTS(text=texto, lang='es')
-    with NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
-        tts.save(tmpfile.name)
-        st.audio(tmpfile.name, format="audio/mp3")
-        time.sleep(duracion)
-
-# Botón para comenzar la sesión
-if st.button("🌀 Iniciar sesión guiada"):
+if seleccion:
     contenedor = st.empty()
-
-    for titulo, frases, usar_audio in sesion:
+    for titulo, frases in areas[seleccion]:
         for frase in frases:
             with contenedor:
                 st.markdown(f"### {titulo}")
                 st.markdown(f"<div class='step'>{frase}</div>", unsafe_allow_html=True)
-            if usar_audio:
-                reproducir_texto(frase)
-            else:
-                time.sleep(9)
+            time.sleep(9)
 
-    contenedor.success("🌟 Has sembrado nuevas creencias. Permanece unos momentos en gratitud y silencio. Todo está en marcha.")
+    contenedor.success("🌟 Has sembrado nuevas semillas de verdad. Quédate en calma y gratitud unos instantes más.")
