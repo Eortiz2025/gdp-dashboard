@@ -3,7 +3,7 @@ from datetime import datetime
 import random
 
 st.set_page_config(page_title="Inicio Diario", layout="centered")
-st.title("🌞 Día a día, en todos sentidos, mejoro y mejoro.")
+st.title("🌞 Día a día, mejoro y mejoro.")
 
 # Lista de afirmaciones
 afirmaciones_dia = [
