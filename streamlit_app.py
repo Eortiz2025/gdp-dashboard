@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime
 
 st.set_page_config(page_title="Inicio Diario", layout="centered")
 st.title("🌞 Mi mente subconsciente todo lo puede")
@@ -29,11 +30,10 @@ if st.button("✅ Ya sé lo que deseo"):
         st.info("Permanece en esa imagen unos segundos, con emoción y gratitud.")
 
     elif opcion == "Afirmar":
-        afirmacion = st.text_input("✍️ Escribe una afirmación positiva basada en tu deseo:")
-        if afirmacion:
-            st.success(f"Repite varias veces hoy: *{afirmacion}*")
-
-    elif opcion == "Escribir":
-        descripcion = st.text_area("📝 Describe tu deseo con todos los detalles que puedas imaginar:")
-        if descripcion:
-            st.success("Excelente, cuanto más claro y emocional, mejor será la impresión en tu subconsciente.")
+        afirmacion = st.text_input("✍️ Escribe una afirmación clara y positiva basada en tu deseo:")
+        if afirmacion.strip() == "":
+            st.warning("✋ La afirmación debe ser específica, positiva y sentida como verdadera. Ejemplo:\n\n- 'Estoy en paz y todo fluye en mi vida'\n- 'La riqueza fluye hacia mí de forma perfecta y armoniosa'")
+        else:
+            st.success(f"Repite varias veces hoy: *{afirmacion}*.\nHazlo con convicción y emoción. Idealmente por la mañana y antes de dormir.")
+            if st.button("💾 Guardar afirmación"):
+                timestamp = datetime.now().strftime(\"%Y-%m-%d_%H-%M-%S\")\n                filename = f\"afirmacion_{timestamp}.txt\"\n                with open(filename, \"w\") as f:\n                    f.write(afirmacion)\n                st.download_button(\"📥 Descargar afirmación\", data=afirmacion, file_name=filename, mime=\"text/plain\")\n\n    elif opcion == \"Escribir\":\n        descripcion = st.text_area(\"📝 Describe tu deseo con todos los detalles que puedas imaginar:\")\n        if descripcion.strip() == \"\":\n            st.warning(\"🖊️ Escribe tu deseo en términos positivos, en tiempo presente y con gratitud. Ejemplo:\\n\\n- 'Estoy disfrutando de una vida plena, con salud, amor y prosperidad. Me siento en paz y agradecido.'\")\n        else:\n            st.success(\"Muy bien. Cuanto más claro y emocional, más fuerte la impresión en tu subconsciente.\")\n            if st.button(\"💾 Guardar deseo escrito\"):\n                timestamp = datetime.now().strftime(\"%Y-%m-%d_%H-%M-%S\")\n                filename = f\"deseo_{timestamp}.txt\"\n                with open(filename, \"w\") as f:\n                    f.write(descripcion)\n                st.download_button(\"📥 Descargar deseo\", data=descripcion, file_name=filename, mime=\"text/plain\")"
