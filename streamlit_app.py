@@ -2,7 +2,7 @@ import streamlit as st
 import time
 
 st.set_page_config(page_title="Inicio Diario", layout="centered")
-st.title("🌞 Mi mente subconsciente todo lo puede")
+st.title("🌞 Hoy es un gran dia")
 
 # Paso 1: Introducción
 st.markdown("### 🧠 Mi mente subconsciente todo lo puede.")
