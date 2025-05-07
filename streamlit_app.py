@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime
 
 st.set_page_config(page_title="Inicio Diario", layout="centered")
-st.title("🌞 Día a día, en todos sentidos, mejoro y mejoro.")
+st.title("🌞 Conexion subconsciente.")
 
 # Paso 1: Introducción
 st.markdown("### 🧠 Mi mente subconsciente todo lo puede.")
