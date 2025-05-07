@@ -27,10 +27,8 @@ else:
 
     # Paso 5: Elegir acción
     st.markdown("¿Qué deseas hacer ahora para avanzar?")
-    if "opcion" not in st.session_state:
-        st.session_state.opcion = ""
 
-    opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir", "Afirmación del día"], key="opcion")
+    opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir", "Afirmación del día"], index=0)
 
     if opcion == "Visualizar":
         st.markdown("### 👁 Visualiza el resultado final como si ya se hubiera cumplido.")
