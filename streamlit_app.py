@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime
 
 st.set_page_config(page_title="Inicio Diario", layout="centered")
-st.title("🌞 Conexion subconsciente.")
+st.title("🌞 Día a día, en todos sentidos, mejoro y mejoro.")
 
 # Paso 1: Introducción
 st.markdown("### 🧠 Mi mente subconsciente todo lo puede.")
@@ -22,7 +22,7 @@ if st.button("✅ Ya sé lo que deseo"):
 
     # Paso 5: Elegir acción
     st.markdown("¿Qué deseas hacer ahora para avanzar?")
-    opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir"])
+    opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir", "Afirmación del día"])
 
     if opcion == "Visualizar":
         st.markdown("### 👁 Visualiza el resultado final como si ya se hubiera cumplido.")
@@ -49,6 +49,7 @@ if st.button("✅ Ya sé lo que deseo"):
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             filename = f"afirmacion_{timestamp}.txt"
             st.download_button("📥 Descargar afirmación", data=afirmacion, file_name=filename, mime="text/plain")
+            st.info("✅ Al guardar y repetir tu afirmación, la siembras más profundamente en tu subconsciente.")
 
     elif opcion == "Escribir":
         st.markdown("### 📝 Cómo escribir tu deseo de forma efectiva:")
@@ -68,3 +69,34 @@ if st.button("✅ Ya sé lo que deseo"):
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             filename = f"deseo_{timestamp}.txt"
             st.download_button("📥 Descargar deseo", data=descripcion, file_name=filename, mime="text/plain")
+            st.info("✅ Escribir tu deseo es una poderosa forma de enfocarte y permitir su manifestación.")
+
+    elif opcion == "Afirmación del día":
+        afirmaciones_dia = [
+            "Estoy conectado con la inteligencia infinita de mi subconsciente y recibo guía perfecta en todo momento.",
+            "Cada célula de mi cuerpo vibra con salud, energía y vitalidad renovada.",
+            "Soy mente clara, enfoque preciso y calma profunda en cada situación.",
+            "Mi vida fluye con propósito, amor y equilibrio. Estoy en armonía con el universo.",
+            "Acepto pensamientos de abundancia, y la prosperidad fluye hacia mí sin esfuerzo.",
+            "Mi subconsciente manifiesta soluciones perfectas a todos los desafíos que enfrento.",
+            "Estoy lleno de amor hacia mí mismo y hacia los demás. Atraigo relaciones armoniosas.",
+            "Libero creencias limitantes y acepto solo pensamientos que me empoderan.",
+            "Visualizo mi éxito y lo siento como una realidad. Mi subconsciente lo manifiesta.",
+            "Estoy alineado con la salud perfecta en cuerpo, mente y espíritu.",
+            "Todo lo que necesito ya está dentro de mí. Confío en mi sabiduría interior.",
+            "Cada día soy más fuerte, más claro y más conectado con mi ser superior.",
+            "La paz interior guía cada decisión que tomo hoy.",
+            "Estoy abierto a recibir milagros y bendiciones en todos los aspectos de mi vida.",
+            "Soy libre de miedos y dudas. Confío plenamente en la vida.",
+            "Mi subconsciente crea mi realidad. Por eso elijo pensamientos de poder y belleza.",
+            "La gratitud abre todas las puertas. Hoy agradezco y recibo con alegría.",
+            "Todo está sucediendo para mi bien. Elijo ver oportunidades donde antes veía obstáculos.",
+            "Mi cuerpo responde con salud a cada pensamiento amoroso que tengo.",
+            "Estoy profundamente en paz conmigo mismo y con el mundo.",
+            "Soy un canal limpio para la energía divina que fluye a través de mí cada día."
+        ]
+        start_date = datetime(2025, 1, 1)
+        hoy = datetime.now()
+        indice = (hoy - start_date).days % 21
+        st.markdown(f"### 🧾 Afirmación del Día {indice+1}:")
+        st.success(afirmaciones_dia[indice])
