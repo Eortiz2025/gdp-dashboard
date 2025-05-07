@@ -44,7 +44,6 @@ if not st.session_state.inicio_completo:
 
 else:
     st.markdown("### 🧠 Mi mente subconsciente todo lo puede.")
-    st.markdown("### ✨ Al iniciar el día me hago esta pregunta:")
     st.markdown("## ¿Cuál es mi deseo más grande?")
 
     with st.expander("👁 Cierra los ojos por un minuto y busca dentro de ti"):
