@@ -16,13 +16,21 @@ with st.expander("👁 Cierra los ojos por un minuto y busca dentro de ti"):
     st.info("Respira profundo, relájate y conéctate con lo que verdaderamente deseas.")
 
 # Paso 4: Confirmación del deseo
-if st.button("✅ Ya sé lo que deseo"):
+afirma_deseo = st.session_state.get("afirma_deseo", False)
+if not afirma_deseo:
+    if st.button("✅ Ya sé lo que deseo"):
+        st.session_state.afirma_deseo = True
+        st.rerun()
+else:
     st.success("Excelente. Ahora tomemos los pasos para lograrlo.")
     st.markdown("### 🚶 Paso a paso tu deseo se convierte en realidad si lo sostienes con claridad y emoción.")
 
     # Paso 5: Elegir acción
     st.markdown("¿Qué deseas hacer ahora para avanzar?")
-    opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir", "Afirmación del día"])
+    if "opcion" not in st.session_state:
+        st.session_state.opcion = ""
+
+    opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir", "Afirmación del día"], key="opcion")
 
     if opcion == "Visualizar":
         st.markdown("### 👁 Visualiza el resultado final como si ya se hubiera cumplido.")
