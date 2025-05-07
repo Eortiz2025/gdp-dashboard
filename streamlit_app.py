@@ -10,7 +10,7 @@ time.sleep(1)
 
 # Paso 2: Pregunta clave
 time.sleep(1)
-st.markdown("### ❓ Para empezar el día tengo una pregunta que hacerme:")
+st.markdown("###  Al iniciar el dia me hago esta pregunta:")
 st.markdown("## ¿Cuál es mi deseo más grande?")
 
 # Paso 3: Cierre de ojos
