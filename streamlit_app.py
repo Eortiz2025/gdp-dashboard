@@ -2,10 +2,10 @@ import streamlit as st
 from datetime import datetime
 import random
 
-st.set_page_config(page_title="Inicio Diario", layout="centered")
+st.set_page_config(page_title="21 Días de Conexión", layout="centered")
 st.title("🌞 Día a día, mejoro y mejoro.")
 
-# Lista de afirmaciones
+# --- Afirmaciones Diarias Aleatorias ---
 afirmaciones_dia = [
     "Estoy conectado con la inteligencia infinita de mi subconsciente y recibo guía perfecta en todo momento.",
     "Cada célula de mi cuerpo vibra con salud, energía y vitalidad renovada.",
@@ -30,79 +30,115 @@ afirmaciones_dia = [
     "Soy un canal limpio para la energía divina que fluye a través de mí cada día."
 ]
 
-# Mostrar afirmación aleatoria
-if "inicio_completo" not in st.session_state:
-    st.session_state.inicio_completo = False
+# --- Modo 21 Días con Progreso ---
+plan_21_dias = {
+    i: {
+        "mañana": f"🌞 Afirmación del día {i}: ...",  # Reemplazar con afirmaciones reales
+        "noche": f"🌙 Afirmación nocturna día {i}: ..."
+    }
+    for i in range(1, 22)
+}
 
-if not st.session_state.inicio_completo:
-    afirmacion = random.choice(afirmaciones_dia)
-    st.markdown("### ✨ Afirmación del día")
-    st.success(afirmacion)
-    if st.button("🌀 Iniciar conexión al Subconsciente"):
-        st.session_state.inicio_completo = True
-        st.rerun()
+if "progreso" not in st.session_state:
+    st.session_state.progreso = {i: False for i in range(1, 22)}
 
-else:
-    st.markdown("### 🧠 Mi mente subconsciente todo lo puede.")
-    st.markdown("## ¿Cuál es mi deseo más grande?")
+# --- Navegación ---
+modo = st.sidebar.radio("Selecciona modo de práctica:", ["Inicio Diario", "21 Días Guiados"])
 
-    with st.expander("👁 Cierra los ojos por un minuto y busca dentro de ti"):
-        st.info("Respira profundo, relájate y conéctate con lo que verdaderamente deseas.")
+if modo == "Inicio Diario":
+    if "inicio_completo" not in st.session_state:
+        st.session_state.inicio_completo = False
 
-    if "afirma_deseo" not in st.session_state:
-        if st.button("✅ Ya sé lo que deseo"):
-            st.session_state.afirma_deseo = True
+    if not st.session_state.inicio_completo:
+        afirmacion = random.choice(afirmaciones_dia)
+        st.markdown("### ✨ Afirmación del día")
+        st.success(afirmacion)
+        if st.button("🌀 Iniciar conexión al Subconsciente"):
+            st.session_state.inicio_completo = True
             st.rerun()
+
     else:
-        st.success("Excelente. Ahora tomemos los pasos para lograrlo.")
-        st.markdown("### 🚶 Paso a paso tu deseo se convierte en realidad si lo sostienes con claridad y emoción.")
+        st.markdown("### 🧠 Mi mente subconsciente todo lo puede.")
+        st.markdown("## ¿Cuál es mi deseo más grande?")
 
-        st.markdown("¿Qué deseas hacer ahora para avanzar?")
-        opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir"], index=0)
+        with st.expander("👁 Cierra los ojos por un minuto y busca dentro de ti"):
+            st.info("Respira profundo, relájate y conéctate con lo que verdaderamente deseas.")
 
-        if opcion == "Visualizar":
-            st.markdown("### 👁 Visualiza el resultado final como si ya se hubiera cumplido.")
-            st.markdown("- ¿Qué estás viendo?\n- ¿Cómo te sientes?\n- ¿Qué cambia en ti?")
-            st.info("Permanece unos segundos con la imagen en tu mente y siéntela real.")
+        if "afirma_deseo" not in st.session_state:
+            if st.button("✅ Ya sé lo que deseo"):
+                st.session_state.afirma_deseo = True
+                st.rerun()
+        else:
+            st.success("Excelente. Ahora tomemos los pasos para lograrlo.")
+            st.markdown("### 🚶 Paso a paso tu deseo se convierte en realidad si lo sostienes con claridad y emoción.")
 
-        elif opcion == "Afirmar":
-            st.markdown("### 📣 Cómo crear tu afirmación:")
-            st.markdown("""
-            Una buena afirmación es:
-            - En tiempo presente
-            - Positiva y concreta
-            - Emocionalmente verdadera
+            st.markdown("¿Qué deseas hacer ahora para avanzar?")
+            opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir"], index=0)
 
-            **Ejemplos:**
-            - “Estoy en calma, guiado y bendecido.”
-            - “Mi cuerpo se llena de salud y energía cada día.”
-            - “Soy merecedor de abundancia y la acepto con alegría.”
-            """)
+            if opcion == "Visualizar":
+                st.markdown("### 👁 Visualiza el resultado final como si ya se hubiera cumplido.")
+                st.markdown("- ¿Qué estás viendo?\n- ¿Cómo te sientes?\n- ¿Qué cambia en ti?")
+                st.info("Permanece unos segundos con la imagen en tu mente y siéntela real.")
 
-            afirmacion = st.text_input("✍️ Escribe tu afirmación personalizada aquí:")
-            if afirmacion.strip():
-                st.success(f"Repite esta afirmación varias veces hoy:\n\n*{afirmacion}*")
-                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                filename = f"afirmacion_{timestamp}.txt"
-                st.download_button("📥 Descargar afirmación", data=afirmacion, file_name=filename, mime="text/plain")
-                st.info("✅ Al guardar y repetir tu afirmación, la siembras más profundamente en tu subconsciente.")
+            elif opcion == "Afirmar":
+                st.markdown("### 📣 Cómo crear tu afirmación:")
+                st.markdown("""
+                Una buena afirmación es:
+                - En tiempo presente
+                - Positiva y concreta
+                - Emocionalmente verdadera
 
-        elif opcion == "Escribir":
-            st.markdown("### 📝 Cómo escribir tu deseo de forma efectiva:")
-            st.markdown("""
-            Escribe tu deseo:
-            - En presente, como si ya lo vivieras
-            - Con gratitud
-            - Con emoción y detalle
+                **Ejemplos:**
+                - “Estoy en calma, guiado y bendecido.”
+                - “Mi cuerpo se llena de salud y energía cada día.”
+                - “Soy merecedor de abundancia y la acepto con alegría.”
+                """)
 
-            **Ejemplo:**
-            “Estoy disfrutando de una vida abundante, con salud plena, rodeado de amor y alegría. Me siento en paz.”
-            """)
+                afirmacion = st.text_input("✍️ Escribe tu afirmación personalizada aquí:")
+                if afirmacion.strip():
+                    st.success(f"Repite esta afirmación varias veces hoy:\n\n*{afirmacion}*")
+                    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                    filename = f"afirmacion_{timestamp}.txt"
+                    st.download_button("📥 Descargar afirmación", data=afirmacion, file_name=filename, mime="text/plain")
+                    st.info("✅ Al guardar y repetir tu afirmación, la siembras más profundamente en tu subconsciente.")
 
-            descripcion = st.text_area("Escribe aquí tu deseo en tus propias palabras:")
-            if descripcion.strip():
-                st.success("Muy bien. Cuanto más clara y sentida la descripción, más fuerte la impresión en tu subconsciente.")
-                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                filename = f"deseo_{timestamp}.txt"
-                st.download_button("📥 Descargar deseo", data=descripcion, file_name=filename, mime="text/plain")
-                st.info("✅ Escribir tu deseo es una poderosa forma de enfocarte y permitir su manifestación.")
+            elif opcion == "Escribir":
+                st.markdown("### 📝 Cómo escribir tu deseo de forma efectiva:")
+                st.markdown("""
+                Escribe tu deseo:
+                - En presente, como si ya lo vivieras
+                - Con gratitud
+                - Con emoción y detalle
+
+                **Ejemplo:**
+                “Estoy disfrutando de una vida abundante, con salud plena, rodeado de amor y alegría. Me siento en paz.”
+                """)
+
+                descripcion = st.text_area("Escribe aquí tu deseo en tus propias palabras:")
+                if descripcion.strip():
+                    st.success("Muy bien. Cuanto más clara y sentida la descripción, más fuerte la impresión en tu subconsciente.")
+                    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                    filename = f"deseo_{timestamp}.txt"
+                    st.download_button("📥 Descargar deseo", data=descripcion, file_name=filename, mime="text/plain")
+                    st.info("✅ Escribir tu deseo es una poderosa forma de enfocarte y permitir su manifestación.")
+
+elif modo == "21 Días Guiados":
+    st.markdown("### 📅 Selecciona tu día de práctica")
+    dia = st.selectbox("Día del programa", list(range(1, 22)))
+
+    st.markdown(f"#### 🔆 Afirmación de la Mañana (Día {dia})")
+    st.success(plan_21_dias[dia]["mañana"])
+
+    st.markdown("#### ✍️ Escribe tu intención de hoy (opcional)")
+    st.text_area("¿Qué deseo sembrar hoy en mi subconsciente?", key=f"deseo_{dia}")
+
+    st.markdown(f"#### 🌙 Afirmación de la Noche (Día {dia})")
+    st.info(plan_21_dias[dia]["noche"])
+
+    dia_completo = st.checkbox("✅ He completado las prácticas de este día", value=st.session_state.progreso[dia])
+    if dia_completo:
+        st.session_state.progreso[dia] = True
+        st.success("Día marcado como completado. ¡Felicidades por tu constancia!")
+
+    completados = sum(1 for estado in st.session_state.progreso.values() if estado)
+    st.markdown(f"### 🔄 Progreso: {completados}/21 días completados")
