@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime
 
 st.set_page_config(page_title="Inicio Diario", layout="centered")
-st.title("🌞 Mi mente subconsciente todo lo puede")
+st.title("🌞 Día a día, en todos sentidos, mejoro y mejoro.")
 
 # Paso 1: Introducción
 st.markdown("### 🧠 Mi mente subconsciente todo lo puede.")
@@ -25,26 +25,46 @@ if st.button("✅ Ya sé lo que deseo"):
     opcion = st.radio("Elige tu siguiente acción:", ["Visualizar", "Afirmar", "Escribir"])
 
     if opcion == "Visualizar":
-        st.markdown("### 👁 Cierra los ojos por unos instantes e imagina tu deseo como si ya se hubiese cumplido.")
-        st.markdown("- ¿Qué ves?\n- ¿Cómo te sientes?\n- ¿Qué hay a tu alrededor?")
-        st.info("Permanece en esa imagen unos segundos, con emoción y gratitud.")
+        st.markdown("### 👁 Visualiza el resultado final como si ya se hubiera cumplido.")
+        st.markdown("- ¿Qué estás viendo?\n- ¿Cómo te sientes?\n- ¿Qué cambia en ti?")
+        st.info("Permanece unos segundos con la imagen en tu mente y siéntela real.")
 
     elif opcion == "Afirmar":
-        afirmacion = st.text_input("✍️ Escribe una afirmación clara y positiva basada en tu deseo:")
-        if afirmacion.strip() == "":
-            st.warning("✋ La afirmación debe ser específica, positiva y sentida como verdadera. Ejemplo:\n\n- 'Estoy en paz y todo fluye en mi vida'\n- 'La riqueza fluye hacia mí de forma perfecta y armoniosa'")
-        else:
-            st.success(f"Repite varias veces hoy: *{afirmacion}*.\nHazlo con convicción y emoción. Idealmente por la mañana y antes de dormir.")
+        st.markdown("### 📣 Cómo crear tu afirmación:")
+        st.markdown("""
+        Una buena afirmación es:
+        - En tiempo presente
+        - Positiva y concreta
+        - Emocionalmente verdadera
+
+        **Ejemplos:**
+        - “Estoy en calma, guiado y bendecido.”
+        - “Mi cuerpo se llena de salud y energía cada día.”
+        - “Soy merecedor de abundancia y la acepto con alegría.”
+        """)
+
+        afirmacion = st.text_input("✍️ Escribe tu afirmación personalizada aquí:")
+        if afirmacion.strip():
+            st.success(f"Repite esta afirmación varias veces hoy:\n\n*{afirmacion}*")
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             filename = f"afirmacion_{timestamp}.txt"
             st.download_button("📥 Descargar afirmación", data=afirmacion, file_name=filename, mime="text/plain")
 
     elif opcion == "Escribir":
-        descripcion = st.text_area("📝 Describe tu deseo con todos los detalles que puedas imaginar:")
-        if descripcion.strip() == "":
-            st.warning("🖊️ Escribe tu deseo en términos positivos, en tiempo presente y con gratitud. Ejemplo:\n\n- 'Estoy disfrutando de una vida plena, con salud, amor y prosperidad. Me siento en paz y agradecido.'")
-        else:
-            st.success("Muy bien. Cuanto más claro y emocional, más fuerte la impresión en tu subconsciente.")
+        st.markdown("### 📝 Cómo escribir tu deseo de forma efectiva:")
+        st.markdown("""
+        Escribe tu deseo:
+        - En presente, como si ya lo vivieras
+        - Con gratitud
+        - Con emoción y detalle
+
+        **Ejemplo:**
+        “Estoy disfrutando de una vida abundante, con salud plena, rodeado de amor y alegría. Me siento en paz.”
+        """)
+
+        descripcion = st.text_area("Escribe aquí tu deseo en tus propias palabras:")
+        if descripcion.strip():
+            st.success("Muy bien. Cuanto más clara y sentida la descripción, más fuerte la impresión en tu subconsciente.")
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             filename = f"deseo_{timestamp}.txt"
             st.download_button("📥 Descargar deseo", data=descripcion, file_name=filename, mime="text/plain")
