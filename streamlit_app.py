@@ -1,10 +1,10 @@
 import streamlit as st
 
-st.set_page_config(page_title="Guía de Activación Subconsciente", layout="centered")
+st.set_page_config(page_title="Guía Activación Subconsciente", layout="centered")
 st.title("🧠 Guía para Activar el Poder de tu Mente Subconsciente")
 
 texto_guia = """
-Guía para Activar el Poder de tu Mente Subconsciente (Basada en los Extractos)
+Guía para Activar el Poder de tu Mente Subconsciente
 
 **Paso 1: Comprende la Naturaleza de tu Mente**
 - Reconoce que tienes dos niveles de mente: la consciente (que piensa, razona) y la subconsciente (que acepta, crea y tiene poder infinito).
