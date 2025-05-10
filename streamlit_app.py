@@ -1,58 +1,74 @@
 import streamlit as st
+import random
+from datetime import datetime
 
-st.set_page_config(page_title="Guía de Activación Subconsciente", layout="centered")
-st.title("🧠 Guía para Activar el Poder de tu Mente Subconsciente")
+st.set_page_config(page_title="Manifiesta con el Subconsciente", layout="centered")
+st.title("✨ Manifiesta con el Poder de tu Subconsciente")
 
-texto_guia = """
-Guía para Activar el Poder de tu Mente Subconsciente
+# --- Afirmaciones Poderosas ---
+afirmaciones = [
+    "Estoy conectado con la inteligencia infinita de mi subconsciente y recibo guía perfecta.",
+    "Cada célula de mi cuerpo vibra con salud, energía y vitalidad.",
+    "Estoy guiado con claridad hacia mi propósito más elevado.",
+    "Acepto pensamientos de abundancia y bienestar. La prosperidad fluye hacia mí.",
+    "Mi subconsciente manifiesta soluciones perfectas a todos los desafíos.",
+    "Soy merecedor de amor, paz y éxito. Lo acepto ahora.",
+    "Visualizo mi éxito y lo siento como una realidad presente.",
+    "Todo lo que necesito ya está dentro de mí.",
+    "Cada día soy más fuerte, más claro y más inspirado.",
+    "La paz interior guía cada decisión que tomo hoy."
+]
 
-**Paso 1: Comprende la Naturaleza de tu Mente**
-- Tienes dos niveles de mente: la consciente (que piensa y razona) y la subconsciente (que acepta y crea).  
-- Tu subconsciente no discute; acepta lo que tu mente consciente le imprime con convicción.  
-- Tu pensamiento habitual es la causa; tus condiciones (salud, dinero, relaciones) son los efectos.
+# --- Momento del Día ---
+momento = st.radio("¿Qué momento del día estás practicando?", ["🌞 Mañana", "🌇 Tarde (Refuerzo)", "🌙 Noche"])
 
-**Paso 2: Define Clara y Específicamente tu Deseo o Meta**
-- Ten una idea o propósito definido: salud, abundancia, relaciones, solución específica.  
-- Sé detallado. Visualiza cómo se ve y se siente tu deseo ya cumplido.
+# --- Inicio Diario ---
+if momento == "🌞 Mañana":
+    st.subheader("🔑 Tu afirmación para comenzar el día:")
+    afirmacion = random.choice(afirmaciones)
+    st.success(afirmacion)
+    st.markdown("---")
+    st.markdown("### 👁 Visualiza el resultado como si ya se cumpliera")
+    st.markdown("Cierra los ojos 1 minuto y siéntelo como real.")
+    st.markdown("---")
+    st.text_input("✍️ Escribe tu intención del día en tiempo presente:", key="intencion")
 
-**Paso 3: Impresiona tu Mente Subconsciente (Técnicas)**
-Esta es la parte de la acción regular. Elige las técnicas que resuenen contigo y prácticalas, idealmente varias veces al día, especialmente justo antes de dormir y al despertar, ya que son los mejores momentos para acceder al subconsciente.
-- **Relajación/Somnolencia**: practica en calma, al despertar y antes de dormir.  
-- **Visualización**: imagina tu deseo cumplido como una película mental.  
-- **Afirmaciones**: repite frases positivas como: *“Riqueza”*, *“Gracias Padre por mi prosperidad”*.  
-- **Agradecimiento anticipado**: siente gratitud como si ya lo hubieras recibido.  
-- **Argumentación**: razona con fe: *Mi mente subconsciente sabe cómo lograr esto.*  
-- **Plegaria**: no formal, sino sincera. Pide y cree que ya has recibido.
+elif momento == "🌇 Tarde (Refuerzo)":
+    st.subheader("🔁 Refuerza tu afirmación del día")
+    st.info("Repite tu afirmación con emoción al menos 3 veces")
+    st.text_area("🔊 Repite aquí o en voz baja:", key="refuerzo")
 
-**Paso 4: Cultiva la Fe y la Convicción**
-- Cree que tu subconsciente está actuando a tu favor ahora.  
-- Siente que tu deseo ya es real, aquí y ahora.  
-- La fe con entendimiento es más poderosa que la fe ciega.
+elif momento == "🌙 Noche":
+    st.subheader("😴 Último pensamiento antes de dormir")
+    st.markdown("### Da gracias como si tu deseo ya fuera real")
+    st.text_area("🙏 Escribe tu agradecimiento de hoy:", key="gratitud")
+    st.markdown("---")
+    st.markdown("🧘 Cierra los ojos. Repite tu deseo con paz. Entrégalo a tu mente subconsciente.")
 
-**Paso 5: Evita el Esfuerzo Mental y el Conflicto**
-- No intentes forzar resultados con voluntad.  
-- El esfuerzo indica duda. Relájate y confía.  
-- Repite interiormente: *Esto también pasará.*
+# --- Guía Central (Resumen 9 pasos) ---
+with st.expander("📘 Ver Guía para Activar tu Mente Subconsciente"):
+    st.markdown("""
+**1. Comprende tu mente:** Consciente = piensa. Subconsciente = crea. Repite con convicción.  
+**2. Define tu deseo:** Claro, específico y visualízalo como ya cumplido.  
+**3. Impresión subconsciente:** Visualización + afirmación + emoción + gratitud.  
+**4. Fe y certeza:** No es esperanza, es convicción. Siente que ya es real.  
+**5. Evita esfuerzo mental:** No fuerces, relájate. El subconsciente responde a calma.  
+**6. Elimina bloqueos:** Perdona, suelta crítica, suelta miedo. Protege tu mente.  
+**7. Sé constante:** Repite cada día. No te detengas si no ves resultados inmediatos.  
+**8. Vive tu deseo ahora:** Siente cómo sería si ya lo tuvieras.  
+**9. Da y sirve:** Tu éxito debe beneficiar a otros. Así cierras el ciclo de abundancia.
+    """)
 
-**Paso 6: Elimina los Obstáculos Internos**
-- Identifica y reemplaza pensamientos negativos.  
-- Perdona: la crítica y el resentimiento bloquean tu bien.  
-- No aceptes sugestiones negativas externas.  
-- Cambia hábitos destructivos sustituyéndolos por pensamientos elevados.
+# --- Sección Especial: 3 Pasos del Éxito (Murphy) ---
+with st.expander("🌟 Los 3 Pasos del Éxito (Joseph Murphy)"):
+    st.markdown("""
+**1. Descubre lo que amas hacer.** Pide guía si no sabes aún:  
+`La inteligencia infinita me revela mi verdadero sitio en la vida.`
 
-**Paso 7: Sé Constante y Persistente**
-- La repetición diaria con fe y emoción es clave.  
-- Si no ves resultados rápidos, continúa con paciencia y alegría.
+**2. Vuélvete experto en ello.** Lee, aprende, práctica.  
 
-**Paso 8: Vive la Realidad de tu Deseo Ahora**
-- Siéntelo ahora. Vive como si ya lo tuvieras.  
-- Permite que tu subconsciente lo haga realidad.
+**3. Asegúrate de que lo que haces beneficie a otros.** El éxito real involucra propósito y servicio.
+    """)
 
-**Paso 9: Busca un Propósito Mayor y Sirve a Otros**
-- Alinea tus metas con el bien de otros.  
-- El verdadero éxito incluye crecimiento espiritual, servicio y comprensión.
-"""
-
-st.markdown(texto_guia)
-
-st.success("✨ Lee cada paso con calma. Reflexiona, vuelve cuando lo necesites, y aplica diariamente en tu vida.")
+st.markdown("---")
+st.caption("🌀 Repite con emoción. Cree con convicción. Vive con intención.")
