@@ -1,74 +1,63 @@
 import streamlit as st
-import random
-from datetime import datetime
+import pandas as pd
 
-st.set_page_config(page_title="Manifiesta con el Subconsciente", layout="centered")
-st.title("✨ Manifiesta con el Poder de tu Subconsciente")
+st.set_page_config(page_title="Proyección de Compras 2025", layout="wide")
+st.title("📊 Proyección de Compras Mayo-Diciembre 2025")
 
-# --- Afirmaciones Poderosas ---
-afirmaciones = [
-    "Estoy conectado con la inteligencia infinita de mi subconsciente y recibo guía perfecta.",
-    "Cada célula de mi cuerpo vibra con salud, energía y vitalidad.",
-    "Estoy guiado con claridad hacia mi propósito más elevado.",
-    "Acepto pensamientos de abundancia y bienestar. La prosperidad fluye hacia mí.",
-    "Mi subconsciente manifiesta soluciones perfectas a todos los desafíos.",
-    "Soy merecedor de amor, paz y éxito. Lo acepto ahora.",
-    "Visualizo mi éxito y lo siento como una realidad presente.",
-    "Todo lo que necesito ya está dentro de mí.",
-    "Cada día soy más fuerte, más claro y más inspirado.",
-    "La paz interior guía cada decisión que tomo hoy."
-]
+# Subir archivo
+archivo = st.file_uploader("Sube tu archivo Excel con ventas (formato: código, nombre, 2301 ... 2504)", type=["xlsx"])
 
-# --- Momento del Día ---
-momento = st.radio("¿Qué momento del día estás practicando?", ["🌞 Mañana", "🌇 Tarde (Refuerzo)", "🌙 Noche"])
+if archivo:
+    df = pd.read_excel(archivo)
+    st.success("Archivo cargado correctamente.")
 
-# --- Inicio Diario ---
-if momento == "🌞 Mañana":
-    st.subheader("🔑 Tu afirmación para comenzar el día:")
-    afirmacion = random.choice(afirmaciones)
-    st.success(afirmacion)
-    st.markdown("---")
-    st.markdown("### 👁 Visualiza el resultado como si ya se cumpliera")
-    st.markdown("Cierra los ojos 1 minuto y siéntelo como real.")
-    st.markdown("---")
-    st.text_input("✍️ Escribe tu intención del día en tiempo presente:", key="intencion")
+    # Verifica columnas esperadas
+    columnas_validas = ["codigo", "nombre"] + [f"{a}{b:02}" for a in range(23, 26) for b in range(1, 13)]
+    columnas_validas = columnas_validas[:len(df.columns)]  # solo las necesarias
+    df.columns = columnas_validas
 
-elif momento == "🌇 Tarde (Refuerzo)":
-    st.subheader("🔁 Refuerza tu afirmación del día")
-    st.info("Repite tu afirmación con emoción al menos 3 veces")
-    st.text_area("🔊 Repite aquí o en voz baja:", key="refuerzo")
+    # Tomamos enero-abril de 2023, 2024 y 2025
+    cols_2023 = [f"23{m:02}" for m in range(1, 13)]
+    cols_2024 = [f"24{m:02}" for m in range(1, 13)]
+    cols_2025 = [f"25{m:02}" for m in range(1, 5)]  # hasta abril
 
-elif momento == "🌙 Noche":
-    st.subheader("😴 Último pensamiento antes de dormir")
-    st.markdown("### Da gracias como si tu deseo ya fuera real")
-    st.text_area("🙏 Escribe tu agradecimiento de hoy:", key="gratitud")
-    st.markdown("---")
-    st.markdown("🧘 Cierra los ojos. Repite tu deseo con paz. Entrégalo a tu mente subconsciente.")
+    resultados = []
 
-# --- Guía Central (Resumen 9 pasos) ---
-with st.expander("📘 Ver Guía para Activar tu Mente Subconsciente"):
-    st.markdown("""
-**1. Comprende tu mente:** Consciente = piensa. Subconsciente = crea. Repite con convicción.  
-**2. Define tu deseo:** Claro, específico y visualízalo como ya cumplido.  
-**3. Impresión subconsciente:** Visualización + afirmación + emoción + gratitud.  
-**4. Fe y certeza:** No es esperanza, es convicción. Siente que ya es real.  
-**5. Evita esfuerzo mental:** No fuerces, relájate. El subconsciente responde a calma.  
-**6. Elimina bloqueos:** Perdona, suelta crítica, suelta miedo. Protege tu mente.  
-**7. Sé constante:** Repite cada día. No te detengas si no ves resultados inmediatos.  
-**8. Vive tu deseo ahora:** Siente cómo sería si ya lo tuvieras.  
-**9. Da y sirve:** Tu éxito debe beneficiar a otros. Así cierras el ciclo de abundancia.
-    """)
+    for _, row in df.iterrows():
+        codigo = row["codigo"]
+        nombre = row["nombre"]
+        ventas_2023 = [row[col] for col in cols_2023]
+        ventas_2024 = [row[col] for col in cols_2024]
+        ventas_2025 = [row[col] for col in cols_2025]
 
-# --- Sección Especial: 3 Pasos del Éxito (Murphy) ---
-with st.expander("🌟 Los 3 Pasos del Éxito (Joseph Murphy)"):
-    st.markdown("""
-**1. Descubre lo que amas hacer.** Pide guía si no sabes aún:  
-`La inteligencia infinita me revela mi verdadero sitio en la vida.`
+        promedio_2023_2024 = [(v2023 + v2024) / 2 for v2023, v2024 in zip(ventas_2023[:4], ventas_2024[:4])]
+        factor_caida = sum([v2025 / p if p > 0 else 1 for v2025, p in zip(ventas_2025, promedio_2023_2024)]) / 4
 
-**2. Vuélvete experto en ello.** Lee, aprende, práctica.  
+        for mes in range(5, 13):  # mayo a diciembre
+            base = (ventas_2023[mes - 1] + ventas_2024[mes - 1]) / 2
+            proyeccion = round(base * factor_caida)
+            stock_seg = round(proyeccion * 0.15)
+            compra = round(proyeccion + stock_seg)
 
-**3. Asegúrate de que lo que haces beneficie a otros.** El éxito real involucra propósito y servicio.
-    """)
+            resultados.append({
+                "codigo": codigo,
+                "nombre": nombre,
+                "mes": f"25{mes:02}",
+                "proyeccion": proyeccion,
+                "stock_seguridad": stock_seg,
+                "compra_sugerida": compra
+            })
 
-st.markdown("---")
-st.caption("🌀 Repite con emoción. Cree con convicción. Vive con intención.")
+    df_resultado = pd.DataFrame(resultados)
+    st.subheader("📦 Compras sugeridas por producto (may-dic 2025)")
+    st.dataframe(df_resultado, use_container_width=True)
+
+    # Descargar como Excel
+    output_excel = df_resultado.pivot_table(index=["codigo", "nombre"], 
+                                            columns="mes", 
+                                            values="compra_sugerida", 
+                                            fill_value=0).reset_index()
+
+    st.download_button("Descargar Excel de compras sugeridas", 
+                       output_excel.to_excel(index=False, engine="openpyxl"), 
+                       file_name="compras_sugeridas_2025.xlsx")
