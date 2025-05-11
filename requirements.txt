@@ -1,2 +1,1 @@
-streamlit>=1.32.0
-gtts>=2.5.1
+openpyxl
