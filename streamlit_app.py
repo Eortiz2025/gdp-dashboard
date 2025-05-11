@@ -1,69 +1,59 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Proyección de Compras 2025", layout="wide")
-st.title("📦 Proyección de Compras Mayo–Diciembre 2025 por Producto")
+st.set_page_config(page_title="Proyección Estacional Ajustada 2025", layout="wide")
+st.title("📦 Proyección de Compras Mayo–Diciembre 2025 (Estacional + Ajuste Real)")
 
-# Paso 1: Subir archivo CSV
-archivo = st.file_uploader("Sube tu archivo .CSV con columnas: codigo, producto, 2301 ... 2504", type=["csv"])
+archivo = st.file_uploader("Sube un archivo .CSV con columnas: codigo, producto, 2301 ... 2504", type=["csv"])
 
 if archivo:
     try:
         df = pd.read_csv(archivo)
-        st.success("Archivo cargado correctamente.")
 
-        # Definir columnas requeridas
-        ventas_2023 = [f"23{m:02}" for m in range(1, 13)]
-        ventas_2024 = [f"24{m:02}" for m in range(1, 13)]
-        ventas_2025 = [f"25{m:02}" for m in range(1, 5)]  # enero a abril
-        columnas_necesarias = ["Codigo", "Producto"] + ventas_2023 + ventas_2024 + ventas_2025
+        st.success("✅ Archivo cargado correctamente.")
+        columnas_requeridas = ["codigo", "producto"] + [f"23{m:02}" for m in range(1, 13)] + [f"24{m:02}" for m in range(1, 13)] + [f"25{m:02}" for m in range(1, 5)]
+        faltantes = [col for col in columnas_requeridas if col not in df.columns]
 
-        # Verificar columnas faltantes
-        faltantes = [col for col in columnas_necesarias if col not in df.columns]
         if faltantes:
-            st.error(f"❌ Faltan columnas requeridas en el archivo: {faltantes}")
+            st.error(f"❌ Faltan columnas requeridas: {faltantes}")
             st.stop()
 
-        # Procesar cada fila (producto)
         resultados = []
+
         for _, row in df.iterrows():
-            codigo = row["Codigo"]
-            producto = row["Producto"]
+            codigo = row["codigo"]
+            producto = row["producto"]
 
-            v2023 = [row[col] for col in ventas_2023]
-            v2024 = [row[col] for col in ventas_2024]
-            v2025 = [row[col] for col in ventas_2025]
+            v2023 = [row[f"23{m:02}"] for m in range(1, 13)]
+            v2024 = [row[f"24{m:02}"] for m in range(1, 13)]
+            v2025 = [row[f"25{m:02}"] for m in range(1, 5)]  # ene a abr
 
-            # Calcular factor de caída real
-            prom_2023_2024 = [(x + y) / 2 for x, y in zip(v2023[:4], v2024[:4])]
-            factor_caida = sum([
-                v / p if p > 0 else 1 for v, p in zip(v2025, prom_2023_2024)
-            ]) / 4
+            prom_hist = [(x + y) / 2 for x, y in zip(v2023[:4], v2024[:4])]
+            factor_caida = sum([v / p if p > 0 else 1 for v, p in zip(v2025, prom_hist)]) / 4
 
-            # Generar proyección para mayo-diciembre 2025
-            for i, mes in enumerate(range(5, 13)):  # meses 5 a 12
+            for i, mes in enumerate(range(5, 13)):  # mayo-diciembre
                 base = (v2023[mes - 1] + v2024[mes - 1]) / 2
-                proyeccion = round(base * factor_caida)
-                stock_seguridad = round(proyeccion * 0.15)
-                compra = proyeccion + stock_seguridad
+                proy = round(base * factor_caida)
+                seguridad = round(proy * 0.15)
+                compra = proy + seguridad
 
                 resultados.append({
                     "Codigo": codigo,
                     "Producto": producto,
                     "Mes": f"25{mes:02}",
-                    "Proyección": proyeccion,
-                    "Stock Seguridad (15%)": stock_seguridad,
+                    "Proyección Estacional Ajustada": proy,
+                    "Stock Seguridad (15%)": seguridad,
                     "Compra Sugerida": compra
                 })
 
         df_resultado = pd.DataFrame(resultados)
 
-        st.subheader("📊 Tabla de Compras Sugeridas (2025/05 a 2025/12)")
+        st.subheader("📊 Compras Sugeridas 2025 (may-dic)")
         st.dataframe(df_resultado, use_container_width=True)
 
-        # Opción de descarga
-        csv = df_resultado.to_csv(index=False).encode("utf-8")
-        st.download_button("📥 Descargar resultados en CSV", data=csv, file_name="compras_2025.csv", mime="text/csv")
+        # Descargar Excel
+        excel = df_resultado.to_excel(index=False, engine="openpyxl")
+        st.download_button("📥 Descargar Excel", data=excel, file_name="compras_2025_estacional.xlsx")
 
     except Exception as e:
         st.error(f"Ocurrió un error al procesar el archivo: {e}")
