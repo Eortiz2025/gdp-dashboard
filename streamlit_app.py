@@ -17,10 +17,10 @@ else:
 
 st.title("🧘 Seguimiento Diario de Hábitos")
 
-# Selección de fecha
+# Fecha seleccionada
 selected_date = st.date_input("Selecciona la fecha", date.today())
 
-# Obtener valores por defecto para los checkboxes
+# Función para obtener los valores por defecto de los checkboxes
 def get_checkbox_defaults(selected_date, df, habits):
     entry = df[df["Fecha"] == pd.Timestamp(selected_date)]
     if not entry.empty:
@@ -30,20 +30,32 @@ def get_checkbox_defaults(selected_date, df, habits):
 
 defaults = get_checkbox_defaults(selected_date, df, habits)
 
-# Mostrar checkboxes
+# Mostrar checkboxes con claves únicas por fecha
 st.subheader("Marca los hábitos que cumpliste hoy:")
 habit_status = {}
 for habit in habits:
-    habit_status[habit] = st.checkbox(habit, value=defaults[habit])
+    key = f"{habit}_{selected_date}"
+    habit_status[habit] = st.checkbox(habit, value=defaults[habit], key=key)
 
 # Guardar los datos
 if st.button("Guardar"):
     new_row = {"Fecha": selected_date}
     new_row.update(habit_status)
-    df = df[df["Fecha"] != pd.Timestamp(selected_date)]  # Elimina entrada previa del mismo día
+
+    # Eliminar entrada previa de la misma fecha
+    df = df[df["Fecha"] != pd.Timestamp(selected_date)]
+
+    # Agregar nueva fila
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+
+    # Guardar en CSV
     df.to_csv(DATA_FILE, index=False)
-    st.success("✅ Datos guardados correctamente")
+
+    # Limpiar claves de sesión para forzar reset visual
+    for habit in habits:
+        st.session_state.pop(f"{habit}_{selected_date}", None)
+
+    st.success("✅ Datos guardados correctamente. Las casillas se reiniciarán si cambias de fecha.")
 
 # Mostrar historial
 st.subheader("📊 Historial")
