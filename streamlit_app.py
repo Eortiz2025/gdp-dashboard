@@ -12,18 +12,18 @@ habits = ["Camina", "Escribe", "Estira", "Lee", "Medita", "Respira", "Tapping"]
 # Cargar datos
 if os.path.exists(DATA_FILE):
     df = pd.read_csv(DATA_FILE)
-    df["Fecha"] = pd.to_datetime(df["Fecha"], errors="coerce")
+    df["Fecha"] = pd.to_datetime(df["Fecha"], errors="coerce").dt.date  # solo fecha
 else:
     df = pd.DataFrame(columns=["Fecha"] + habits)
 
 st.title("🧘 Seguimiento Diario de Hábitos")
 
-# Fecha seleccionada (convertimos a Timestamp para asegurar formato compatible)
-selected_date = pd.to_datetime(st.date_input("Selecciona la fecha", date.today()))
+# Selección de fecha
+selected_date = st.date_input("Selecciona la fecha", date.today())
 
-# Valores por defecto
+# Obtener valores por defecto
 def get_checkbox_defaults(selected_date, df, habits):
-    match = df[df["Fecha"].dt.date == selected_date.date()]
+    match = df[df["Fecha"] == selected_date]
     if not match.empty:
         return {habit: bool(match.iloc[0][habit]) for habit in habits}
     else:
@@ -43,10 +43,10 @@ if st.button("Guardar"):
     new_row = {"Fecha": selected_date}
     new_row.update(habit_status)
 
-    # Filtrar eliminando cualquier fila con la misma fecha (por día, sin hora)
-    df = df[df["Fecha"].dt.date != selected_date.date()]
+    # Eliminar fila existente para ese día exacto
+    df = df[df["Fecha"] != selected_date]
 
-    # Agregar la nueva fila
+    # Agregar nueva fila
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
 
     # Guardar archivo
@@ -62,8 +62,7 @@ if st.button("Guardar"):
 st.subheader("📊 Historial")
 if not df.empty:
     df["% Cumplimiento"] = df[habits].sum(axis=1) / len(habits) * 100
-    df["Fecha"] = pd.to_datetime(df["Fecha"], errors="coerce")
     df_sorted = df.sort_values("Fecha", ascending=False)
-    st.dataframe(df_sorted.style.format({"% Cumplimiento": "{:.0f}%"}))
+    st.dataframe(df_sorted.style.format({"% Cumplimiento": "{:.0f}%", "Fecha": lambda d: d.strftime("%Y-%m-%d")}))
 else:
     st.info("No hay datos aún.")
