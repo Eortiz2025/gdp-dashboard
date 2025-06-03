@@ -18,12 +18,12 @@ else:
 
 st.title("🧘 Seguimiento Diario de Hábitos")
 
-# Fecha seleccionada
-selected_date = st.date_input("Selecciona la fecha", date.today())
+# Fecha seleccionada (convertimos a Timestamp para asegurar formato compatible)
+selected_date = pd.to_datetime(st.date_input("Selecciona la fecha", date.today()))
 
 # Valores por defecto
 def get_checkbox_defaults(selected_date, df, habits):
-    match = df[df["Fecha"].dt.date == selected_date]
+    match = df[df["Fecha"].dt.date == selected_date.date()]
     if not match.empty:
         return {habit: bool(match.iloc[0][habit]) for habit in habits}
     else:
@@ -43,16 +43,16 @@ if st.button("Guardar"):
     new_row = {"Fecha": selected_date}
     new_row.update(habit_status)
 
-    # Eliminar fila existente usando .dt.date para evitar conflictos con horas
-    df = df[df["Fecha"].dt.date != selected_date]
+    # Filtrar eliminando cualquier fila con la misma fecha (por día, sin hora)
+    df = df[df["Fecha"].dt.date != selected_date.date()]
 
-    # Añadir nueva fila
+    # Agregar la nueva fila
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
 
     # Guardar archivo
     df.to_csv(DATA_FILE, index=False)
 
-    # Limpiar estado de checkboxes
+    # Limpiar sesión
     for habit in habits:
         st.session_state.pop(f"{habit}_{selected_date}", None)
 
