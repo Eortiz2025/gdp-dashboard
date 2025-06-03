@@ -3,13 +3,13 @@ import pandas as pd
 from datetime import date
 import os
 
-# Nombre del archivo para guardar los datos
+# Archivo donde se guarda la información
 DATA_FILE = "habitos.csv"
 
 # Lista de hábitos (orden alfabético)
 habits = ["Camina", "Escribe", "Estira", "Lee", "Medita", "Respira", "Tapping"]
 
-# Cargar datos existentes o crear nuevo DataFrame
+# Cargar datos si existen
 if os.path.exists(DATA_FILE):
     df = pd.read_csv(DATA_FILE, parse_dates=["Fecha"])
 else:
@@ -17,26 +17,30 @@ else:
 
 st.title("🧘 Seguimiento Diario de Hábitos")
 
-# Fecha seleccionada
+# Selección de fecha
 selected_date = st.date_input("Selecciona la fecha", date.today())
 
-# Entrada existente
-existing_entry = df[df["Fecha"] == pd.Timestamp(selected_date)]
+# Obtener valores por defecto para los checkboxes
+def get_checkbox_defaults(selected_date, df, habits):
+    entry = df[df["Fecha"] == pd.Timestamp(selected_date)]
+    if not entry.empty:
+        return {habit: bool(entry.iloc[0][habit]) for habit in habits}
+    else:
+        return {habit: False for habit in habits}
 
-# Checkboxes
+defaults = get_checkbox_defaults(selected_date, df, habits)
+
+# Mostrar checkboxes
 st.subheader("Marca los hábitos que cumpliste hoy:")
 habit_status = {}
 for habit in habits:
-    default_val = False
-    if not existing_entry.empty:
-        default_val = existing_entry.iloc[0][habit]
-    habit_status[habit] = st.checkbox(habit, value=default_val)
+    habit_status[habit] = st.checkbox(habit, value=defaults[habit])
 
-# Botón guardar
+# Guardar los datos
 if st.button("Guardar"):
     new_row = {"Fecha": selected_date}
     new_row.update(habit_status)
-    df = df[df["Fecha"] != pd.Timestamp(selected_date)]  # elimina entrada previa
+    df = df[df["Fecha"] != pd.Timestamp(selected_date)]  # Elimina entrada previa del mismo día
     df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     df.to_csv(DATA_FILE, index=False)
     st.success("✅ Datos guardados correctamente")
