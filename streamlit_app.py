@@ -12,13 +12,13 @@ habits = ["Camina", "Escribe", "Estira", "Lee", "Medita", "Respira", "Tapping"]
 # Cargar datos
 if os.path.exists(DATA_FILE):
     df = pd.read_csv(DATA_FILE)
-    df["Fecha"] = pd.to_datetime(df["Fecha"], errors="coerce").dt.date  # solo fecha
+    df["Fecha"] = pd.to_datetime(df["Fecha"], errors="coerce").dt.date
 else:
     df = pd.DataFrame(columns=["Fecha"] + habits)
 
 st.title("🧘 Seguimiento Diario de Hábitos")
 
-# Selección de fecha
+# Fecha seleccionada
 selected_date = st.date_input("Selecciona la fecha", date.today())
 
 # Obtener valores por defecto
@@ -43,7 +43,7 @@ if st.button("Guardar"):
     new_row = {"Fecha": selected_date}
     new_row.update(habit_status)
 
-    # Eliminar fila existente para ese día exacto
+    # Eliminar fila existente de ese día
     df = df[df["Fecha"] != selected_date]
 
     # Agregar nueva fila
@@ -62,7 +62,8 @@ if st.button("Guardar"):
 st.subheader("📊 Historial")
 if not df.empty:
     df["% Cumplimiento"] = df[habits].sum(axis=1) / len(habits) * 100
-    df_sorted = df.sort_values("Fecha", ascending=False)
-    st.dataframe(df_sorted.style.format({"% Cumplimiento": "{:.0f}%", "Fecha": lambda d: d.strftime("%Y-%m-%d")}))
+    df_sorted = df.sort_values("Fecha", ascending=False).copy()
+    df_sorted["Fecha"] = df_sorted["Fecha"].astype(str)  # mostrar solo fecha
+    st.dataframe(df_sorted.style.format({"% Cumplimiento": "{:.0f}%"}))
 else:
     st.info("No hay datos aún.")
