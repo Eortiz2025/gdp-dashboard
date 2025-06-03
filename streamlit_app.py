@@ -18,13 +18,6 @@ else:
 
 st.title("🧘 Seguimiento Diario de Hábitos")
 
-# Agregar botón para borrar historial
-if st.button("🗑️ Borrar historial COMPLETO"):
-    if os.path.exists(DATA_FILE):
-        os.remove(DATA_FILE)
-        df = pd.DataFrame(columns=["Fecha"] + habits)
-        st.warning("⚠️ Historial eliminado correctamente.")
-
 # Selección de fecha
 selected_date = st.date_input("Selecciona la fecha", date.today())
 
@@ -65,3 +58,11 @@ if not df.empty:
     st.dataframe(df_sorted.style.format({"% Cumplimiento": "{:.0f}%"}))
 else:
     st.info("No hay datos aún.")
+
+# 🔻 Botón para borrar historial al final
+st.markdown("---")
+if st.button("🗑️ Borrar historial COMPLETO"):
+    if os.path.exists(DATA_FILE):
+        os.remove(DATA_FILE)
+        df = pd.DataFrame(columns=["Fecha"] + habits)
+        st.warning("⚠️ Historial eliminado correctamente. Refresca la página.")
