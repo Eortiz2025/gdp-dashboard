@@ -8,16 +8,6 @@ st.title("💼 Agente Temporada")
 # Subida del archivo
 archivo = st.file_uploader("🗂️ Sube el archivo exportado desde Erply (.xls)", type=["xls"])
 
-# Preguntar número de días
-dias = st.text_input("⏰ ¿Cuántos días deseas calcular para VtaProm? (Escribe un número)")
-
-# Validar número
-if not dias.strip().isdigit() or int(dias) <= 0:
-    st.warning("⚠️ Por favor escribe un número válido de días (mayor que 0) para continuar.")
-    st.stop()
-
-dias = int(dias)
-
 if archivo:
     try:
         # Leer archivo
@@ -45,11 +35,11 @@ if archivo:
         ]
         tabla = tabla.drop(columns=columnas_a_eliminar)
 
-        # Renombrar columnas según nuevo uso
+        # Renombrar columnas
         tabla = tabla.rename(columns={
             "Stock (total)": "Stock",
-            "Cantidad vendida": "V30D Hoy",         # últimos 30 días reales
-            "Cantidad vendida (2)": "V30D 24"       # mismos 30 días del año pasado
+            "Cantidad vendida": "V30D Hoy",
+            "Cantidad vendida (2)": "V30D 24"
         })
 
         # Filtrar productos sin proveedor
@@ -69,25 +59,18 @@ if archivo:
         tabla["V30D 24"] = pd.to_numeric(tabla["V30D 24"], errors="coerce").fillna(0).round()
         tabla["Stock"] = pd.to_numeric(tabla["Stock"], errors="coerce").fillna(0).round()
 
-        # Calcular venta diaria y proyección
-        tabla["VtaDiaria"] = (tabla["V30D Hoy"] / 30).round(2)
-        tabla["VtaProm"] = (tabla["VtaDiaria"] * dias).round()
-
-        # Cálculo de Max
+        # Calcular Max directo sin VtaProm
         max_calculado = []
         for i, row in tabla.iterrows():
             if row["V30D 24"] == 0:
-                max_val = 0.5 * row["VtaProm"]
+                max_val = 0.5 * row["V30D Hoy"]
             else:
-                intermedio = max(0.6 * row["V30D 24"] + 0.4 * row["VtaProm"], row["V30D 24"])
+                intermedio = max(0.6 * row["V30D 24"] + 0.4 * row["V30D Hoy"], row["V30D 24"])
                 max_val = min(intermedio, row["V30D 24"] * 1.5)
             max_calculado.append(round(max_val))
 
         tabla["Max"] = max_calculado
         tabla["Compra"] = (tabla["Max"] - tabla["Stock"]).clip(lower=0).round()
-
-        # Eliminar temporal
-        tabla = tabla.drop(columns=["VtaDiaria"])
 
         # Filtrar productos con compra
         tabla = tabla[tabla["Compra"] > 0].sort_values("Nombre")
@@ -98,13 +81,13 @@ if archivo:
         if mostrar_proveedor:
             columnas_finales = [
                 "Código", "Código EAN", "Nombre", "Proveedor", "Stock",
-                "V30D Hoy", "VtaProm", "V30D 24", "Max", "Compra"
+                "V30D Hoy", "V30D 24", "Max", "Compra"
             ]
         else:
             tabla = tabla.drop(columns=["Proveedor"])
             columnas_finales = [
                 "Código", "Código EAN", "Nombre", "Stock",
-                "V30D Hoy", "VtaProm", "V30D 24", "Max", "Compra"
+                "V30D Hoy", "V30D 24", "Max", "Compra"
             ]
 
         tabla = tabla[columnas_finales]
@@ -116,7 +99,6 @@ if archivo:
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             tabla.to_excel(writer, index=False, sheet_name='Compra del día')
-            workbook = writer.book
             worksheet = writer.sheets['Compra del día']
             worksheet.freeze_panes = worksheet['A2']
 
@@ -129,7 +111,7 @@ if archivo:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-        # Top productos donde año pasado > actual
+        # Top productos donde V30D 24 > V30D Hoy
         st.subheader("🔥 Top 10 productos donde V30D 24 supera V30D Hoy")
 
         productos_calientes = tabla[tabla["V30D 24"] > tabla["V30D Hoy"]]
@@ -137,7 +119,7 @@ if archivo:
         if not productos_calientes.empty:
             productos_calientes = productos_calientes.sort_values("Nombre", ascending=True)
             top_productos = productos_calientes.head(10)
-            columnas_a_mostrar = ["Código", "Nombre", "V30D Hoy", "VtaProm", "V30D 24"]
+            columnas_a_mostrar = ["Código", "Nombre", "V30D Hoy", "V30D 24"]
             st.dataframe(top_productos[columnas_a_mostrar])
         else:
             st.info("✅ No hay productos donde V30D del año pasado supere al actual.")
