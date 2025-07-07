@@ -2,8 +2,8 @@ import pandas as pd
 import streamlit as st
 import io
 
-st.set_page_config(page_title="Agente de Compras", page_icon="💼")
-st.title("💼 Agente de Compras")
+st.set_page_config(page_title="Agente Temporada", page_icon="💼")
+st.title("💼 Agente Temporada")
 
 # Subida del archivo
 archivo = st.file_uploader("🗂️ Sube el archivo exportado desde Erply (.xls)", type=["xls"])
@@ -48,8 +48,8 @@ if archivo:
         # Renombrar columnas según nuevo uso
         tabla = tabla.rename(columns={
             "Stock (total)": "Stock",
-            "Cantidad vendida": "V30D_Actual",         # últimos 30 días reales
-            "Cantidad vendida (2)": "V30D_AñoPasado"   # mismos 30 días del año pasado
+            "Cantidad vendida": "V30D Hoy",         # últimos 30 días reales
+            "Cantidad vendida (2)": "V30D 24"       # mismos 30 días del año pasado
         })
 
         # Filtrar productos sin proveedor
@@ -65,22 +65,22 @@ if archivo:
             tabla = tabla[tabla["Proveedor"] == proveedor_seleccionado]
 
         # Convertir a numérico
-        tabla["V30D_Actual"] = pd.to_numeric(tabla["V30D_Actual"], errors="coerce").fillna(0).round()
-        tabla["V30D_AñoPasado"] = pd.to_numeric(tabla["V30D_AñoPasado"], errors="coerce").fillna(0).round()
+        tabla["V30D Hoy"] = pd.to_numeric(tabla["V30D Hoy"], errors="coerce").fillna(0).round()
+        tabla["V30D 24"] = pd.to_numeric(tabla["V30D 24"], errors="coerce").fillna(0).round()
         tabla["Stock"] = pd.to_numeric(tabla["Stock"], errors="coerce").fillna(0).round()
 
         # Calcular venta diaria y proyección
-        tabla["VtaDiaria"] = (tabla["V30D_Actual"] / 30).round(2)
+        tabla["VtaDiaria"] = (tabla["V30D Hoy"] / 30).round(2)
         tabla["VtaProm"] = (tabla["VtaDiaria"] * dias).round()
 
         # Cálculo de Max
         max_calculado = []
         for i, row in tabla.iterrows():
-            if row["V30D_AñoPasado"] == 0:
+            if row["V30D 24"] == 0:
                 max_val = 0.5 * row["VtaProm"]
             else:
-                intermedio = max(0.6 * row["V30D_AñoPasado"] + 0.4 * row["VtaProm"], row["V30D_AñoPasado"])
-                max_val = min(intermedio, row["V30D_AñoPasado"] * 1.5)
+                intermedio = max(0.6 * row["V30D 24"] + 0.4 * row["VtaProm"], row["V30D 24"])
+                max_val = min(intermedio, row["V30D 24"] * 1.5)
             max_calculado.append(round(max_val))
 
         tabla["Max"] = max_calculado
@@ -98,13 +98,13 @@ if archivo:
         if mostrar_proveedor:
             columnas_finales = [
                 "Código", "Código EAN", "Nombre", "Proveedor", "Stock",
-                "V30D_Actual", "VtaProm", "V30D_AñoPasado", "Max", "Compra"
+                "V30D Hoy", "VtaProm", "V30D 24", "Max", "Compra"
             ]
         else:
             tabla = tabla.drop(columns=["Proveedor"])
             columnas_finales = [
                 "Código", "Código EAN", "Nombre", "Stock",
-                "V30D_Actual", "VtaProm", "V30D_AñoPasado", "Max", "Compra"
+                "V30D Hoy", "VtaProm", "V30D 24", "Max", "Compra"
             ]
 
         tabla = tabla[columnas_finales]
@@ -130,14 +130,14 @@ if archivo:
         )
 
         # Top productos donde año pasado > actual
-        st.subheader("🔥 Top 10 productos donde V30D_AñoPasado supera V30D_Actual")
+        st.subheader("🔥 Top 10 productos donde V30D 24 supera V30D Hoy")
 
-        productos_calientes = tabla[tabla["V30D_AñoPasado"] > tabla["V30D_Actual"]]
+        productos_calientes = tabla[tabla["V30D 24"] > tabla["V30D Hoy"]]
 
         if not productos_calientes.empty:
             productos_calientes = productos_calientes.sort_values("Nombre", ascending=True)
             top_productos = productos_calientes.head(10)
-            columnas_a_mostrar = ["Código", "Nombre", "V30D_Actual", "VtaProm", "V30D_AñoPasado"]
+            columnas_a_mostrar = ["Código", "Nombre", "V30D Hoy", "VtaProm", "V30D 24"]
             st.dataframe(top_productos[columnas_a_mostrar])
         else:
             st.info("✅ No hay productos donde V30D del año pasado supere al actual.")
