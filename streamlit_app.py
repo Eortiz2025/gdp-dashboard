@@ -59,17 +59,8 @@ if archivo:
         tabla["V30D 24"] = pd.to_numeric(tabla["V30D 24"], errors="coerce").fillna(0).round()
         tabla["Stock"] = pd.to_numeric(tabla["Stock"], errors="coerce").fillna(0).round()
 
-        # Calcular Max directo sin VtaProm
-        max_calculado = []
-        for i, row in tabla.iterrows():
-            if row["V30D 24"] == 0:
-                max_val = 0.5 * row["V30D Hoy"]
-            else:
-                intermedio = max(0.6 * row["V30D 24"] + 0.4 * row["V30D Hoy"], row["V30D 24"])
-                max_val = min(intermedio, row["V30D 24"] * 1.5)
-            max_calculado.append(round(max_val))
-
-        tabla["Max"] = max_calculado
+        # Calcular Max como el mayor de los dos valores
+        tabla["Max"] = tabla[["V30D Hoy", "V30D 24"]].max(axis=1)
         tabla["Compra"] = (tabla["Max"] - tabla["Stock"]).clip(lower=0).round()
 
         # Filtrar productos con compra
