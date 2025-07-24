@@ -75,4 +75,49 @@ elif menu == "Estado de cuenta por cliente":
         cliente_sel = st.selectbox("Selecciona un cliente", clientes)
 
         facturas_cliente = df_facturas[df_facturas["Cliente"] == cliente_sel]
-        pagos_cliente = df_pagos[df_pagos["No. Factura"]
+        pagos_cliente = df_pagos[df_pagos["No. Factura"].isin(facturas_cliente["No. Factura"])]
+
+        st.subheader("Facturas")
+        st.dataframe(facturas_cliente)
+
+        st.subheader("Pagos")
+        st.dataframe(pagos_cliente)
+
+        resumen = facturas_cliente.copy()
+        resumen["Pagado"] = resumen["No. Factura"].apply(
+            lambda x: pagos_cliente[pagos_cliente["No. Factura"] == x]["Importe Pagado"].sum()
+        )
+        resumen["Saldo"] = resumen["Importe"] - resumen["Pagado"]
+        st.subheader("Resumen")
+        st.dataframe(resumen[["No. Factura", "Importe", "Pagado", "Saldo"]])
+    else:
+        st.info("No hay facturas registradas aún.")
+
+elif menu == "Reporte de antigüedad de saldos":
+    st.header("📊 Antigüedad de saldos detallada")
+    hoy = pd.to_datetime(datetime.today())
+    df_facturas["Fecha"] = pd.to_datetime(df_facturas["Fecha"])
+
+    resumen = df_facturas.copy()
+    resumen["Pagado"] = resumen["No. Factura"].apply(
+        lambda x: df_pagos[df_pagos["No. Factura"] == x]["Importe Pagado"].sum()
+    )
+    resumen["Saldo"] = resumen["Importe"] - resumen["Pagado"]
+    resumen = resumen[resumen["Saldo"] > 0].copy()
+    resumen["Días"] = (hoy - resumen["Fecha"]).dt.days
+
+    # Clasificación por antigüedad (por fila)
+    resumen["Al día"] = resumen.apply(lambda row: row["Saldo"] if row["Días"] <= 0 else 0, axis=1)
+    resumen["1 a 30"] = resumen.apply(lambda row: row["Saldo"] if 1 <= row["Días"] <= 30 else 0, axis=1)
+    resumen["31 a 60"] = resumen.apply(lambda row: row["Saldo"] if 31 <= row["Días"] <= 60 else 0, axis=1)
+    resumen["61 a 90"] = resumen.apply(lambda row: row["Saldo"] if 61 <= row["Días"] <= 90 else 0, axis=1)
+    resumen["91 a 120"] = resumen.apply(lambda row: row["Saldo"] if 91 <= row["Días"] <= 120 else 0, axis=1)
+
+    tabla = resumen[["Fecha", "Cliente", "No. Factura", "Importe", "Saldo", "Al día", "1 a 30", "31 a 60", "61 a 90", "91 a 120"]]
+    st.dataframe(tabla.style.format("{:.2f}"))
+
+elif menu == "Exportar a Excel":
+    st.header("📤 Exportar datos")
+    st.download_button("Descargar Facturas", data=df_facturas.to_csv(index=False), file_name="facturas.csv")
+    st.download_button("Descargar Pagos", data=df_pagos.to_csv(index=False), file_name="pagos.csv")
+    st.success("Archivos preparados para descarga.")
