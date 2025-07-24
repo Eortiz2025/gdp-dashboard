@@ -1,119 +1,90 @@
-import pandas as pd
 import streamlit as st
-import io
+import pandas as pd
+import os
+from datetime import datetime
 
-st.set_page_config(page_title="Agente Temporada", page_icon="💼")
-st.title("💼 Agente Temporada")
+# Archivo de datos
+FACTURAS_FILE = "facturas.xlsx"
+PAGOS_FILE = "pagos.xlsx"
 
-# Subida del archivo
-archivo = st.file_uploader("🗂️ Sube el archivo exportado desde Erply (.xls)", type=["xls"])
+# Cargar o crear archivos
+if os.path.exists(FACTURAS_FILE):
+    df_facturas = pd.read_excel(FACTURAS_FILE)
+else:
+    df_facturas = pd.DataFrame(columns=["Fecha", "Cliente", "No. Factura", "Importe", "Notas"])
 
-if archivo:
-    try:
-        # Leer archivo
-        tabla = pd.read_html(archivo, header=3)[0]
-        if tabla.columns[0] in ("", "Unnamed: 0", "No", "Moneda"):
-            tabla = tabla.iloc[:, 1:]
+if os.path.exists(PAGOS_FILE):
+    df_pagos = pd.read_excel(PAGOS_FILE)
+else:
+    df_pagos = pd.DataFrame(columns=["No. Factura", "Fecha de Pago", "Importe Pagado", "Método de Pago"])
 
-        columnas_deseadas = [
-            "Código", "Código EAN", "Nombre",
-            "Stock (total)", "Stock (apartado)", "Stock (disponible)",
-            "Proveedor", "Cantidad vendida", "Ventas netas totales ($)",
-            "Cantidad vendida (2)", "Ventas netas totales ($) (2)"
-        ]
+st.title("📘 Control de Cuentas por Cobrar")
 
-        if len(tabla.columns) >= len(columnas_deseadas):
-            tabla.columns = columnas_deseadas[:len(tabla.columns)]
-        else:
-            st.error("❌ El archivo no tiene suficientes columnas.")
-            st.stop()
+menu = st.sidebar.selectbox("Selecciona una opción", [
+    "Registrar nueva factura",
+    "Registrar pago",
+    "Estado de cuenta por cliente",
+    "Exportar a Excel"
+])
 
-        # Eliminar columnas innecesarias
-        columnas_a_eliminar = [
-            "Ventas netas totales ($)", "Stock (apartado)", "Stock (disponible)",
-            "Ventas netas totales ($) (2)"
-        ]
-        tabla = tabla.drop(columns=columnas_a_eliminar)
+if menu == "Registrar nueva factura":
+    st.header("🧾 Nueva factura")
+    with st.form("factura_form"):
+        fecha = st.date_input("Fecha", value=datetime.today())
+        cliente = st.text_input("Cliente")
+        num_fact = st.text_input("Número de Factura")
+        importe = st.number_input("Importe", min_value=0.01)
+        notas = st.text_area("Notas")
+        guardar = st.form_submit_button("Guardar")
 
-        # Renombrar columnas
-        tabla = tabla.rename(columns={
-            "Stock (total)": "Stock",
-            "Cantidad vendida": "V30D Hoy",
-            "Cantidad vendida (2)": "V30D 24"
-        })
+    if guardar:
+        nueva_factura = pd.DataFrame([[fecha, cliente, num_fact, importe, notas]],
+                                     columns=df_facturas.columns)
+        df_facturas = pd.concat([df_facturas, nueva_factura], ignore_index=True)
+        df_facturas.to_excel(FACTURAS_FILE, index=False)
+        st.success("Factura guardada correctamente.")
 
-        # Filtrar productos sin proveedor
-        tabla = tabla[tabla["Proveedor"].notna()]
-        tabla = tabla[tabla["Proveedor"].astype(str).str.strip() != ""]
+elif menu == "Registrar pago":
+    st.header("💵 Registrar pago")
+    facturas_pendientes = df_facturas["No. Factura"].unique().tolist()
+    with st.form("pago_form"):
+        factura = st.selectbox("Número de Factura", facturas_pendientes)
+        fecha_pago = st.date_input("Fecha de pago", value=datetime.today())
+        importe_pagado = st.number_input("Importe pagado", min_value=0.01)
+        metodo = st.selectbox("Método de pago", ["Efectivo", "Transferencia", "Tarjeta", "Otro"])
+        registrar = st.form_submit_button("Registrar pago")
 
-        # Filtrar por proveedor (opcional)
-        calcular_proveedor = st.checkbox("¿Deseas calcular sólo un proveedor?", value=False)
+    if registrar:
+        nuevo_pago = pd.DataFrame([[factura, fecha_pago, importe_pagado, metodo]],
+                                  columns=df_pagos.columns)
+        df_pagos = pd.concat([df_pagos, nuevo_pago], ignore_index=True)
+        df_pagos.to_excel(PAGOS_FILE, index=False)
+        st.success("Pago registrado correctamente.")
 
-        if calcular_proveedor:
-            lista_proveedores = tabla["Proveedor"].dropna().unique()
-            proveedor_seleccionado = st.selectbox("Selecciona el proveedor a calcular:", sorted(lista_proveedores))
-            tabla = tabla[tabla["Proveedor"] == proveedor_seleccionado]
+elif menu == "Estado de cuenta por cliente":
+    st.header("📄 Estado de cuenta")
+    clientes = df_facturas["Cliente"].unique().tolist()
+    cliente_sel = st.selectbox("Selecciona un cliente", clientes)
 
-        # Convertir a numérico
-        tabla["V30D Hoy"] = pd.to_numeric(tabla["V30D Hoy"], errors="coerce").fillna(0).round()
-        tabla["V30D 24"] = pd.to_numeric(tabla["V30D 24"], errors="coerce").fillna(0).round()
-        tabla["Stock"] = pd.to_numeric(tabla["Stock"], errors="coerce").fillna(0).round()
+    facturas_cliente = df_facturas[df_facturas["Cliente"] == cliente_sel]
+    pagos_cliente = df_pagos[df_pagos["No. Factura"].isin(facturas_cliente["No. Factura"])]
 
-        # Calcular Max como el mayor de los dos valores
-        tabla["Max"] = tabla[["V30D Hoy", "V30D 24"]].max(axis=1)
-        tabla["Compra"] = (tabla["Max"] - tabla["Stock"]).clip(lower=0).round()
+    st.subheader("Facturas")
+    st.dataframe(facturas_cliente)
 
-        # Filtrar productos con compra
-        tabla = tabla[tabla["Compra"] > 0].sort_values("Nombre")
+    st.subheader("Pagos")
+    st.dataframe(pagos_cliente)
 
-        # Mostrar proveedor (opcional)
-        mostrar_proveedor = st.checkbox("¿Mostrar Proveedor?", value=False)
+    resumen = facturas_cliente.copy()
+    resumen["Pagado"] = resumen["No. Factura"].apply(
+        lambda x: pagos_cliente[pagos_cliente["No. Factura"] == x]["Importe Pagado"].sum()
+    )
+    resumen["Saldo"] = resumen["Importe"] - resumen["Pagado"]
+    st.subheader("Resumen")
+    st.dataframe(resumen[["No. Factura", "Importe", "Pagado", "Saldo"]])
 
-        if mostrar_proveedor:
-            columnas_finales = [
-                "Código", "Código EAN", "Nombre", "Proveedor", "Stock",
-                "V30D Hoy", "V30D 24", "Max", "Compra"
-            ]
-        else:
-            tabla = tabla.drop(columns=["Proveedor"])
-            columnas_finales = [
-                "Código", "Código EAN", "Nombre", "Stock",
-                "V30D Hoy", "V30D 24", "Max", "Compra"
-            ]
-
-        tabla = tabla[columnas_finales]
-
-        st.success("✅ Archivo procesado correctamente")
-        st.dataframe(tabla)
-
-        # Descargar Excel
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            tabla.to_excel(writer, index=False, sheet_name='Compra del día')
-            worksheet = writer.sheets['Compra del día']
-            worksheet.freeze_panes = worksheet['A2']
-
-        processed_data = output.getvalue()
-
-        st.download_button(
-            label="📄 Descargar Excel",
-            data=processed_data,
-            file_name="Compra del día.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-
-        # Top productos donde V30D 24 > V30D Hoy
-        st.subheader("🔥 Top 10 productos donde V30D 24 supera V30D Hoy")
-
-        productos_calientes = tabla[tabla["V30D 24"] > tabla["V30D Hoy"]]
-
-        if not productos_calientes.empty:
-            productos_calientes = productos_calientes.sort_values("Nombre", ascending=True)
-            top_productos = productos_calientes.head(10)
-            columnas_a_mostrar = ["Código", "Nombre", "V30D Hoy", "V30D 24"]
-            st.dataframe(top_productos[columnas_a_mostrar])
-        else:
-            st.info("✅ No hay productos donde V30D del año pasado supere al actual.")
-
-    except Exception as e:
-        st.error(f"❌ Error al procesar el archivo: {e}")
+elif menu == "Exportar a Excel":
+    st.header("📤 Exportar datos")
+    st.download_button("Descargar Facturas", data=df_facturas.to_csv(index=False), file_name="facturas.csv")
+    st.download_button("Descargar Pagos", data=df_pagos.to_csv(index=False), file_name="pagos.csv")
+    st.success("Archivos preparados para descarga.")
