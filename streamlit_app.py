@@ -26,6 +26,7 @@ st.title("📘 Control de Cuentas por Cobrar")
 menu = st.sidebar.selectbox("Selecciona una opción", [
     "Registrar nueva factura",
     "Registrar pago",
+    "Eliminar factura",
     "Estado de cuenta por cliente",
     "Reporte de antigüedad de saldos",
     "Exportar a Excel"
@@ -67,6 +68,19 @@ elif menu == "Registrar pago":
         df_pagos = pd.concat([df_pagos, nuevo_pago], ignore_index=True)
         df_pagos.to_excel(PAGOS_FILE, index=False)
         st.success("Pago registrado correctamente.")
+
+elif menu == "Eliminar factura":
+    st.header("🗑️ Eliminar factura")
+    if df_facturas.empty:
+        st.info("No hay facturas registradas.")
+    else:
+        factura_sel = st.selectbox("Selecciona la factura a eliminar", df_facturas["No. Factura"].tolist())
+        if st.button("Eliminar factura"):
+            df_facturas = df_facturas[df_facturas["No. Factura"] != factura_sel]
+            df_facturas.to_excel(FACTURAS_FILE, index=False)
+            df_pagos = df_pagos[df_pagos["No. Factura"] != factura_sel]
+            df_pagos.to_excel(PAGOS_FILE, index=False)
+            st.success(f"Factura {factura_sel} eliminada correctamente.")
 
 elif menu == "Estado de cuenta por cliente":
     st.header("📄 Estado de cuenta")
