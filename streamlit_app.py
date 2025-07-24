@@ -106,19 +106,35 @@ elif menu == "Reporte de antigüedad de saldos":
     resumen = resumen[resumen["Saldo"] > 0].copy()
     resumen["Días"] = (hoy - resumen["Fecha"]).dt.days
 
-    # Clasificación por antigüedad (por fila)
     resumen["Al día"] = resumen.apply(lambda row: row["Saldo"] if row["Días"] <= 0 else 0.0, axis=1)
     resumen["1 a 30"] = resumen.apply(lambda row: row["Saldo"] if 1 <= row["Días"] <= 30 else 0.0, axis=1)
     resumen["31 a 60"] = resumen.apply(lambda row: row["Saldo"] if 31 <= row["Días"] <= 60 else 0.0, axis=1)
     resumen["61 a 90"] = resumen.apply(lambda row: row["Saldo"] if 61 <= row["Días"] <= 90 else 0.0, axis=1)
     resumen["91 a 120"] = resumen.apply(lambda row: row["Saldo"] if 91 <= row["Días"] <= 120 else 0.0, axis=1)
 
+    resumen["Fecha"] = resumen["Fecha"].dt.date
+
     tabla = resumen[["Fecha", "Cliente", "No. Factura", "Importe", "Saldo", "Al día", "1 a 30", "31 a 60", "61 a 90", "91 a 120"]].copy()
 
-    for col in ["Importe", "Saldo", "Al día", "1 a 30", "31 a 60", "61 a 90", "91 a 120"]:
-        tabla[col] = tabla[col].map(lambda x: f"{x:,.2f}")
+    totales = pd.DataFrame({
+        "Fecha": [""],
+        "Cliente": [""],
+        "No. Factura": ["TOTAL"],
+        "Importe": [tabla["Importe"].sum()],
+        "Saldo": [tabla["Saldo"].sum()],
+        "Al día": [tabla["Al día"].sum()],
+        "1 a 30": [tabla["1 a 30"].sum()],
+        "31 a 60": [tabla["31 a 60"].sum()],
+        "61 a 90": [tabla["61 a 90"].sum()],
+        "91 a 120": [tabla["91 a 120"].sum()]
+    })
 
-    st.dataframe(tabla)
+    final_tabla = pd.concat([tabla, totales], ignore_index=True)
+
+    for col in ["Importe", "Saldo", "Al día", "1 a 30", "31 a 60", "61 a 90", "91 a 120"]:
+        final_tabla[col] = final_tabla[col].map(lambda x: f"{x:,.2f}" if pd.notnull(x) else "")
+
+    st.dataframe(final_tabla)
 
 elif menu == "Exportar a Excel":
     st.header("📤 Exportar datos")
