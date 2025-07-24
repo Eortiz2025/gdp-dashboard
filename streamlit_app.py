@@ -90,4 +90,4 @@ elif menu == "Exportar a Excel":
     st.header("📤 Exportar datos")
     st.download_button("Descargar Facturas", data=df_facturas.to_csv(index=False), file_name="facturas.csv")
     st.download_button("Descargar Pagos", data=df_pagos.to_csv(index=False), file_name="pagos.csv")
-    st.success("Archivos preparados para desc
+    st.success("Archivos preparados para descarga.")
