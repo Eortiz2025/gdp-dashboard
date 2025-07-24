@@ -84,26 +84,29 @@ elif menu == "Eliminar factura":
             st.success(f"Factura {factura_sel} eliminada correctamente.")
 
 elif menu == "Importar facturas":
-    st.header("📥 Importar facturas desde archivo")
-    archivo = st.file_uploader("Selecciona un archivo .xlsx o .csv", type=["xlsx", "csv"])
+    st.header("📥 Importar facturas desde archivo personalizado")
+    archivo = st.file_uploader("Selecciona un archivo Excel con columnas: fecha factura, PROVEEDOR, FACTURA, IMPORTE", type=["xlsx"])
     if archivo is not None:
         try:
-            if archivo.name.endswith(".csv"):
-                nuevas_facturas = pd.read_csv(archivo)
-            else:
-                nuevas_facturas = pd.read_excel(archivo)
+            df_archivo = pd.read_excel(archivo)
+            columnas_esperadas = ["fecha factura", "PROVEEDOR", "FACTURA", "IMPORTE"]
+            if all(col in df_archivo.columns for col in columnas_esperadas):
+                df_convertido = pd.DataFrame()
+                df_convertido["Fecha"] = pd.to_datetime(df_archivo["fecha factura"]).dt.date
+                df_convertido["Cliente"] = df_archivo["PROVEEDOR"]
+                df_convertido["No. Factura"] = df_archivo["FACTURA"].astype(str)
+                df_convertido["Importe"] = df_archivo["IMPORTE"]
+                df_convertido["Notas"] = ""
 
-            columnas_requeridas = ["Fecha", "Cliente", "No. Factura", "Importe", "Notas"]
-            if all(col in nuevas_facturas.columns for col in columnas_requeridas):
-                nuevas_facturas = nuevas_facturas[columnas_requeridas]
-                nuevas_facturas["Fecha"] = pd.to_datetime(nuevas_facturas["Fecha"]).dt.date
-                existentes = df_facturas["No. Factura"].values
-                nuevas_unicas = nuevas_facturas[~nuevas_facturas["No. Factura"].isin(existentes)]
+                existentes = df_facturas["No. Factura"].astype(str).values
+                nuevas_unicas = df_convertido[~df_convertido["No. Factura"].isin(existentes)]
+
                 df_facturas = pd.concat([df_facturas, nuevas_unicas], ignore_index=True)
                 df_facturas.to_excel(FACTURAS_FILE, index=False)
                 st.success(f"Se importaron {len(nuevas_unicas)} nuevas facturas correctamente.")
+                st.dataframe(nuevas_unicas)
             else:
-                st.error("El archivo no contiene todas las columnas requeridas.")
+                st.error("El archivo no tiene las columnas requeridas: fecha factura, PROVEEDOR, FACTURA, IMPORTE")
         except Exception as e:
             st.error(f"Error al procesar el archivo: {e}")
 
