@@ -7,6 +7,9 @@ from datetime import datetime
 FACTURAS_FILE = "facturas.xlsx"
 PAGOS_FILE = "pagos.xlsx"
 
+# Clientes predefinidos
+CLIENTES = ["Casa Ley", "Coppel", "Chata"]
+
 # Cargar o crear archivos
 if os.path.exists(FACTURAS_FILE):
     df_facturas = pd.read_excel(FACTURAS_FILE)
@@ -31,7 +34,7 @@ if menu == "Registrar nueva factura":
     st.header("🧾 Nueva factura")
     with st.form("factura_form"):
         fecha = st.date_input("Fecha", value=datetime.today())
-        cliente = st.text_input("Cliente")
+        cliente = st.selectbox("Cliente", CLIENTES)
         num_fact = st.text_input("Número de Factura")
         importe = st.number_input("Importe", min_value=0.01)
         notas = st.text_area("Notas")
@@ -87,4 +90,4 @@ elif menu == "Exportar a Excel":
     st.header("📤 Exportar datos")
     st.download_button("Descargar Facturas", data=df_facturas.to_csv(index=False), file_name="facturas.csv")
     st.download_button("Descargar Pagos", data=df_pagos.to_csv(index=False), file_name="pagos.csv")
-    st.success("Archivos preparados para descarga.")
+    st.success("Archivos preparados para desc
