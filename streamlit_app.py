@@ -94,7 +94,7 @@ elif menu == "Estado de cuenta por cliente":
         st.info("No hay facturas registradas aún.")
 
 elif menu == "Reporte de antigüedad de saldos":
-    st.header("⏳ Antigüedad de saldos")
+    st.header("📊 Antigüedad de saldos detallada")
     hoy = pd.to_datetime(datetime.today())
     df_facturas["Fecha"] = pd.to_datetime(df_facturas["Fecha"])
 
@@ -106,21 +106,15 @@ elif menu == "Reporte de antigüedad de saldos":
     resumen = resumen[resumen["Saldo"] > 0].copy()
     resumen["Días"] = (hoy - resumen["Fecha"]).dt.days
 
-    condiciones = [
-        (resumen["Días"] <= 15),
-        (resumen["Días"] > 15) & (resumen["Días"] <= 30),
-        (resumen["Días"] > 30) & (resumen["Días"] <= 60),
-        (resumen["Días"] > 60)
-    ]
-    categorias = ["1-15 días", "16-30 días", "31-60 días", ">60 días"]
-    resumen["Antigüedad"] = pd.cut(resumen["Días"],
-                                   bins=[-1, 15, 30, 60, float('inf')],
-                                   labels=categorias)
+    # Clasificación por antigüedad
+    resumen["Al día"] = resumen["Días"].apply(lambda x: resumen["Saldo"] if x <= 0 else 0)
+    resumen["1 a 30"] = resumen["Días"].apply(lambda x: resumen["Saldo"] if 1 <= x <= 30 else 0)
+    resumen["31 a 60"] = resumen["Días"].apply(lambda x: resumen["Saldo"] if 31 <= x <= 60 else 0)
+    resumen["61 a 90"] = resumen["Días"].apply(lambda x: resumen["Saldo"] if 61 <= x <= 90 else 0)
+    resumen["91 a 120"] = resumen["Días"].apply(lambda x: resumen["Saldo"] if 91 <= x <= 120 else 0)
 
-    antiguedad = resumen.groupby("Antigüedad")["Saldo"].sum().reindex(categorias, fill_value=0)
-
-    st.bar_chart(antiguedad)
-    st.dataframe(resumen[["Cliente", "No. Factura", "Fecha", "Saldo", "Antigüedad"]])
+    tabla = resumen[["Fecha", "Cliente", "No. Factura", "Importe", "Saldo", "Al día", "1 a 30", "31 a 60", "61 a 90", "91 a 120"]]
+    st.dataframe(tabla)
 
 elif menu == "Exportar a Excel":
     st.header("📤 Exportar datos")
