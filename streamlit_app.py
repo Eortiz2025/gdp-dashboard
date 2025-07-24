@@ -34,18 +34,21 @@ if menu == "Registrar nueva factura":
     st.header("🧾 Nueva factura")
     with st.form("factura_form"):
         fecha = st.date_input("Fecha", value=datetime.today())
-        cliente = st.selectbox("Cliente", CLIENTES)
+        cliente = st.selectbox("Cliente", options=CLIENTES, index=0)
         num_fact = st.text_input("Número de Factura")
         importe = st.number_input("Importe", min_value=0.01)
         notas = st.text_area("Notas")
         guardar = st.form_submit_button("Guardar")
 
     if guardar:
-        nueva_factura = pd.DataFrame([[fecha, cliente, num_fact, importe, notas]],
-                                     columns=df_facturas.columns)
-        df_facturas = pd.concat([df_facturas, nueva_factura], ignore_index=True)
-        df_facturas.to_excel(FACTURAS_FILE, index=False)
-        st.success("Factura guardada correctamente.")
+        if num_fact in df_facturas["No. Factura"].values:
+            st.error("❌ Ya existe una factura con ese número.")
+        else:
+            nueva_factura = pd.DataFrame([[fecha, cliente, num_fact, importe, notas]],
+                                         columns=df_facturas.columns)
+            df_facturas = pd.concat([df_facturas, nueva_factura], ignore_index=True)
+            df_facturas.to_excel(FACTURAS_FILE, index=False)
+            st.success("Factura guardada correctamente.")
 
 elif menu == "Registrar pago":
     st.header("💵 Registrar pago")
@@ -67,24 +70,27 @@ elif menu == "Registrar pago":
 elif menu == "Estado de cuenta por cliente":
     st.header("📄 Estado de cuenta")
     clientes = df_facturas["Cliente"].unique().tolist()
-    cliente_sel = st.selectbox("Selecciona un cliente", clientes)
+    if clientes:
+        cliente_sel = st.selectbox("Selecciona un cliente", clientes)
 
-    facturas_cliente = df_facturas[df_facturas["Cliente"] == cliente_sel]
-    pagos_cliente = df_pagos[df_pagos["No. Factura"].isin(facturas_cliente["No. Factura"])]
+        facturas_cliente = df_facturas[df_facturas["Cliente"] == cliente_sel]
+        pagos_cliente = df_pagos[df_pagos["No. Factura"].isin(facturas_cliente["No. Factura"])]
 
-    st.subheader("Facturas")
-    st.dataframe(facturas_cliente)
+        st.subheader("Facturas")
+        st.dataframe(facturas_cliente)
 
-    st.subheader("Pagos")
-    st.dataframe(pagos_cliente)
+        st.subheader("Pagos")
+        st.dataframe(pagos_cliente)
 
-    resumen = facturas_cliente.copy()
-    resumen["Pagado"] = resumen["No. Factura"].apply(
-        lambda x: pagos_cliente[pagos_cliente["No. Factura"] == x]["Importe Pagado"].sum()
-    )
-    resumen["Saldo"] = resumen["Importe"] - resumen["Pagado"]
-    st.subheader("Resumen")
-    st.dataframe(resumen[["No. Factura", "Importe", "Pagado", "Saldo"]])
+        resumen = facturas_cliente.copy()
+        resumen["Pagado"] = resumen["No. Factura"].apply(
+            lambda x: pagos_cliente[pagos_cliente["No. Factura"] == x]["Importe Pagado"].sum()
+        )
+        resumen["Saldo"] = resumen["Importe"] - resumen["Pagado"]
+        st.subheader("Resumen")
+        st.dataframe(resumen[["No. Factura", "Importe", "Pagado", "Saldo"]])
+    else:
+        st.info("No hay facturas registradas aún.")
 
 elif menu == "Exportar a Excel":
     st.header("📤 Exportar datos")
