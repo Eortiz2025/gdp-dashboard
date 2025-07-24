@@ -27,6 +27,7 @@ menu = st.sidebar.selectbox("Selecciona una opción", [
     "Registrar nueva factura",
     "Registrar pago",
     "Eliminar factura",
+    "Importar facturas",
     "Estado de cuenta por cliente",
     "Reporte de antigüedad de saldos",
     "Exportar a Excel"
@@ -81,6 +82,30 @@ elif menu == "Eliminar factura":
             df_pagos = df_pagos[df_pagos["No. Factura"] != factura_sel]
             df_pagos.to_excel(PAGOS_FILE, index=False)
             st.success(f"Factura {factura_sel} eliminada correctamente.")
+
+elif menu == "Importar facturas":
+    st.header("📥 Importar facturas desde archivo")
+    archivo = st.file_uploader("Selecciona un archivo .xlsx o .csv", type=["xlsx", "csv"])
+    if archivo is not None:
+        try:
+            if archivo.name.endswith(".csv"):
+                nuevas_facturas = pd.read_csv(archivo)
+            else:
+                nuevas_facturas = pd.read_excel(archivo)
+
+            columnas_requeridas = ["Fecha", "Cliente", "No. Factura", "Importe", "Notas"]
+            if all(col in nuevas_facturas.columns for col in columnas_requeridas):
+                nuevas_facturas = nuevas_facturas[columnas_requeridas]
+                nuevas_facturas["Fecha"] = pd.to_datetime(nuevas_facturas["Fecha"]).dt.date
+                existentes = df_facturas["No. Factura"].values
+                nuevas_unicas = nuevas_facturas[~nuevas_facturas["No. Factura"].isin(existentes)]
+                df_facturas = pd.concat([df_facturas, nuevas_unicas], ignore_index=True)
+                df_facturas.to_excel(FACTURAS_FILE, index=False)
+                st.success(f"Se importaron {len(nuevas_unicas)} nuevas facturas correctamente.")
+            else:
+                st.error("El archivo no contiene todas las columnas requeridas.")
+        except Exception as e:
+            st.error(f"Error al procesar el archivo: {e}")
 
 elif menu == "Estado de cuenta por cliente":
     st.header("📄 Estado de cuenta")
