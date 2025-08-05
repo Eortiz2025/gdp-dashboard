@@ -25,9 +25,19 @@ if archivo:
         if not requeridas.issubset(set(df.columns)):
             raise ValueError("Faltan columnas requeridas: FECHA ENTREGA, GRADO, NIVEL EDUCATIVO")
 
-        # Procesar fechas
+        # 🔍 Verificación detallada
+        st.write("✅ Total filas originales:", len(df))
+
         df["FECHA ENTREGA"] = pd.to_datetime(df["FECHA ENTREGA"], errors="coerce", dayfirst=True)
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
+
+        st.write("📆 Filas con FECHA válida:", df["FECHA"].notna().sum())
+        st.write("🎓 Filas con GRADO válido:", df["GRADO"].notna().sum())
+        st.write("🏫 Filas con NIVEL EDUCATIVO válido:", df["NIVEL EDUCATIVO"].notna().sum())
+
+        # Eliminar filas incompletas
+        df = df.dropna(subset=["FECHA", "GRADO", "NIVEL EDUCATIVO"])
+        st.write("✅ Filas finales válidas para análisis:", len(df))
 
         # Clasificación por paquete
         def clasificar_paquete(row):
@@ -46,11 +56,7 @@ if archivo:
 
         df["PAQUETE"] = df.apply(clasificar_paquete, axis=1)
 
-        # 🔍 Verificación rápida
-        st.write("✅ Total filas cargadas:", len(df))
-        st.write("🧾 Vista previa de los datos:", df[["FECHA", "GRADO", "NIVEL EDUCATIVO", "PAQUETE"]].head())
-
-        # Agrupar y pivotear
+        # Agrupar por fecha y paquete
         ventas = df.groupby(["FECHA", "PAQUETE"]).size().reset_index(name="VENTAS")
         reporte = ventas.pivot(index="FECHA", columns="PAQUETE", values="VENTAS").fillna(0).astype(int)
         reporte["TOTAL"] = reporte.sum(axis=1)
@@ -60,11 +66,11 @@ if archivo:
         total.index = ["TOTAL GENERAL"]
         reporte_final = pd.concat([reporte, total])
 
-        # Mostrar
+        # Mostrar resultado
         st.subheader("📊 Resumen por Paquete")
         st.dataframe(reporte_final, use_container_width=True)
 
-        # Exportar a Excel
+        # Descargar Excel
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             reporte_final.to_excel(writer, sheet_name='Paquetes', index=True)
