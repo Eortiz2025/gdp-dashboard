@@ -2,14 +2,14 @@ import streamlit as st
 import pandas as pd
 import io
 
-st.set_page_config(page_title="Reporte por paquete con fechas", layout="centered")
-st.title("📦 Reporte por Paquete Educativo (agrupado por fecha si es posible)")
+st.set_page_config(page_title="Reporte completo por paquete", layout="centered")
+st.title("📦 Reporte Final por Paquete Educativo")
 
 archivo = st.file_uploader("📎 Sube el archivo (.xls o .xlsx)", type=["xls", "xlsx"])
 
 if archivo:
     try:
-        # Leer archivo
+        # Leer archivo según extensión
         if archivo.name.endswith(".xlsx"):
             df = pd.read_excel(archivo)
         elif archivo.name.endswith(".xls"):
@@ -20,12 +20,10 @@ if archivo:
         # Normalizar columnas
         df.columns = [col.strip().upper() for col in df.columns]
         requeridas = {"GRADO", "NIVEL EDUCATIVO", "FECHA ENTREGA"}
-        if not requeridas.issubset(set(df.columns)):
-            raise ValueError("Faltan columnas: GRADO, NIVEL EDUCATIVO, FECHA ENTREGA")
+        if not requeridas.issubset(df.columns):
+            raise ValueError("El archivo debe contener las columnas: GRADO, NIVEL EDUCATIVO, FECHA ENTREGA")
 
-        st.write("✅ Filas totales cargadas:", len(df))
-
-        # Clasificar paquetes
+        # Clasificar paquete
         def clasificar_paquete(row):
             nivel = str(row["NIVEL EDUCATIVO"]).upper()
             grado = row["GRADO"]
@@ -42,52 +40,67 @@ if archivo:
 
         df["PAQUETE"] = df.apply(clasificar_paquete, axis=1)
 
-        # Procesar fechas válidas
+        # Convertir fecha (manejar errores)
         df["FECHA ENTREGA"] = pd.to_datetime(df["FECHA ENTREGA"], errors="coerce", dayfirst=True)
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
 
-        # Separar válidos y sin fecha
-        df_validas = df[df["FECHA"].notna()]
+        # Dividir registros
+        df_validos = df[df["FECHA"].notna()]
         df_sin_fecha = df[df["FECHA"].isna()]
 
-        # Agrupar por fecha
-        ventas_fecha = df_validas.groupby(["FECHA", "PAQUETE"]).size().reset_index(name="VENTAS")
-        tabla = ventas_fecha.pivot(index="FECHA", columns="PAQUETE", values="VENTAS").fillna(0).astype(int)
-        tabla["TOTAL"] = tabla.sum(axis=1)
+        ### 📅 AGRUPAR POR FECHA
+        agrupado_fecha = (
+            df_validos
+            .groupby(["FECHA", "PAQUETE"])
+            .size()
+            .reset_index(name="CANTIDAD")
+            .pivot(index="FECHA", columns="PAQUETE", values="CANTIDAD")
+            .fillna(0).astype(int)
+        )
+        agrupado_fecha["TOTAL"] = agrupado_fecha.sum(axis=1)
+        agrupado_fecha.loc["TOTAL GENERAL"] = agrupado_fecha.sum()
 
-        # Fila total general
-        total = tabla.sum(axis=0).to_frame().T
-        total.index = ["TOTAL GENERAL"]
-        tabla_final = pd.concat([tabla, total])
-
-        st.subheader("📆 Ventas agrupadas por fecha")
-        st.dataframe(tabla_final)
-
-        # Mostrar si hubo registros sin fecha
+        ### ❓ AGRUPAR SIN FECHA
         if not df_sin_fecha.empty:
-            st.warning(f"⚠️ {len(df_sin_fecha)} registros no tienen fecha y no se incluyeron en el agrupamiento.")
+            sin_fecha = df_sin_fecha["PAQUETE"].value_counts().sort_index().to_frame().T
+            sin_fecha.index = ["SIN FECHA"]
+            sin_fecha["TOTAL"] = sin_fecha.sum(axis=1)
+        else:
+            sin_fecha = pd.DataFrame({"Mensaje": ["Todos los registros tienen fecha."]})
 
-            resumen_sin_fecha = df_sin_fecha["PAQUETE"].value_counts().sort_index().to_frame(name="SIN FECHA").T
-            st.subheader("🕘 Registros sin fecha agrupados por paquete")
-            st.dataframe(resumen_sin_fecha)
+        ### 📦 TOTAL COMBINADO (OPCIONAL)
+        total_por_paquete = df["PAQUETE"].value_counts().sort_index().to_frame().T
+        total_por_paquete.index = ["TOTAL ABSOLUTO"]
+        total_por_paquete["TOTAL"] = total_por_paquete.sum(axis=1)
 
-        # Descargar Excel
+        # Mostrar resultados
+        st.subheader("📊 Ventas por Fecha y Paquete")
+        st.dataframe(agrupado_fecha)
+
+        if not df_sin_fecha.empty:
+            st.subheader("⚠️ Registros sin fecha")
+            st.dataframe(sin_fecha)
+
+        st.subheader("🔢 Total absoluto por Paquete")
+        st.dataframe(total_por_paquete)
+
+        ### 📁 EXPORTAR A EXCEL
         buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-            tabla_final.to_excel(writer, sheet_name="Por_Fecha")
-            if not df_sin_fecha.empty:
-                resumen_sin_fecha.to_excel(writer, sheet_name="Sin_Fecha")
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            agrupado_fecha.to_excel(writer, sheet_name="Por_Fecha")
+            sin_fecha.to_excel(writer, sheet_name="Sin_Fecha")
+            total_por_paquete.to_excel(writer, sheet_name="Totales_Globales")
         buffer.seek(0)
 
         st.download_button(
             label="⬇️ Descargar Excel completo",
             data=buffer,
-            file_name="reporte_paquetes_con_fechas.xlsx",
+            file_name="reporte_final_paquetes.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
     except Exception as e:
-        st.error(f"❌ Error al procesar el archivo: {e}")
+        st.error(f"❌ Error: {e}")
 
 else:
-    st.info("📂 Sube un archivo para generar el reporte por fecha y paquete.")
+    st.info("📂 Sube un archivo para generar el reporte.")
