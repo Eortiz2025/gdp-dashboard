@@ -25,15 +25,15 @@ if archivo:
 
         st.write("✅ Filas totales cargadas:", len(df))
 
-        # Clasificar paquete
+        # Clasificar paquete (ajustada según nueva lógica)
         def clasificar_paquete(row):
             nivel = str(row["NIVEL EDUCATIVO"]).upper()
             grado = row["GRADO"]
             if nivel == "PREESCOLAR":
                 return "Paq1"
-            elif nivel == "PRIMARIA" and grado in [1, 2, 3]:
+            elif nivel == "PRIMARIA" and grado in [1, 2]:
                 return "Paq2"
-            elif nivel == "PRIMARIA" and grado in [4, 5, 6]:
+            elif nivel == "PRIMARIA" and grado in [3, 4, 5, 6]:
                 return "Paq3"
             elif nivel == "SECUNDARIA":
                 return "Paq4"
