@@ -111,7 +111,7 @@ if archivo:
             st.subheader("⚠️ Registros sin fecha")
             st.dataframe(sin_fecha)
 
-        st.subheader("🎯 Total absoluto, Meta y % Avance")
+        st.subheader("🎯 Total , Meta y % Avance")
         st.dataframe(tabla_totales)
 
         ### 📁 EXPORTAR A EXCEL
