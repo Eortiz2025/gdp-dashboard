@@ -9,26 +9,27 @@ archivo = st.file_uploader("📎 Sube el archivo de entregas (.xls o .xlsx)", ty
 
 if archivo:
     try:
-        # Detectar extensión y cargar correctamente
+        # Leer archivo según extensión
         if archivo.name.endswith(".xlsx"):
             df = pd.read_excel(archivo)
         elif archivo.name.endswith(".xls"):
             df = pd.read_html(archivo)[0]
         else:
-            raise ValueError("Formato de archivo no compatible")
+            raise ValueError("Formato no compatible")
 
         # Normalizar nombres de columnas
         df.columns = [col.strip().upper() for col in df.columns]
 
-        # Verificar columnas necesarias
-        if "FECHA ENTREGA" not in df.columns or "GRADO" not in df.columns or "NIVEL EDUCATIVO" not in df.columns:
-            raise ValueError("El archivo no tiene las columnas necesarias: FECHA ENTREGA, GRADO, NIVEL EDUCATIVO")
+        # Verificar columnas requeridas
+        requeridas = {"FECHA ENTREGA", "GRADO", "NIVEL EDUCATIVO"}
+        if not requeridas.issubset(set(df.columns)):
+            raise ValueError("Faltan columnas requeridas: FECHA ENTREGA, GRADO, NIVEL EDUCATIVO")
 
-        # Procesar fecha
+        # Procesar fechas
         df["FECHA ENTREGA"] = pd.to_datetime(df["FECHA ENTREGA"], errors="coerce", dayfirst=True)
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
 
-        # Clasificar en paquetes
+        # Clasificación por paquete
         def clasificar_paquete(row):
             nivel = str(row["NIVEL EDUCATIVO"]).upper()
             grado = row["GRADO"]
@@ -45,18 +46,22 @@ if archivo:
 
         df["PAQUETE"] = df.apply(clasificar_paquete, axis=1)
 
-        # Agrupar por fecha y paquete
+        # 🔍 Verificación rápida
+        st.write("✅ Total filas cargadas:", len(df))
+        st.write("🧾 Vista previa de los datos:", df[["FECHA", "GRADO", "NIVEL EDUCATIVO", "PAQUETE"]].head())
+
+        # Agrupar y pivotear
         ventas = df.groupby(["FECHA", "PAQUETE"]).size().reset_index(name="VENTAS")
         reporte = ventas.pivot(index="FECHA", columns="PAQUETE", values="VENTAS").fillna(0).astype(int)
         reporte["TOTAL"] = reporte.sum(axis=1)
 
-        # Fila TOTAL GENERAL
+        # Fila total general
         total = reporte.sum(axis=0).to_frame().T
         total.index = ["TOTAL GENERAL"]
         reporte_final = pd.concat([reporte, total])
 
-        # Mostrar resultado
-        st.subheader("📊 Ventas por Paquete")
+        # Mostrar
+        st.subheader("📊 Resumen por Paquete")
         st.dataframe(reporte_final, use_container_width=True)
 
         # Exportar a Excel
