@@ -17,8 +17,18 @@ if archivo:
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
 
         if "NIVEL EDUCATIVO" in df.columns:
+            niveles_fijos = ["PREESCOLAR", "PRIMARIA", "SECUNDARIA", "BACHILLERATO", "UNIVERSIDAD"]
+
             ventas = df.groupby(["FECHA", "NIVEL EDUCATIVO"]).size().reset_index(name="VENTAS")
             reporte = ventas.pivot(index="FECHA", columns="NIVEL EDUCATIVO", values="VENTAS").fillna(0).astype(int)
+
+            # Asegurar que estén todos los niveles, aunque no aparezcan en el archivo
+            for nivel in niveles_fijos:
+                if nivel not in reporte.columns:
+                    reporte[nivel] = 0
+
+            # Reordenar columnas según el orden fijo
+            reporte = reporte[niveles_fijos]
 
             # Agregar columna TOTAL
             reporte["TOTAL"] = reporte.sum(axis=1)
@@ -26,7 +36,7 @@ if archivo:
             st.subheader("📅 Ventas por Nivel Educativo")
             st.dataframe(reporte, use_container_width=True)
 
-            # Exportar a Excel con columna TOTAL
+            # Exportar a Excel
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                 reporte.to_excel(writer, sheet_name='Reporte', index=True)
