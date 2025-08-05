@@ -9,6 +9,7 @@ archivo = st.file_uploader("📎 Sube el archivo .xls de entregas", type=["xls"]
 
 if archivo:
     try:
+        # Leer archivo .xls como tabla HTML
         tablas = pd.read_html(archivo)
         df = tablas[0]
 
@@ -21,17 +22,17 @@ if archivo:
             ventas = df.groupby(["FECHA", "NIVEL EDUCATIVO"]).size().reset_index(name="VENTAS")
             reporte = ventas.pivot(index="FECHA", columns="NIVEL EDUCATIVO", values="VENTAS").fillna(0).astype(int)
 
-            # Agregar columna de total diario
+            # Agregar columna TOTAL (por día)
             reporte["TOTAL"] = reporte.sum(axis=1)
 
-            # Crear fila TOTAL GENERAL
-            total_general = reporte.sum(axis=0).to_frame().T
-            total_general.index = ["TOTAL GENERAL"]
+            # Agregar fila TOTAL GENERAL
+            fila_total = reporte.sum(axis=0).to_frame().T
+            fila_total.index = ["TOTAL GENERAL"]
 
-            # Unir tabla con la fila total
-            reporte_final = pd.concat([reporte, total_general])
+            # Combinar
+            reporte_final = pd.concat([reporte, fila_total])
 
-            # Mostrar tabla
+            # Mostrar en pantalla
             st.subheader("📅 Ventas por Nivel Educativo")
             st.dataframe(reporte_final, use_container_width=True)
 
