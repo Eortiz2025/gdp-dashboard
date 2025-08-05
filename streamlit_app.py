@@ -5,11 +5,24 @@ import io
 st.set_page_config(page_title="Reporte por paquete", layout="centered")
 st.title("📦 Reporte de Ventas por Paquete Educativo")
 
-archivo = st.file_uploader("📎 Sube el archivo .xlsx de entregas", type=["xlsx"])
+archivo = st.file_uploader("📎 Sube el archivo de entregas (.xls o .xlsx)", type=["xls", "xlsx"])
 
 if archivo:
     try:
-        df = pd.read_excel(archivo)
+        # Detectar extensión y cargar correctamente
+        if archivo.name.endswith(".xlsx"):
+            df = pd.read_excel(archivo)
+        elif archivo.name.endswith(".xls"):
+            df = pd.read_html(archivo)[0]
+        else:
+            raise ValueError("Formato de archivo no compatible")
+
+        # Normalizar nombres de columnas
+        df.columns = [col.strip().upper() for col in df.columns]
+
+        # Verificar columnas necesarias
+        if "FECHA ENTREGA" not in df.columns or "GRADO" not in df.columns or "NIVEL EDUCATIVO" not in df.columns:
+            raise ValueError("El archivo no tiene las columnas necesarias: FECHA ENTREGA, GRADO, NIVEL EDUCATIVO")
 
         # Procesar fecha
         df["FECHA ENTREGA"] = pd.to_datetime(df["FECHA ENTREGA"], errors="coerce", dayfirst=True)
@@ -42,7 +55,7 @@ if archivo:
         total.index = ["TOTAL GENERAL"]
         reporte_final = pd.concat([reporte, total])
 
-        # Mostrar en pantalla
+        # Mostrar resultado
         st.subheader("📊 Ventas por Paquete")
         st.dataframe(reporte_final, use_container_width=True)
 
@@ -62,4 +75,4 @@ if archivo:
     except Exception as e:
         st.error(f"❌ Error al procesar el archivo: {e}")
 else:
-    st.info("📂 Esperando archivo .xlsx con datos de entrega...")
+    st.info("📂 Sube un archivo .xls o .xlsx para generar el reporte.")
