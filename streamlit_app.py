@@ -23,6 +23,8 @@ if archivo:
         if not requeridas.issubset(df.columns):
             raise ValueError("El archivo debe contener las columnas: GRADO, NIVEL EDUCATIVO, FECHA ENTREGA")
 
+        st.write("✅ Filas totales cargadas:", len(df))
+
         # Clasificar paquete
         def clasificar_paquete(row):
             nivel = str(row["NIVEL EDUCATIVO"]).upper()
@@ -40,11 +42,19 @@ if archivo:
 
         df["PAQUETE"] = df.apply(clasificar_paquete, axis=1)
 
-        # Convertir fecha (manejar errores)
+        # 🛠 EXTRAER SOLO FECHA (ignorando hora, a. m., p. m.)
+        df["FECHA ENTREGA"] = (
+            df["FECHA ENTREGA"]
+            .astype(str)
+            .str.replace("a. m.", "AM", regex=False)
+            .str.replace("p. m.", "PM", regex=False)
+            .str.extract(r"(\d{2}/\d{2}/\d{4})")[0]  # Extraer solo la parte de la fecha
+        )
+
         df["FECHA ENTREGA"] = pd.to_datetime(df["FECHA ENTREGA"], errors="coerce", dayfirst=True)
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
 
-        # Dividir registros
+        # Dividir registros válidos e inválidos
         df_validos = df[df["FECHA"].notna()]
         df_sin_fecha = df[df["FECHA"].isna()]
 
