@@ -6,28 +6,27 @@ st.set_page_config(page_title="Reporte de ventas por nivel educativo", layout="c
 
 st.title("📊 Reporte de Ventas por Nivel Educativo")
 
-# Subir archivo
 archivo = st.file_uploader("📎 Sube el archivo .xls de entregas", type=["xls"])
 
 if archivo:
     try:
-        # Leer archivo como tabla HTML (formato típico de .xls exportado)
         tablas = pd.read_html(archivo)
         df = tablas[0]
 
-        # Procesar columna de fecha
         df["FECHA ENTREGA"] = pd.to_datetime(df["FECHA ENTREGA"], errors="coerce", dayfirst=True)
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
 
-        # Validar que exista la columna "NIVEL EDUCATIVO"
         if "NIVEL EDUCATIVO" in df.columns:
             ventas = df.groupby(["FECHA", "NIVEL EDUCATIVO"]).size().reset_index(name="VENTAS")
             reporte = ventas.pivot(index="FECHA", columns="NIVEL EDUCATIVO", values="VENTAS").fillna(0).astype(int)
 
+            # Agregar columna TOTAL
+            reporte["TOTAL"] = reporte.sum(axis=1)
+
             st.subheader("📅 Ventas por Nivel Educativo")
             st.dataframe(reporte, use_container_width=True)
 
-            # Preparar para descarga como Excel
+            # Exportar a Excel con columna TOTAL
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                 reporte.to_excel(writer, sheet_name='Reporte', index=True)
