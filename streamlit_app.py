@@ -3,7 +3,7 @@ import pandas as pd
 import io
 
 st.set_page_config(page_title="Reporte completo por paquete", layout="centered")
-st.title("📦 Reporte Final por Paquete Educativo")
+st.title("📦 Reporte Paquete Escolares")
 
 archivo = st.file_uploader("📎 Sube el archivo (.xls o .xlsx)", type=["xls", "xlsx"])
 
