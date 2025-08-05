@@ -12,27 +12,30 @@ if archivo:
         tablas = pd.read_html(archivo)
         df = tablas[0]
 
+        # Convertir fecha
         df["FECHA ENTREGA"] = pd.to_datetime(df["FECHA ENTREGA"], errors="coerce", dayfirst=True)
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
 
         if "NIVEL EDUCATIVO" in df.columns:
+            # Agrupar y pivotear
             ventas = df.groupby(["FECHA", "NIVEL EDUCATIVO"]).size().reset_index(name="VENTAS")
             reporte = ventas.pivot(index="FECHA", columns="NIVEL EDUCATIVO", values="VENTAS").fillna(0).astype(int)
 
-            # Agregar columna de total por día
+            # Agregar columna de total diario
             reporte["TOTAL"] = reporte.sum(axis=1)
 
-            # Agregar fila de totales por nivel
-            totales_por_nivel = reporte.sum(axis=0).to_frame().T
-            totales_por_nivel.index = ["TOTAL GENERAL"]
+            # Crear fila TOTAL GENERAL
+            total_general = reporte.sum(axis=0).to_frame().T
+            total_general.index = ["TOTAL GENERAL"]
 
-            # Unir tabla de reporte con totales
-            reporte_final = pd.concat([reporte, totales_por_nivel])
+            # Unir tabla con la fila total
+            reporte_final = pd.concat([reporte, total_general])
 
+            # Mostrar tabla
             st.subheader("📅 Ventas por Nivel Educativo")
             st.dataframe(reporte_final, use_container_width=True)
 
-            # Exportar a Excel
+            # Descargar como Excel
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                 reporte_final.to_excel(writer, sheet_name='Reporte', index=True)
