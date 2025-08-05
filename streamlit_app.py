@@ -3,7 +3,6 @@ import pandas as pd
 import io
 
 st.set_page_config(page_title="Reporte de ventas por nivel educativo", layout="centered")
-
 st.title("📊 Reporte de Ventas por Nivel Educativo")
 
 archivo = st.file_uploader("📎 Sube el archivo .xls de entregas", type=["xls"])
@@ -17,29 +16,26 @@ if archivo:
         df["FECHA"] = df["FECHA ENTREGA"].dt.date
 
         if "NIVEL EDUCATIVO" in df.columns:
-            niveles_fijos = ["PREESCOLAR", "PRIMARIA", "SECUNDARIA", "BACHILLERATO", "UNIVERSIDAD"]
-
             ventas = df.groupby(["FECHA", "NIVEL EDUCATIVO"]).size().reset_index(name="VENTAS")
             reporte = ventas.pivot(index="FECHA", columns="NIVEL EDUCATIVO", values="VENTAS").fillna(0).astype(int)
 
-            # Asegurar que estén todos los niveles, aunque no aparezcan en el archivo
-            for nivel in niveles_fijos:
-                if nivel not in reporte.columns:
-                    reporte[nivel] = 0
-
-            # Reordenar columnas según el orden fijo
-            reporte = reporte[niveles_fijos]
-
-            # Agregar columna TOTAL
+            # Agregar columna de total por día
             reporte["TOTAL"] = reporte.sum(axis=1)
 
+            # Agregar fila de totales por nivel
+            totales_por_nivel = reporte.sum(axis=0).to_frame().T
+            totales_por_nivel.index = ["TOTAL GENERAL"]
+
+            # Unir tabla de reporte con totales
+            reporte_final = pd.concat([reporte, totales_por_nivel])
+
             st.subheader("📅 Ventas por Nivel Educativo")
-            st.dataframe(reporte, use_container_width=True)
+            st.dataframe(reporte_final, use_container_width=True)
 
             # Exportar a Excel
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-                reporte.to_excel(writer, sheet_name='Reporte', index=True)
+                reporte_final.to_excel(writer, sheet_name='Reporte', index=True)
             buffer.seek(0)
 
             st.download_button(
