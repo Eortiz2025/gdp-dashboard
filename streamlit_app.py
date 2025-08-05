@@ -95,7 +95,8 @@ if archivo:
                 avance[col] = "0%"
 
         metas_row = {**metas, "TOTAL": sum(metas.values())}
-        avance_row = {**avance, "TOTAL": ""}
+        avance_total = (total_por_paquete["TOTAL"].iloc[0] / metas_row["TOTAL"]) * 100
+        avance_row = {**avance, "TOTAL": f"{avance_total:.1f}%"}
 
         tabla_totales = pd.concat([
             total_por_paquete,
