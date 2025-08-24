@@ -85,7 +85,7 @@ if archivo:
         total_por_paquete["TOTAL"] = total_por_paquete.sum(axis=1)
 
         # Agregar metas y % de avance
-        metas = {"Paq1": 500, "Paq2": 950, "Paq3": 2450, "Paq4": 2100}
+        metas = {"Paq1": 550, "Paq2": 950, "Paq3": 2450, "Paq4": 2100}
         avance = {}
         for col in metas:
             if col in total_por_paquete.columns:
